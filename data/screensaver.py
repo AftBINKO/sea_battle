@@ -1,26 +1,31 @@
-import cv2
+# импортируем библиотеки
+from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 import pygame
-import os
+import os  # для открытия файлов без ошибок
 
 
-def screensaver():
+# функция воспроизведения заставки
+def screensaver(screen, fps):
     pygame.mixer.init()
-    cap = cv2.VideoCapture(os.path.join("data", "aftforseabattle1366x768.mp4"))
-    s = pygame.mixer.Sound(os.path.join("data", "aftforseabattle.wav"))
-    running, img = cap.read()
+    size = screen.get_size()  # получаем размер экрана
+    # воспроизводим видео, в соответствии разрешения
+    cap = VideoCapture(os.path.join("data", f"screensaver{size[0]}x{size[1]}.mp4"))
+    # т.к видео воспроизводится без звука, мы его добавим вручную
+    s = pygame.mixer.Sound(os.path.join("data", "screensaver.wav"))
+    running, img = cap.read()  # running — кадры остались? img — изображение
     shape = img.shape[1::-1]
-    wn = pygame.display.set_mode(shape)
     clock = pygame.time.Clock()
-    s.play()
+    pygame.mouse.set_visible(False)
+    s.play()  # воспроизводим звук
 
     while running:
-        clock.tick(60)
+        clock.tick(fps)
         running, img = cap.read()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
         try:
-            wn.blit(pygame.image.frombuffer(img.tobytes(), shape, "BGR"), (0, 0))
+            screen.blit(pygame.image.frombuffer(img.tobytes(), shape, "BGR"), (0, 0))  # заполняем
         except AttributeError:
             pass
         pygame.display.update()
