@@ -10,8 +10,8 @@ The project will be the embodiment of the game of the same name, but with a plot
 - Andrey. The main character
 - Ivan. Comrade of the main character
 - Julia. An ally, a computer science teacher in the pre-war years
-- Andey's mother. In the pre - war years, a housewife
-- Peter, Andey's father, captain of the Navy
+- Andrey's mother. In the pre - war years, a housewife
+- Peter, Andrey's father, captain of the Navy
 
 ### Plot
 
