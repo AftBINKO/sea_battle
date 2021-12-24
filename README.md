@@ -12,12 +12,13 @@ The project will be the embodiment of the game of the same name, but with a plot
 - Julia. An ally, a computer science teacher in the pre-war years
 - Andrey's mother. In the pre - war years, a housewife
 - Peter, Andrey's father, captain of the Navy
+- Ekaterina. Andrey's Love
 
 ### Plot
 
 #### Mission 1
 
-The beginning of the game will take place in the middle of the plot. The main actions take place in 2032 in the 3rd World War. Andrey and Ivan are going to land on an enemy island. Ivan asks Andrey about how this war started. Andrey says that everyone has their own story with this event, and flashbacks begin. The beginning of the plot. Andrey tells how he arrives on the bus to school, and says that the first lesson was computer science. Andrey loved computer science very much, as the teacher used to work at the institute, so firstly he was very experienced, knew the approach to students, and knew the subject very well. She was also humorous, so the students were not bored. Andrey studied for satisfactory grades, but he knew computer science at 5. After studying, Andrey went home. As always, Andrey sat down at the computer to play minecraft. Then the light goes out, Andrey complains that he has nothing to do. Andrey's mother offered to teach him how to play naval combat. Andrey agreed.
+The beginning of the game will take place in the middle of the plot. The main actions take place in 2032 in the 3rd World War. Andrey and Ivan are going to land on an enemy island. Ivan asks Andrey about how this war started. Andrey says that everyone has their own story with this event, and flashbacks begin. The beginning of the plot. Andrey tells how he arrives on the bus to school, and says that the first lesson was computer science. Andrey loved computer science very much, as the teacher used to work at the institute, so firstly he was very experienced, knew the approach to students, and knew the subject very well. She was also humorous, so the students were not bored. Andrey studied for satisfactory grades, but he knew computer science at 5. Andrey had a school love - Ekaterina. After studying, Andrey went home. As always, Andrey sat down at the computer to play minecraft. Then the light goes out, Andrey complains that he has nothing to do. Andrey's mother offered to teach him how to play naval combat. Andrey agreed.
 
 #### Mission 2
 
@@ -37,12 +38,13 @@ After playing with Mom, the light turned on, and Andrey went on to play minecraf
 - Юлия. Союзник, в довоенные годы учитель информатики
 - Мать Андрея. В довоенные годы домохозяйка
 - Пётр. Отец Андрея, капитан морского флота
+- Екатерина. Любовь Андрея
 
 ### Сюжет
 
 #### Миссия 1
 
-Начало игры будет происходить в середине сюжета. Основные действия происходят в 2032 году в 3-ю мировую войну. Андрей и Ваня собираются высадиться на вражеский остров. Ваня спрашивает у Андрея о том, как же началась эта война. Андрей говорит, что у каждого своя история с этим событие, и начинаются флэшбеки. Начало сюжета. Андрей рассказывает, как он приежает на автобусе в школу, и говорит о том, что первым уроком была информатика. Андрей очень любил информатику, так как преподаватель раньше работал в институте, поэтому во-первых он был очень опытен, знал подход к ученикам, и очень хорошо знал предмет. Также она была с юмором, поэтому ученики не скучали. Андрей был троечником, но информатику знал на 5. После учёбы Андрей поехал домой. Как всегда, Андрей сел за компьютер, чтобы поиграть в майнкрафт. Далее свет вырубается, Андрей жалуется на то, что ему нечего делать. Мама Андрея предложила его научить играть в морской бой. Андрей согласился.
+Начало игры будет происходить в середине сюжета. Основные действия происходят в 2032 году в 3-ю мировую войну. Андрей и Ваня собираются высадиться на вражеский остров. Ваня спрашивает у Андрея о том, как же началась эта война. Андрей говорит, что у каждого своя история с этим событие, и начинаются флэшбеки. Начало сюжета. Андрей рассказывает, как он приежает на автобусе в школу, и говорит о том, что первым уроком была информатика. Андрей очень любил информатику, так как преподаватель раньше работал в институте, поэтому во-первых он был очень опытен, знал подход к ученикам, и очень хорошо знал предмет. Также она была с юмором, поэтому ученики не скучали. Андрей был троечником, но информатику знал на 5. У Андрея была школьная любовь — Катя. После учёбы Андрей поехал домой. Как всегда, Андрей сел за компьютер, чтобы поиграть в майнкрафт. Далее свет вырубается, Андрей жалуется на то, что ему нечего делать. Мама Андрея предложила его научить играть в морской бой. Андрей согласился.
 
 #### Миссия 2
 
