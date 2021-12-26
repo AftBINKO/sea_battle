@@ -35,7 +35,7 @@ class Menu:
             running, img = cap.read()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    terminate()
             try:
                 self.screen.blit(pygame.image.frombuffer(img.tobytes(), shape, "BGR"), (0, 0))
             except AttributeError:
