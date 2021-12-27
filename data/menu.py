@@ -1,22 +1,13 @@
 # импортируем библиотеки
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
-from data.main_functions import terminate, load_image
+from data.main_functions import terminate, create_sprite
 import pygame
 import os  # для открытия файлов без ошибок
 
 
-def creator(sprite, name, x, y, group):  # функция помогает быстрее поставить sprite
-    sprite.image = load_image(name)
-    sprite.rect = sprite.image.get_rect()
-    sprite.rect.x = x
-    sprite.rect.y = y
-    group.add(sprite)
-
-
 class Menu:
     def __init__(self, screen, fps):
-        self.screen, self.size, self.fps, self.title, self.rect = screen, screen.get_size(), fps, \
-                                                                  None, None
+        self.screen, self.size, self.fps = screen, screen.get_size(), fps
 
     # функция воспроизведения заставки
     def screensaver(self):
@@ -51,25 +42,25 @@ class Menu:
         menu_sprites = pygame.sprite.Group()
 
         title = pygame.sprite.Sprite()
-        creator(title, "title.png", 549, 50, menu_sprites)
+        create_sprite(title, "title.png", 549, 50, menu_sprites)
 
         play = pygame.sprite.Sprite()
-        creator(play, "play.png", 558, 150, menu_sprites)
+        create_sprite(play, "play.png", 558, 150, menu_sprites)
 
         with_friend = pygame.sprite.Sprite()
-        creator(with_friend, "withfriend.png", 558, 200, menu_sprites)
+        create_sprite(with_friend, "withfriend.png", 558, 200, menu_sprites)
 
         with_bot = pygame.sprite.Sprite()
-        creator(with_bot, "withbot.png", 683, 200, menu_sprites)
+        create_sprite(with_bot, "withbot.png", 683, 200, menu_sprites)
 
         settings = pygame.sprite.Sprite()
-        creator(settings, "settings.png", 50, 250, menu_sprites)
+        create_sprite(settings, "settings.png", 50, 250, menu_sprites)
 
         achievements = pygame.sprite.Sprite()
-        creator(achievements, "achievements.png", 50, 500, menu_sprites)
+        create_sprite(achievements, "achievements.png", 50, 500, menu_sprites)
 
         e = pygame.sprite.Sprite()
-        creator(e, "exit.png", 1066, 500, menu_sprites)
+        create_sprite(e, "exit.png", 1066, 500, menu_sprites)
 
         menu_sprites.draw(self.screen)
         while True:
@@ -84,7 +75,7 @@ class Menu:
                     elif with_bot.rect.collidepoint(event.pos):
                         pass
                     elif settings.rect.collidepoint(event.pos):
-                        pass
+                        return 'Settings'
                     elif achievements.rect.collidepoint(event.pos):
                         pass
                     elif e.rect.collidepoint(event.pos):

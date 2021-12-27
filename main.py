@@ -1,6 +1,7 @@
 # импортируем библиотеки
 import os
 from data.menu import Menu
+from data.settings import Settings
 import pygame
 import sys
 
@@ -25,11 +26,14 @@ def main():
         screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
     fps = int(config['fps'])  # ставим количество кадров в секунду
     menu = Menu(screen, fps)
-    pygame.mouse.set_visible(False)  # погашаем мышь
-    menu.screensaver()  # заставка
-    pygame.mouse.set_visible(True)  # показываем мышь
-    menu.menu()  # меню
-    pygame.quit()  # выходим из игры
+    # pygame.mouse.set_visible(False)  # погашаем мышь
+    # menu.screensaver()  # заставка
+    # pygame.mouse.set_visible(True)  # показываем мышь
+    while True:
+        result = menu.menu()  # меню
+        if result == 'Settings':
+            settings = Settings(screen, fps, config)
+            settings.menu()
 
 
 if __name__ == '__main__':
