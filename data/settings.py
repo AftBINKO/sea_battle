@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, create_text
+from data.main_functions import terminate, create_sprite
 import pygame
 import os
 
@@ -6,16 +6,27 @@ import os
 class Settings:
     def __init__(self, screen, fps, config):
         self.screen, self.size, self.fps, self.config = screen, screen.get_size(), fps, config
+        self.values_screensize, self.values_screenmode, self.values_fps = ['1366x768', '1920x1080',
+                                                                           '3840x2160'], [
+                                                                              'window', 'noframe',
+                                                                              'fullscreen'], [
+                                                                              '30', '60', '90',
+                                                                              '120']
+        self.value_screensize, self.value_screenmode, self.value_fps = self.values_screensize.index(
+            config['screensize']), self.values_screenmode.index(
+            config['screenmode']), self.values_fps.index(config['fps'])
 
     def menu(self):
         clock = pygame.time.Clock()
         # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
-        self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
 
         settings_sprites = pygame.sprite.Group()
 
         x = pygame.sprite.Sprite()
         create_sprite(x, 'x.png', 1266, 50, settings_sprites)
+
+        apply = pygame.sprite.Sprite()
+        create_sprite(apply, 'apply.png', 1066, 668, settings_sprites)
 
         title = pygame.sprite.Sprite()
         create_sprite(title, 'settings_title.png', 50, 50, settings_sprites)
@@ -35,17 +46,6 @@ class Settings:
         right_fps = pygame.sprite.Sprite()
         create_sprite(right_fps, 'right_arrow.png', 800, 300, settings_sprites)
 
-        for i in [[self.screen, f"Версия конфигурационного файла: {self.config['version']}",
-                   (128, 128, 128), 50, 150, 25],
-                  [self.screen, "Размер экрана: ", (255, 255, 255), 50, 200, 50],
-                  [self.screen, self.config['screensize'], (255, 255, 255), 500, 200, 50],
-                  [self.screen, "Режим экрана: ", (255, 255, 255), 50, 250, 50],
-                  [self.screen, self.config['screenmode'], (255, 255, 255), 500, 250, 50],
-                  [self.screen, "FPS: ", (255, 255, 255), 50, 300, 50],
-                  [self.screen, self.config['fps'], (255, 255, 255), 500, 300, 50]]:
-            create_text(*i)
-
-        settings_sprites.draw(self.screen)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -53,5 +53,71 @@ class Settings:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
                         return
+                    elif left_screensize.rect.collidepoint(event.pos):
+                        if self.value_screensize > 0:
+                            self.value_screensize -= 1
+                        else:
+                            self.value_screensize = len(self.values_screensize) - 1
+                    elif right_screensize.rect.collidepoint(event.pos):
+                        if self.value_screensize < len(self.values_screensize) - 1:
+                            self.value_screensize += 1
+                        else:
+                            self.value_screensize = 0
+                    elif left_screenmode.rect.collidepoint(event.pos):
+                        if self.value_screenmode > 0:
+                            self.value_screenmode -= 1
+                        else:
+                            self.value_screenmode = len(self.values_screenmode) - 1
+                    elif right_screenmode.rect.collidepoint(event.pos):
+                        if self.value_screenmode < len(self.values_screenmode) - 1:
+                            self.value_screenmode += 1
+                        else:
+                            self.value_screenmode = 0
+                    elif left_fps.rect.collidepoint(event.pos):
+                        if self.value_fps > 0:
+                            self.value_fps -= 1
+                        else:
+                            self.value_fps = len(self.values_fps) - 1
+                    elif right_fps.rect.collidepoint(event.pos):
+                        if self.value_fps < len(self.values_fps) - 1:
+                            self.value_fps += 1
+                        else:
+                            self.value_fps = 0
+                    elif apply.rect.collidepoint(event.pos):
+                        with open(os.path.join("data", "config.txt"),
+                                  encoding="utf-8") as config_for_read:
+                            config_for_read = list(
+                                map(lambda a: a.strip('\n'), config_for_read.readlines()))
+                        with open(os.path.join("data", "config.txt"), 'w',
+                                  encoding="utf-8") as config_for_write:
+                            write = []
+                            for i in range(len(config_for_read)):
+                                if config_for_read[i].split(': ')[0] == 'screensize':
+                                    write.append(f'screensize: \
+{self.values_screensize[self.value_screensize]}')
+                                elif config_for_read[i].split(': ')[0] == 'screenmode':
+                                    write.append(f'screenmode: \
+{self.values_screenmode[self.value_screenmode]}')
+                                elif config_for_read[i].split(': ')[0] == 'fps':
+                                    write.append(f'fps: \
+{self.values_fps[self.value_fps]}')
+                                else:
+                                    write.append(config_for_read[i])
+                            config_for_write.write('\n'.join(write))
+                        return True
+            self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
+
+            settings_sprites.draw(self.screen)
+
+            for i in [[f"Версия конфигурационного файла: {self.config['version']}",
+                       (128, 128, 128), 50, 150, 25],
+                      ["Размер экрана: ", (255, 255, 255), 50, 200, 50],
+                      [self.values_screensize[self.value_screensize], (255, 255, 255), 500, 200, 50],
+                      ["Режим экрана: ", (255, 255, 255), 50, 250, 50],
+                      [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 250, 50],
+                      ["FPS: ", (255, 255, 255), 50, 300, 50],
+                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 300, 50]]:
+                self.screen.blit(pygame.font.Font(None, i[4]).render(i[0], True, i[1]), (i[2], i[3]))
+
             pygame.display.flip()
             clock.tick(self.fps)
