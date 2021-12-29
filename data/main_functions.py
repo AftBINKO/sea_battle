@@ -1,6 +1,6 @@
-import os
-import sys
 import pygame
+import sys
+import os
 
 
 def terminate():
@@ -10,7 +10,7 @@ def terminate():
 
 def load_image(name, c=None):
     fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
+    # если файл не существует, то выдаём ошибку
     if not os.path.isfile(fullname):
         raise FileNotFoundError(f'the file with the image f"{fullname}" was not found')
     image = pygame.image.load(fullname)
@@ -25,8 +25,8 @@ def create_sprite(sprite, name, x, y, group):  # функция помогает
     group.add(sprite)
 
 
-def create_window():
-    with open(os.path.join("data", "config.txt"), encoding="utf-8") as config:
+def create_window(path):
+    with open(f"{path}\config.txt", encoding="utf-8") as config:
         config = dict(map(lambda x: tuple(x.split(': ')),
                           [line for line in list(map(lambda x: x.strip('\n'), config.readlines())) if
                            line != '' if line[0] != '#']))

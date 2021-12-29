@@ -4,8 +4,9 @@ import os
 
 
 class Settings:
-    def __init__(self, screen, fps, config):
-        self.screen, self.size, self.fps, self.config = screen, screen.get_size(), fps, config
+    def __init__(self, screen, fps, config, path):
+        self.screen, self.size, self.fps, self.config, self.path = screen, screen.get_size(), fps, \
+                                                                   config, path
         self.values_screensize, self.values_screenmode, self.values_fps = ['1366x768', '1920x1080',
                                                                            '3840x2160'], [
                                                                               'window', 'noframe',
@@ -84,11 +85,10 @@ class Settings:
                         else:
                             self.value_fps = 0
                     elif apply.rect.collidepoint(event.pos):
-                        with open(os.path.join("data", "config.txt"),
-                                  encoding="utf-8") as config_for_read:
+                        with open(f"{self.path}\config.txt", encoding="utf-8") as config_for_read:
                             config_for_read = list(
                                 map(lambda a: a.strip('\n'), config_for_read.readlines()))
-                        with open(os.path.join("data", "config.txt"), 'w',
+                        with open(f"{self.path}\config.txt", 'w',
                                   encoding="utf-8") as config_for_write:
                             write = []
                             for i in range(len(config_for_read)):
