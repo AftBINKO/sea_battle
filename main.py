@@ -1,6 +1,7 @@
 # импортируем библиотеки
 import ctypes.wintypes
 import pygame
+import csv
 import sys
 import os
 
@@ -25,25 +26,26 @@ def main():
         else:
             if not os.path.isfile(f"{path}\Sea Battle\config.txt"):
                 file.extract('config.txt', f"{path}\Sea Battle")
-            if not os.path.isfile(f"{path}\Sea Battle\achievements.sqlite"):
-                file.extract('achievements.sqlite', f"{path}\Sea Battle")
+            if not os.path.isfile(f"{path}\Sea Battle\achievements.csv"):
+                file.extract('achievements.csv', f"{path}\Sea Battle")
+            if not os.path.isfile(f"{path}\Sea Battle\statistic.txt"):
+                file.extract('statistic.txt', f"{path}\Sea Battle")
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    menu = Menu(screen, fps)
+    settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
+        screen, fps, f"{path}\Sea Battle")
     # pygame.mouse.set_visible(False)  # погашаем мышь
     # menu.screensaver()  # заставка
     # pygame.mouse.set_visible(True)  # показываем мышь
     while True:
+        menu = Menu(screen, fps, f"{path}\Sea Battle")
         result = menu.menu()  # меню
         if result == 'Settings':
-            settings = Settings(screen, fps, config, f"{path}\Sea Battle")
             settings.menu()
             if settings:
                 screen, config, fps = create_window(f"{path}\Sea Battle")
-                menu = Menu(screen, fps)
         elif result == 'Achievements':
-            achievements = Achievements(screen, fps, f"{path}\Sea Battle")
             achievements.menu()
 
 
