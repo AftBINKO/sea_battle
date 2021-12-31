@@ -1,6 +1,6 @@
 # импортируем библиотеки
+import sqlite3
 import pygame
-import csv
 import os
 
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
@@ -74,11 +74,11 @@ class Menu:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if play.rect.collidepoint(event.pos):
-                        pass
+                        return 'Play'
                     elif with_friend.rect.collidepoint(event.pos):
-                        pass
+                        return 'Play_With_Friend'
                     elif with_bot.rect.collidepoint(event.pos):
-                        pass
+                        return 'Play_With_Bot'
                     elif settings.rect.collidepoint(event.pos):
                         return 'Settings'
                     elif achievements.rect.collidepoint(event.pos):
@@ -89,7 +89,7 @@ class Menu:
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
             menu_sprites.draw(self.screen)
             self.screen.blit(
-                pygame.font.Font(None, 50).render(f"{self.statistic['EX']} EX", True,
+                pygame.font.Font(None, 50).render(f"{self.statistic['XP']} XP", True,
                                                   (255, 255, 255)), (0, 0))
             pygame.display.flip()
             clock.tick(self.fps)
@@ -98,10 +98,9 @@ class Menu:
 class Achievements:
     def __init__(self, screen, fps, path):
         self.screen, self.fps, self.path = screen, fps, path
-        with open(os.path.join(path, 'achievements.csv'), encoding='utf8') as file:
-            self.achievements = list(
-                map(lambda q: [int(q[0]), q[1], q[2], int(q[3]), float(q[4]), q[5], int(q[6]), q[7]],
-                    list(csv.reader(file, delimiter=';', quotechar='"'))[1:]))
+        with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
+            cur = con.cursor()
+            self.achievements = cur.execute("""SELECT * FROM achievements""").fetchall()
 
     def menu(self):
         clock = pygame.time.Clock()
@@ -168,7 +167,8 @@ class Achievements:
                           ["Прогресс", (192, 192, 192), 900, y + 10, 25],
                           [f"{int(achievement[4] * 100)}%", (255, 255, 255), 900, y + 45, 50],
                           ["Награда", (192, 192, 192), 1100, y + 10, 25],
-                          [f"{achievement[6]} EX", (255, 255, 255), 1100, y + 45, 50]]:
+                          [f"{achievement[6]} XP", (255, 255, 255), 1100, y + 45, 50],
+                          [achievement[5], (255, 255, 255), 1100, y + 100, 25]]:
                     self.screen.blit(pygame.font.Font(None, j[4]).render(j[0], True, j[1]),
                                      (j[2], j[3]))
 
@@ -180,35 +180,34 @@ class Achievements:
             clock.tick(self.fps)
 
     def add_progress(self, number, i):
-        with open(os.path.join(self.path, 'achievements.csv'), encoding='utf8') as file:
-            self.achievements = list(
-                map(lambda q: [int(q[0]), q[1], q[2], int(q[3]), float(q[4]), q[5], int(q[6]), q[7]],
-                    list(csv.reader(file, delimiter=';', quotechar='"'))[1:]))
-        i = list(map(lambda x: x[0], self.achievements)).index(i)
-        if self.achievements[i][5] == '':
-            self.achievements[i][4] += number
-            if self.achievements[i][4] == 1.0:
-                self.achievements[i][5] = datetime.now().date().strftime('%d.%m.%Y')
-                with open(f"{self.path}\statistic.txt", encoding="utf-8") as statistic_for_read:
-                    statistic_for_read = list(
-                        map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
-                with open(f"{self.path}\statistic.txt", 'w',
-                          encoding="utf-8") as statistic_for_write:
-                    write = []
-                    for j in range(len(statistic_for_read)):
-                        if statistic_for_read[j].split(': ')[0] == 'EX':
-                            n = str(
-                                int(statistic_for_read[j].split(': ')[1]) + self.achievements[i][6])
-                            write.append(f"EX: {n}")
-                        else:
-                            write.append(statistic_for_read[j])
-                    statistic_for_write.write('\n'.join(write))
-                with open(os.path.join(self.path, 'achievements.csv'), 'w',
-                          encoding='utf-8') as file:
-                    write = [
-                        'id;name;description;difficulty;progress;date_of_completion;experience\
-;image\n']
-                    for i in self.achievements:
-                        write.append(';'.join(list(map(str, i))))
-                    write = ''.join(write)
-                    file.write(write)
+        with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
+            cur = con.cursor()
+            if float(cur.execute(f"""SELECT progress FROM achievements
+WHERE id = {i}""").fetchone()[0]) != 1:
+                cur.execute(f"""UPDATE achievements
+SET progress = {float(cur.execute(f'''SELECT progress FROM achievements
+WHERE id = {i}''').fetchone()[0]) + number}
+WHERE id = {i}""")
+                con.commit()
+                if float(cur.execute(f"""SELECT progress FROM achievements
+WHERE id = {i}""").fetchone()[0]) == 1:
+                    cur.execute(f"""UPDATE achievements
+SET date_of_completion = '{datetime.now().date().strftime('%d.%m.%Y')}'
+WHERE id = {i}""")
+                    con.commit()
+                    with open(f"{self.path}\statistic.txt", encoding="utf-8") as statistic_for_read:
+                        statistic_for_read = list(
+                            map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
+                    with open(f"{self.path}\statistic.txt", 'w',
+                              encoding="utf-8") as statistic_for_write:
+                        write = []
+                        for j in range(len(statistic_for_read)):
+                            if statistic_for_read[j].split(': ')[0] == 'XP':
+                                n = str(
+                                    int(statistic_for_read[j].split(': ')[1]) + int(
+                                        cur.execute(f"""SELECT experience FROM achievements
+WHERE id = {i}""").fetchone()[0]))
+                                write.append(f"XP: {n}")
+                            else:
+                                write.append(statistic_for_read[j])
+                        statistic_for_write.write('\n'.join(write))
