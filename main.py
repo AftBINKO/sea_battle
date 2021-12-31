@@ -38,6 +38,7 @@ def main():
     # pygame.mouse.set_visible(False)  # погашаем мышь
     # menu.screensaver()  # заставка
     # pygame.mouse.set_visible(True)  # показываем мышь
+    achievements.add_progress(1, 1)
     while True:
         menu = Menu(screen, fps, f"{path}\Sea Battle")
         result = menu.menu()  # меню

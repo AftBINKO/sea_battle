@@ -180,10 +180,14 @@ class Achievements:
             clock.tick(self.fps)
 
     def add_progress(self, number, i):
+        with open(os.path.join(self.path, 'achievements.csv'), encoding='utf8') as file:
+            self.achievements = list(
+                map(lambda q: [int(q[0]), q[1], q[2], int(q[3]), float(q[4]), q[5], int(q[6]), q[7]],
+                    list(csv.reader(file, delimiter=';', quotechar='"'))[1:]))
         i = list(map(lambda x: x[0], self.achievements)).index(i)
-        if self.achievements[i][4] != 1:
+        if self.achievements[i][5] == '':
             self.achievements[i][4] += number
-            if self.achievements[i][4] == 1:
+            if self.achievements[i][4] == 1.0:
                 self.achievements[i][5] = datetime.now().date().strftime('%d.%m.%Y')
                 with open(f"{self.path}\statistic.txt", encoding="utf-8") as statistic_for_read:
                     statistic_for_read = list(
@@ -193,13 +197,17 @@ class Achievements:
                     write = []
                     for j in range(len(statistic_for_read)):
                         if statistic_for_read[j].split(': ')[0] == 'EX':
+                            n = str(
+                                int(statistic_for_read[j].split(': ')[1]) + self.achievements[i][6])
                             write.append(
-                                str(int(statistic_for_read[j].split(': ')[1]) + self.achievements[i][
-                                    6]))
+                                f"EX: {n}")
                         else:
                             write.append(statistic_for_read[j])
                     statistic_for_write.write('\n'.join(write))
             with open(os.path.join(self.path, 'achievements.csv'), 'w', encoding='utf-8') as file:
-                file.read(
-                    'id;name;description;dificulty;progress;date_of_completion;experience;image\n' + '\n'.join(
-                        list(map(lambda q: '\n'.join(q), self.achievements))))
+                write = [
+                    'id;name;description;difficulty;progress;date_of_completion;experience;image\n']
+                for i in self.achievements:
+                    write.append(';'.join(list(map(str, i))))
+                write = ''.join(write)
+                file.write(write)
