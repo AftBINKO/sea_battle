@@ -199,15 +199,16 @@ class Achievements:
                         if statistic_for_read[j].split(': ')[0] == 'EX':
                             n = str(
                                 int(statistic_for_read[j].split(': ')[1]) + self.achievements[i][6])
-                            write.append(
-                                f"EX: {n}")
+                            write.append(f"EX: {n}")
                         else:
                             write.append(statistic_for_read[j])
                     statistic_for_write.write('\n'.join(write))
-            with open(os.path.join(self.path, 'achievements.csv'), 'w', encoding='utf-8') as file:
-                write = [
-                    'id;name;description;difficulty;progress;date_of_completion;experience;image\n']
-                for i in self.achievements:
-                    write.append(';'.join(list(map(str, i))))
-                write = ''.join(write)
-                file.write(write)
+                with open(os.path.join(self.path, 'achievements.csv'), 'w',
+                          encoding='utf-8') as file:
+                    write = [
+                        'id;name;description;difficulty;progress;date_of_completion;experience\
+;image\n']
+                    for i in self.achievements:
+                        write.append(';'.join(list(map(str, i))))
+                    write = ''.join(write)
+                    file.write(write)
