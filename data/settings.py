@@ -33,9 +33,9 @@ class Settings:
         create_sprite(title, 'settings_title.png', 50, 50, settings_sprites)
 
         left_screensize = pygame.sprite.Sprite()
-        create_sprite(left_screensize, 'left_arrow.png', 450, 205, settings_sprites)
+        create_sprite(left_screensize, 'left_arrow.png', 450, 200, settings_sprites)
         right_screensize = pygame.sprite.Sprite()
-        create_sprite(right_screensize, 'right_arrow.png', 800, 205, settings_sprites)
+        create_sprite(right_screensize, 'right_arrow.png', 800, 200, settings_sprites)
 
         left_screenmode = pygame.sprite.Sprite()
         create_sprite(left_screenmode, 'left_arrow.png', 450, 250, settings_sprites)
@@ -110,13 +110,13 @@ class Settings:
             settings_sprites.draw(self.screen)
 
             for i in [[f"Версия конфигурационного файла: {self.config['version']}",
-                       (128, 128, 128), 50, 150, 25],
-                      ["Размер экрана: ", (255, 255, 255), 50, 200, 50],
-                      [self.values_screensize[self.value_screensize], (255, 255, 255), 500, 200, 50],
-                      ["Режим экрана: ", (255, 255, 255), 50, 250, 50],
-                      [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 250, 50],
-                      ["FPS: ", (255, 255, 255), 50, 300, 50],
-                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 300, 50]]:
+                       (128, 128, 128), 50, 155, 25],
+                      ["Размер экрана: ", (255, 255, 255), 50, 205, 50],
+                      [self.values_screensize[self.value_screensize], (255, 255, 255), 500, 205, 50],
+                      ["Режим экрана: ", (255, 255, 255), 50, 255, 50],
+                      [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 255, 50],
+                      ["FPS: ", (255, 255, 255), 50, 305, 50],
+                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 305, 50]]:
                 self.screen.blit(pygame.font.Font(None, i[4]).render(i[0], True, i[1]), (i[2], i[3]))
 
             pygame.display.flip()

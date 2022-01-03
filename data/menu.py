@@ -11,7 +11,7 @@ from data.main_functions import terminate, create_sprite
 
 class Menu:
     def __init__(self, screen, fps, path):
-        self.screen, self.size, self.fps = screen, screen.get_size(), fps
+        self.screen, self.size, self.fps, self.n = screen, screen.get_size(), fps, 0
         with open(f"{path}\statistic.txt", encoding="utf-8") as statistic:
             self.statistic = dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
                 map(lambda x: x.strip('\n'), statistic.readlines())) if line != '' if
@@ -48,51 +48,106 @@ class Menu:
         menu_sprites = pygame.sprite.Group()
 
         title = pygame.sprite.Sprite()
-        create_sprite(title, "title.png", 549, 50, menu_sprites)
+        create_sprite(title, "title.png", 50, 200, menu_sprites)
 
-        play = pygame.sprite.Sprite()
-        create_sprite(play, "play.png", 558, 150, menu_sprites)
-
-        with_friend = pygame.sprite.Sprite()
-        create_sprite(with_friend, "withfriend.png", 558, 200, menu_sprites)
-
-        with_bot = pygame.sprite.Sprite()
-        create_sprite(with_bot, "withbot.png", 683, 200, menu_sprites)
-
-        settings = pygame.sprite.Sprite()
-        create_sprite(settings, "settings.png", 50, 250, menu_sprites)
-
-        achievements = pygame.sprite.Sprite()
-        create_sprite(achievements, "achievements.png", 50, 500, menu_sprites)
-
-        e = pygame.sprite.Sprite()
-        create_sprite(e, "exit.png", 1066, 500, menu_sprites)
+        mat = pygame.sprite.Sprite()
+        create_sprite(mat, "mat_3.png", 0, 500, menu_sprites)
 
         while True:
+            buttons_sprites = pygame.sprite.Group()
+
+            play = pygame.sprite.Sprite()
+            create_sprite(play, "play.png", 558 - 300 * self.n + 300 * 0, 500, buttons_sprites)
+
+            with_friend = pygame.sprite.Sprite()
+            create_sprite(with_friend, "with_friend.png", 558 - 300 * self.n + 300 * 1, 500,
+                          buttons_sprites)
+
+            with_bot = pygame.sprite.Sprite()
+            create_sprite(with_bot, "with_bot.png", 558 - 300 * self.n + 300 * 2, 500,
+                          buttons_sprites)
+
+            settings = pygame.sprite.Sprite()
+            create_sprite(settings, "settings.png", 558 - 300 * self.n + 300 * 3, 500,
+                          buttons_sprites)
+
+            achievements = pygame.sprite.Sprite()
+            create_sprite(achievements, "achievements.png", 558 - 300 * self.n + 300 * 4, 500,
+                          buttons_sprites)
+
+            e = pygame.sprite.Sprite()
+            create_sprite(e, "exit.png", 558 - 300 * self.n + 300 * 5, 500, buttons_sprites)
+
+            arrows_sprites = pygame.sprite.Group()
+
+            down_arrow = pygame.sprite.Sprite()
+            create_sprite(down_arrow, "down_arrow.png", 658, 450, arrows_sprites)
+
+            left_arrow = pygame.sprite.Sprite()
+            if self.n - 1 >= 0:
+                create_sprite(left_arrow, "left_arrow.png", 508, 500, arrows_sprites)
+
+            right_arrow = pygame.sprite.Sprite()
+            if self.n + 1 <= 5:
+                create_sprite(right_arrow, "right_arrow.png", 808, 500, arrows_sprites)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if play.rect.collidepoint(event.pos):
+                    try:
+                        if left_arrow.rect.collidepoint(event.pos):
+                            self.n -= 1
+                    except AttributeError:
+                        pass
+                    try:
+                        if right_arrow.rect.collidepoint(event.pos):
+                            self.n += 1
+                    except AttributeError:
+                        pass
+                    if play.rect.collidepoint(event.pos) and self.n == 0:
                         return 'Play'
-                    elif with_friend.rect.collidepoint(event.pos):
+                    elif with_friend.rect.collidepoint(event.pos) and self.n == 1:
                         return 'Play_With_Friend'
-                    elif with_bot.rect.collidepoint(event.pos):
+                    elif with_bot.rect.collidepoint(event.pos) and self.n == 2:
                         return 'Play_With_Bot'
-                    elif settings.rect.collidepoint(event.pos):
+                    elif settings.rect.collidepoint(event.pos) and self.n == 3:
                         return 'Settings'
-                    elif achievements.rect.collidepoint(event.pos):
+                    elif achievements.rect.collidepoint(event.pos) and self.n == 4:
                         return 'Achievements'
-                    elif e.rect.collidepoint(event.pos):
+                    elif e.rect.collidepoint(event.pos) and self.n == 5:
                         terminate()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT and self.n - 1 >= 0:
+                        self.n -= 1
+                    elif event.key == pygame.K_RIGHT and self.n + 1 <= 5:
+                        self.n += 1
+                    elif event.key == pygame.K_RETURN:
+                        if self.n == 5:
+                            terminate()
+                        return (
+                            'Play', 'Play_With_Friend', 'Play_With_Bot', 'Settings', 'Achievements')[
+                                self.n]
+
             # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
+
+            buttons_sprites.draw(self.screen)
             menu_sprites.draw(self.screen)
+            arrows_sprites.draw(self.screen)
+
             self.screen.blit(
                 pygame.font.Font(None, 50).render(f"{self.statistic['XP']} XP", True,
                                                   (255, 255, 255)), (0, 0))
+
             pygame.display.flip()
             clock.tick(self.fps)
+
+    def set_n(self, n):
+        self.n = n
+
+    def get_n(self):
+        return self.n
 
 
 class Achievements:
