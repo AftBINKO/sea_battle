@@ -2,7 +2,8 @@ import pygame
 
 
 class Board:
-    pass
+    def __init__(self):
+        self.board = [[0] * 10 for _ in range(10)]
 
 
 class PlayWithFriend(Board):
