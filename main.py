@@ -33,9 +33,6 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    # menu, settings, achievements = Menu(
-    #     screen, fps, f"{path}\Sea Battle"), Settings(
-    #     screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
     menu = Menu(screen, fps, f"{path}\Sea Battle")
     settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
         screen, fps, f"{path}\Sea Battle")
