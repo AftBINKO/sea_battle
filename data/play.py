@@ -10,7 +10,7 @@ class Board:
         print()
 
     def map_draw(self):
-        font = pg.font.Font(None, self.size // 2 + 10)
+        font = pg.font.Font(None, self.size)
         slo = list('АБВГДЕЁЖЗИ')
 
         for i in range(10):
@@ -32,9 +32,9 @@ class Board:
 class PlayWithBot(Board):
     def __init__(self, screen):
         super().__init__(screen)
-        self.main()
+        self.main_1()
 
-    def main(self):
+    def main_1(self):
         running = True
         while running:
             self.sc.fill((0, 0, 0))
