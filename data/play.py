@@ -4,49 +4,62 @@ import pygame as pg
 
 
 class Board:
-    def __init__(self, screen):
+    def __init__(self, screen, fps):
         self.board = [[0] * 10 for _ in range(10)]
         self.sc = screen
-        self.co = 30
-        self.size = 40
-        print()
+        self.fps = fps
 
-    def map_draw(self):
-        font = pg.font.Font(None, self.size)
+        sur = pg.display.get_surface()
+        self.display_width = sur.get_width()
+        self.display_height = sur.get_height()
+
+        self.co = int(self.display_width * 0.02)
+        self.size = int(self.display_width * 0.035)
+
+    def map_draw(self, x, y):
+        font = pg.font.Font(None, self.size - 10)
         slo = list('АБВГДЕЁЖЗИ')
 
         for i in range(10):
             text = font.render(str(i), True, (255, 255, 255))
-            self.sc.blit(text, (i * self.size + self.co + 15, 3))
+            self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
 
         for i, pp in enumerate(slo):
-            print(i, pp)
             text = font.render(pp, True, (255, 255, 255))
-            self.sc.blit(text, (0, i * self.size + self.co + 15))
+            self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
         for i in range(10):
             for g in range(10):
-                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + self.co,
-                                                        g * self.size + self.co,
-                                                        self.size, self.size), 2)
+                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + x + self.co,
+                                                        g * self.size + y + self.co,
+                                                        self.size, self.size), 1)
+        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
+                                                y + self.co,
+                                                self.size * 10, self.size * 10), 4)
+
+    def ships_draw(self):
+        pass
 
 
 class PlayWithBot(Board):
     # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
-    def __init__(self, screen):
-        super().__init__(screen)
+    def __init__(self, screen, fps):
+        super().__init__(screen, fps)
         self.main_1()
 
     def main_1(self):
+        clock = pg.time.Clock()
         running = True
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    running = False
+                    terminate()
 
-            self.map_draw()
+            self.map_draw(30, 30)
             pg.display.flip()
+
+        clock.tick(self.fps)
 
 
 class PlayWithFriend(Board):
