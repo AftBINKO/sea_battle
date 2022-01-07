@@ -43,6 +43,8 @@ class Menu:
         s.stop()
 
     def menu(self):
+        buttons_tuple = ('Play', 'Play_With_Friend', 'Play_With_Bot', 'Settings', 'Achievements')
+
         clock = pygame.time.Clock()
 
         menu_sprites = pygame.sprite.Group()
@@ -53,30 +55,30 @@ class Menu:
         mat = pygame.sprite.Sprite()
         create_sprite(mat, "mat_3.png", 0, 500, menu_sprites)
 
+        x = 300 * self.n
+        left, right = False, False
+
         while True:
             buttons_sprites = pygame.sprite.Group()
 
-            play = pygame.sprite.Sprite()
-            create_sprite(play, "play.png", 558 - 300 * self.n + 300 * 0, 500, buttons_sprites)
+            if right:
+                if x < (300 * self.n) - 1:
+                    x += 50
+                else:
+                    x += 1  # корректировка
+                    right = False
+            if left:
+                if x > (300 * self.n) + 1:
+                    x -= 50
+                else:
+                    x -= 1
+                    left = False
 
-            with_friend = pygame.sprite.Sprite()
-            create_sprite(with_friend, "with_friend.png", 558 - 300 * self.n + 300 * 1, 500,
-                          buttons_sprites)
+            buttons = pygame.sprite.Sprite()
+            create_sprite(buttons, "buttons.png", 558 - x, 500, buttons_sprites)
 
-            with_bot = pygame.sprite.Sprite()
-            create_sprite(with_bot, "with_bot.png", 558 - 300 * self.n + 300 * 2, 500,
-                          buttons_sprites)
-
-            settings = pygame.sprite.Sprite()
-            create_sprite(settings, "settings.png", 558 - 300 * self.n + 300 * 3, 500,
-                          buttons_sprites)
-
-            achievements = pygame.sprite.Sprite()
-            create_sprite(achievements, "achievements.png", 558 - 300 * self.n + 300 * 4, 500,
-                          buttons_sprites)
-
-            e = pygame.sprite.Sprite()
-            create_sprite(e, "exit.png", 558 - 300 * self.n + 300 * 5, 500, buttons_sprites)
+            frame = pygame.sprite.Sprite()
+            create_sprite(frame, "frame_6.png", 558, 500, buttons_sprites)
 
             arrows_sprites = pygame.sprite.Group()
 
@@ -97,37 +99,35 @@ class Menu:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     try:
                         if left_arrow.rect.collidepoint(event.pos):
+                            x = 300 * self.n + 1
+                            left = True
                             self.n -= 1
                     except AttributeError:
                         pass
                     try:
                         if right_arrow.rect.collidepoint(event.pos):
+                            x = 300 * self.n - 1
+                            right = True
                             self.n += 1
                     except AttributeError:
                         pass
-                    if play.rect.collidepoint(event.pos) and self.n == 0:
-                        return 'Play'
-                    elif with_friend.rect.collidepoint(event.pos) and self.n == 1:
-                        return 'Play_With_Friend'
-                    elif with_bot.rect.collidepoint(event.pos) and self.n == 2:
-                        return 'Play_With_Bot'
-                    elif settings.rect.collidepoint(event.pos) and self.n == 3:
-                        return 'Settings'
-                    elif achievements.rect.collidepoint(event.pos) and self.n == 4:
-                        return 'Achievements'
-                    elif e.rect.collidepoint(event.pos) and self.n == 5:
-                        terminate()
+                    if frame.rect.collidepoint(event.pos):
+                        if self.n == 5:
+                            terminate()
+                        return buttons_tuple[self.n]
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT and self.n - 1 >= 0:
+                        x = 300 * self.n + 1
+                        left = True
                         self.n -= 1
                     elif event.key == pygame.K_RIGHT and self.n + 1 <= 5:
+                        x = 300 * self.n - 1
+                        right = True
                         self.n += 1
                     elif event.key == pygame.K_RETURN:
                         if self.n == 5:
                             terminate()
-                        return (
-                            'Play', 'Play_With_Friend', 'Play_With_Bot', 'Settings', 'Achievements')[
-                                self.n]
+                        return buttons_tuple[self.n]
 
             # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))

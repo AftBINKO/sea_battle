@@ -1,3 +1,5 @@
+from data.main_functions import terminate, create_sprite
+
 import pygame as pg
 
 
@@ -30,6 +32,7 @@ class Board:
 
 
 class PlayWithBot(Board):
+    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
     def __init__(self, screen):
         super().__init__(screen)
         self.main_1()
@@ -50,5 +53,28 @@ class PlayWithFriend(Board):
     pass
 
 
-class Play(PlayWithBot):
-    pass
+class Play:
+    def __init__(self, screen, fps):
+        self.screen, self.fps = screen, fps
+
+    def menu(self):
+        clock = pg.time.Clock()
+
+        while True:
+            menu_sprites = pg.sprite.Group()
+
+            x = pg.sprite.Sprite()
+            create_sprite(x, 'x.png', 1266, 50, menu_sprites)
+
+            while True:
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        terminate()
+                    elif event.type == pg.MOUSEBUTTONDOWN:
+                        if x.rect.collidepoint(event.pos):
+                            return
+
+                self.screen.fill((0, 0, 0))
+                menu_sprites.draw(self.screen)
+                pg.display.flip()
+                clock.tick(self.fps)

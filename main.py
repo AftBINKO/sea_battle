@@ -1,7 +1,6 @@
 # импортируем библиотеки
 import ctypes.wintypes
 import pygame
-import csv
 import sys
 import os
 
@@ -34,15 +33,12 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    # menu, settings, achievements = Menu(
-    #     screen, fps, f"{path}\Sea Battle"), Settings(
-    #     screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
     menu = Menu(screen, fps, f"{path}\Sea Battle")
-    settings = Settings(screen, fps, config, f"{path}\Sea Battle")
-    achievements = Achievements(screen, fps, f"{path}\Sea Battle")
-    # pygame.mouse.set_visible(False)  # погашаем мышь
-    # menu.screensaver()  # заставка
-    # pygame.mouse.set_visible(True)  # показываем мышь
+    settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
+        screen, fps, f"{path}\Sea Battle")
+    pygame.mouse.set_visible(False)  # погашаем мышь
+    menu.screensaver()  # заставка
+    pygame.mouse.set_visible(True)  # показываем мышь
     achievements.add_progress(1, 1)
     achievements = Achievements(screen, fps, f"{path}\Sea Battle")  # обновляем достижения
     while True:
@@ -58,11 +54,12 @@ def main():
         elif result == 'Achievements':
             achievements.menu()
         elif result == 'Play_With_Friend':
-            play = PlayWithFriend()
+            play = PlayWithFriend(screen, fps)
         elif result == 'Play_With_Bot':
-            play = PlayWithBot()
+            play = PlayWithBot(screen, fps)
         elif result == 'Play':
-            play = Play()
+            play = Play(screen, fps)
+            play.menu()
 
 
 if __name__ == '__main__':
