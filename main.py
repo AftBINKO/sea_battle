@@ -33,6 +33,7 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
+    PlayWithBot(screen, fps)
     menu = Menu(screen, fps, f"{path}\Sea Battle")
     settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
         screen, fps, f"{path}\Sea Battle")
@@ -42,7 +43,7 @@ def main():
     achievements.add_progress(1, 1)
     achievements = Achievements(screen, fps, f"{path}\Sea Battle")  # обновляем достижения
     while True:
-        PlayWithBot(screen)
+
         x = menu.get_n()  # сохраним значение x в переменную
         menu = Menu(screen, fps, f"{path}\Sea Battle")  # обновляем меню
         menu.set_n(x)  # и вставим обратно
