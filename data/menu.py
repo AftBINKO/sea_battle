@@ -6,16 +6,16 @@ import os
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 from datetime import datetime
 
-from data.main_functions import terminate, create_sprite
+from data.main_functions import terminate, create_sprite, add_xp, format_xp
 
 
 class Menu:
     def __init__(self, screen, fps, path):
-        self.screen, self.size, self.fps, self.n = screen, screen.get_size(), fps, 0
-        with open(f"{path}\statistic.txt", encoding="utf-8") as statistic:
-            self.statistic = dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
-                map(lambda x: x.strip('\n'), statistic.readlines())) if line != '' if
-                                                                       line[0] != '#']))
+        self.screen, self.size, self.fps, self.path, self.n = screen, screen.get_size(), fps, path, 0
+        # with open(f"{path}\statistic.txt", encoding="utf-8") as statistic:
+        #     self.statistic = dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
+        #         map(lambda x: x.strip('\n'), statistic.readlines())) if line != '' if
+        #                                                                line[0] != '#']))
 
     # функция воспроизведения заставки
     def screensaver(self):
@@ -136,9 +136,12 @@ class Menu:
             menu_sprites.draw(self.screen)
             arrows_sprites.draw(self.screen)
 
-            self.screen.blit(
-                pygame.font.Font(None, 50).render(f"{self.statistic['XP']} XP", True,
-                                                  (255, 255, 255)), (0, 0))
+            text = format_xp(f"{self.path}/statistic.txt")[0].split('\n')
+            y = 0
+            for line in text:
+                self.screen.blit(pygame.font.Font(None, 50).render(line, True, (255, 255, 255)),
+                                 (0, y))
+                y += 50
 
             pygame.display.flip()
             clock.tick(self.fps)
@@ -192,6 +195,8 @@ class Achievements:
                     elif event.key == pygame.K_DOWN:
                         if f + 1 < len(self.achievements) - 2:
                             a, f = a - 175, f + 1
+                    elif event.key == pygame.K_ESCAPE:
+                        return
             self.screen.fill((0, 0, 0))
 
             y, i = a, 0
@@ -250,19 +255,6 @@ WHERE id = {i}""").fetchone()[0]) == 1:
 SET date_of_completion = '{datetime.now().date().strftime('%d.%m.%Y')}'
 WHERE id = {i}""")
                     con.commit()
-                    with open(f"{self.path}\statistic.txt", encoding="utf-8") as statistic_for_read:
-                        statistic_for_read = list(
-                            map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
-                    with open(f"{self.path}\statistic.txt", 'w',
-                              encoding="utf-8") as statistic_for_write:
-                        write = []
-                        for j in range(len(statistic_for_read)):
-                            if statistic_for_read[j].split(': ')[0] == 'XP':
-                                n = str(
-                                    int(statistic_for_read[j].split(': ')[1]) + int(
-                                        cur.execute(f"""SELECT experience FROM achievements
+                    add_xp(f"{self.path}\statistic.txt", int(cur.execute(
+                        f"""SELECT experience FROM achievements
 WHERE id = {i}""").fetchone()[0]))
-                                write.append(f"XP: {n}")
-                            else:
-                                write.append(statistic_for_read[j])
-                        statistic_for_write.write('\n'.join(write))

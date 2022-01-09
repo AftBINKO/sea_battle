@@ -43,3 +43,37 @@ def create_window(path):
         screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
     fps = int(config['fps'])  # ставим количество кадров в секунду
     return screen, config, fps
+
+
+def add_xp(path, number):
+    with open(path, encoding="utf-8") as statistic_for_read:
+        statistic_for_read = list(
+            map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
+    with open(path, 'w', encoding="utf-8") as statistic_for_write:
+        write = []
+        for i in range(len(statistic_for_read)):
+            if statistic_for_read[i].split(': ')[0] == 'XP':
+                n = str(int(statistic_for_read[i].split(': ')[1]) + number)
+                write.append(f"XP: {n}")
+            else:
+                write.append(statistic_for_read[i])
+        statistic_for_write.write('\n'.join(write))
+
+
+def format_xp(path):
+    with open(path, encoding="utf-8") as statistic_for_read:
+        statistic_for_read = list(
+            map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
+        for statistic in statistic_for_read:
+            if statistic.split(': ')[0] == 'XP':
+                xp = int(statistic.split(': ')[1])
+    level, requirement, x = None, None, xp
+    for i in range(100):
+        level, requirement = i, 100 * (i + 1)
+        if requirement - x > 0:
+            return f"""{level} LVL
+{x}/{requirement} XP""", level, x, requirement
+        x -= requirement
+    return f"""100 LVL
+{x} XP""", 100, x
+

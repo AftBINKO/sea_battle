@@ -73,21 +73,35 @@ class Play:
     def menu(self):
         clock = pg.time.Clock()
 
+        menu_sprites = pg.sprite.Group()
+
+        mat = pg.sprite.Sprite()
+        create_sprite(mat, 'mat_5.png', 0, 0, menu_sprites)
+
+        x = pg.sprite.Sprite()
+        create_sprite(x, 'x.png', 1266, 50, menu_sprites)
+
+        title = pg.sprite.Sprite()
+        create_sprite(title, 'play_title.png', 50, 50, menu_sprites)
+
+        reward = pg.sprite.Sprite()
+        create_sprite(reward, "reward.png", 1066, 518, menu_sprites)
+
+        play = pg.sprite.Sprite()
+        create_sprite(play, 'play.png', 1066, 668, menu_sprites)
+
         while True:
-            menu_sprites = pg.sprite.Group()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                    if x.rect.collidepoint(event.pos):
+                        return
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        return
 
-            x = pg.sprite.Sprite()
-            create_sprite(x, 'x.png', 1266, 50, menu_sprites)
-
-            while True:
-                for event in pg.event.get():
-                    if event.type == pg.QUIT:
-                        terminate()
-                    elif event.type == pg.MOUSEBUTTONDOWN:
-                        if x.rect.collidepoint(event.pos):
-                            return
-
-                self.screen.fill((0, 0, 0))
-                menu_sprites.draw(self.screen)
-                pg.display.flip()
-                clock.tick(self.fps)
+            self.screen.fill((0, 0, 0))
+            menu_sprites.draw(self.screen)
+            pg.display.flip()
+            clock.tick(self.fps)

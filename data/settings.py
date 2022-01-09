@@ -17,6 +17,28 @@ class Settings:
             config['screensize']), self.values_screenmode.index(
             config['screenmode']), self.values_fps.index(config['fps'])
 
+    def apply(self):
+        with open(f"{self.path}\config.txt", encoding="utf-8") as config_for_read:
+            config_for_read = list(
+                map(lambda a: a.strip('\n'), config_for_read.readlines()))
+        with open(f"{self.path}\config.txt", 'w',
+                  encoding="utf-8") as config_for_write:
+            write = []
+            for i in range(len(config_for_read)):
+                if config_for_read[i].split(': ')[0] == 'screensize':
+                    write.append(f'screensize: \
+{self.values_screensize[self.value_screensize]}')
+                elif config_for_read[i].split(': ')[0] == 'screenmode':
+                    write.append(f'screenmode: \
+{self.values_screenmode[self.value_screenmode]}')
+                elif config_for_read[i].split(': ')[0] == 'fps':
+                    write.append(f'fps: \
+{self.values_fps[self.value_fps]}')
+                else:
+                    write.append(config_for_read[i])
+            config_for_write.write('\n'.join(write))
+        return True
+
     def menu(self):
         clock = pygame.time.Clock()
         # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
@@ -85,26 +107,12 @@ class Settings:
                         else:
                             self.value_fps = 0
                     elif apply.rect.collidepoint(event.pos):
-                        with open(f"{self.path}\config.txt", encoding="utf-8") as config_for_read:
-                            config_for_read = list(
-                                map(lambda a: a.strip('\n'), config_for_read.readlines()))
-                        with open(f"{self.path}\config.txt", 'w',
-                                  encoding="utf-8") as config_for_write:
-                            write = []
-                            for i in range(len(config_for_read)):
-                                if config_for_read[i].split(': ')[0] == 'screensize':
-                                    write.append(f'screensize: \
-{self.values_screensize[self.value_screensize]}')
-                                elif config_for_read[i].split(': ')[0] == 'screenmode':
-                                    write.append(f'screenmode: \
-{self.values_screenmode[self.value_screenmode]}')
-                                elif config_for_read[i].split(': ')[0] == 'fps':
-                                    write.append(f'fps: \
-{self.values_fps[self.value_fps]}')
-                                else:
-                                    write.append(config_for_read[i])
-                            config_for_write.write('\n'.join(write))
-                        return True
+                        return self.apply()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return
+                    elif event.key == pygame.K_RETURN:
+                        return self.apply()
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
 
             settings_sprites.draw(self.screen)
