@@ -1,5 +1,4 @@
-from data.main_functions import terminate, create_sprite
-
+from data.main_functions import terminate, create_sprite, load_image
 import pygame as pg
 
 
@@ -15,17 +14,19 @@ class Board:
 
         self.co = int(self.display_width * 0.02)
         self.size = int(self.display_width * 0.035)
+        self.font = pg.font.Font(None, int(self.size * 0.8))
+        self.clock = pg.time.Clock()
 
     def map_draw(self, x, y):
-        font = pg.font.Font(None, self.size - 10)
+
         slo = list('АБВГДЕЁЖЗИ')
 
         for i in range(10):
-            text = font.render(str(i), True, (255, 255, 255))
+            text = self.font.render(str(i), True, (255, 255, 255))
             self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
 
         for i, pp in enumerate(slo):
-            text = font.render(pp, True, (255, 255, 255))
+            text = self.font.render(pp, True, (255, 255, 255))
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
         for i in range(10):
@@ -37,19 +38,29 @@ class Board:
                                                 y + self.co,
                                                 self.size * 10, self.size * 10), 4)
 
-    def ships_draw(self):
-        pass
+
+class Ship(pg.sprite.Sprite):
+    def __init__(self, n, x, y, *op):
+        super().__init__(*op)
+        image = load_image('ship_' + str(n) + '.png', 1)
+        print(image)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 
 class PlayWithBot(Board):
     # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
     def __init__(self, screen, fps):
         super().__init__(screen, fps)
-        self.main_1()
+        self.map_customization()
 
-    def main_1(self):
-        clock = pg.time.Clock()
+    def map_customization(self):
         running = True
+        all_sprites = pg.sprite.Group()
+        Ship(1, 0, 0, all_sprites)
+
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
@@ -57,9 +68,10 @@ class PlayWithBot(Board):
                     terminate()
 
             self.map_draw(30, 30)
+            all_sprites.draw(self.sc)
             pg.display.flip()
 
-        clock.tick(self.fps)
+        self.clock.tick(self.fps)
 
 
 class PlayWithFriend(Board):
