@@ -97,25 +97,13 @@ class Play:
         title = pg.sprite.Sprite()
         create_sprite(title, 'play_title.png', 50, 50, menu_sprites)
 
-        reward = pg.sprite.Sprite()
-        create_sprite(reward, "reward.png", 1066, 518, menu_sprites)
-
         play = pg.sprite.Sprite()
         create_sprite(play, 'play.png', 1066, 668, menu_sprites)
 
+        q, n = 255, 0
         while True:
-
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    terminate()
-                elif event.type == pg.MOUSEBUTTONDOWN:
-                    if x.rect.collidepoint(event.pos):
-                        return
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
-                        return
-
             self.screen.fill((0, 0, 0))
+
             with open(os.path.join(self.path, "statistic.txt")) as statistic:
                 statistic = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
                     map(lambda a: a.strip('\n'), statistic.readlines())) if line != '' if
@@ -124,11 +112,57 @@ class Play:
                       encoding='utf-8') as mission:
                 mission = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
                     map(lambda a: a.strip('\n'), mission.readlines())) if line != '' if
-                                                                      line[0] != '#']))
-                for j in [[mission['name'], (255, 255, 255), 70, 205, 50],
-                          [mission['mission'], (192, 192, 192), 55, 255, 25]]:
-                    self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]),
-                                     (j[2], j[3]))
+                                                                    line[0] != '#']))
+
+            texts, words, y, i, running = [], mission['mission'].split(), q, 0, True
+            while running:
+                text, ln = '', 0
+                while True:
+                    try:
+                        if ln + len(words[i]) < 57 and '\\n' not in words[i]:
+                            text, ln, i = text + words[i] + ' ', ln + len(words[i]), i + 1
+                        else:
+                            words[i] = words[i].strip('\\n')
+                            break
+                    except IndexError:
+                        running = False
+                        break
+                texts.append([text, (192, 192, 192), 55, y, 25])
+                y += 25
+            for j in texts:
+                self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]), (j[2], j[3]))
+
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 4:
+                        if n - 1 >= 0:
+                            q, n = q + 25, n - 1
+                    elif event.button == 5:
+                        if n + 1 < len(texts) - 16:
+                            q, n = q - 25, n + 1
+                    if x.rect.collidepoint(event.pos):
+                        return
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        return
+
             menu_sprites.draw(self.screen)
+
+            for j in [[mission['name'], (255, 255, 255), 70, 205, 50],
+                      ['Награда:', (255, 255, 255), 1066, 638, 25],
+                      [f"{mission['reward']} XP", (255, 255, 255), 1150, 638, 25],
+                      ['Сложность:', (255, 255, 255), 1066, 613, 25],
+                      (['Обучение', (255, 255, 255), 1175, 613, 25],
+                       ['Самый лёгкий', (66, 170, 255), 1175, 613, 25],
+                       ['Лёгкий', (0, 255, 0), 1175, 613, 25],
+                       ['Нормальный', (255, 255, 0), 1175, 613, 25],
+                       ['Сложный', (255, 165, 0), 1175, 613, 25],
+                       ['Невозможный', (255, 0, 0), 1175, 613, 25])[
+                          int(mission['difficulty'])]]:
+                self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]),
+                                 (j[2], j[3]))
+
             pg.display.flip()
             clock.tick(self.fps)
