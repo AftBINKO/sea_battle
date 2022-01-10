@@ -4,7 +4,7 @@ import pygame
 import os
 
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
-from datetime import datetime
+from datetime import datetime, date
 
 from data.main_functions import terminate, create_sprite, add_xp, format_xp
 
@@ -158,7 +158,19 @@ class Achievements:
         self.screen, self.fps, self.path = screen, fps, path
         with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
             cur = con.cursor()
-            self.achievements = cur.execute("""SELECT * FROM achievements""").fetchall()
+
+            # эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
+            # если имеется, сложности и наконец, по проценту выполнения
+            s = sorted(sorted(sorted(
+                sorted(cur.execute("""SELECT * FROM achievements""").fetchall(), key=lambda x: x[2]),
+                key=lambda x: x[1]), key=lambda x: int(x[0])), key=lambda x: int(x[6]), reverse=True)
+            try:
+                s = sorted(s, key=lambda x: date(int(x[5].split('.')[2]), int(x[5].split('.')[1]),
+                                                 int(x[5].split('.')[0])))
+            except AttributeError:
+                pass
+            self.achievements = sorted(sorted(s, key=lambda x: int(x[3]), reverse=True),
+                                       key=lambda x: float(x[4]), reverse=True)
 
     def menu(self):
         clock = pygame.time.Clock()
@@ -199,8 +211,8 @@ class Achievements:
                         return
             self.screen.fill((0, 0, 0))
 
-            y, i = a, 0
-            while i < len(self.achievements):
+            y = a
+            for i in range(len(self.achievements)):
                 achievement_sprites = pygame.sprite.Group()
 
                 achievement = self.achievements[i]
@@ -224,29 +236,34 @@ class Achievements:
                 for j in [[str(i + 1), (255, 255, 255), 75, y + 25, 75],
                           [achievement[1], (255, 255, 255), 400, y + 25, 75],
                           [achievement[2], (192, 192, 192), 400, y + 100, 25],
-                          ["Прогресс", (192, 192, 192), 900, y + 10, 25],
-                          [f"{int(achievement[4] * 100)}%", (255, 255, 255), 900, y + 45, 50],
-                          ["Награда", (192, 192, 192), 1100, y + 10, 25],
-                          [f"{achievement[6]} XP", (255, 255, 255), 1100, y + 45, 50],
-                          [achievement[5], (255, 255, 255), 1100, y + 100, 25]]:
+                          ["Прогресс", (192, 192, 192), 1000, y + 10, 25],
+                          [f"{int(achievement[4] * 100)}%", (255, 255, 255), 1000, y + 45, 50],
+                          ["Награда", (192, 192, 192), 1150, y + 10, 25],
+                          [f"{achievement[6]} XP", (255, 255, 255), 1150, y + 45, 50],
+                          [achievement[5], (255, 255, 255), 1150, y + 100, 25]]:
                     self.screen.blit(pygame.font.Font(None, j[4]).render(j[0], True, j[1]),
                                      (j[2], j[3]))
 
-                y, i = y + 175, i + 1
+                y += 175
 
             menu_sprites.draw(self.screen)
 
             pygame.display.flip()
             clock.tick(self.fps)
 
-    def add_progress(self, number, i):
+    def set_progress(self, number, i, add=False):
         with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
             cur = con.cursor()
             if float(cur.execute(f"""SELECT progress FROM achievements
 WHERE id = {i}""").fetchone()[0]) != 1:
+                if add:
+                    pre_result = float(cur.execute(f'''SELECT progress FROM achievements
+    WHERE id = {i}''').fetchone()[0]) + number
+                    result = pre_result if pre_result < 1 else 1
+                else:
+                    result = number if number < 1 else 1
                 cur.execute(f"""UPDATE achievements
-SET progress = {float(cur.execute(f'''SELECT progress FROM achievements
-WHERE id = {i}''').fetchone()[0]) + number}
+SET progress = {result}
 WHERE id = {i}""")
                 con.commit()
                 if float(cur.execute(f"""SELECT progress FROM achievements

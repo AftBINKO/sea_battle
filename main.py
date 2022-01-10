@@ -6,7 +6,7 @@ import os
 
 from zipfile import ZipFile
 
-from data.main_functions import create_window
+from data.main_functions import create_window, format_xp
 from data.menu import Menu, Achievements
 from data.play import Play, PlayWithFriend, PlayWithBot
 from data.settings import Settings
@@ -33,19 +33,22 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    PlayWithBot(screen, fps)
+    # PlayWithBot(screen, fps)
     menu = Menu(screen, fps, f"{path}\Sea Battle")
     settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
         screen, fps, f"{path}\Sea Battle")
-    pygame.mouse.set_visible(False)  # погашаем мышь
-    menu.screensaver()  # заставка
-    pygame.mouse.set_visible(True)  # показываем мышь
-    achievements.add_progress(1, 1)
-    achievements = Achievements(screen, fps, f"{path}\Sea Battle")  # обновляем достижения
+    # pygame.mouse.set_visible(False)  # погашаем мышь
+    # menu.screensaver()  # заставка
+    # pygame.mouse.set_visible(True)  # показываем мышь
+    achievements.set_progress(1, 1, True)
     while True:
-
         x = menu.get_n()  # сохраним значение x в переменную
-        menu = Menu(screen, fps, f"{path}\Sea Battle")  # обновляем меню
+        level = format_xp(f"{path}\Sea Battle\statistic.txt")[1]
+        for i, val in enumerate(['25', '50', '75', '100'], start=2):
+            achievements.set_progress(level / int(val), i)
+        menu, achievements = Menu(
+            screen, fps, f"{path}\Sea Battle"
+        ), Achievements(screen, fps, f"{path}\Sea Battle")  # обновляем достижения и меню
         menu.set_n(x)  # и вставим обратно
         result = menu.menu()  # меню
         if result == 'Settings':
@@ -59,7 +62,7 @@ def main():
         elif result == 'Play_With_Bot':
             play = PlayWithBot(screen, fps)
         elif result == 'Play':
-            play = Play(screen, fps)
+            play = Play(screen, fps, f"{path}\Sea Battle")
             play.menu()
 
 

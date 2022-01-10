@@ -1,5 +1,6 @@
 from data.main_functions import terminate, create_sprite, load_image
 import pygame as pg
+import os
 
 
 class Board:
@@ -79,8 +80,8 @@ class PlayWithFriend(Board):
 
 
 class Play:
-    def __init__(self, screen, fps):
-        self.screen, self.fps = screen, fps
+    def __init__(self, screen, fps, path):
+        self.screen, self.fps, self.path = screen, fps, path
 
     def menu(self):
         clock = pg.time.Clock()
@@ -103,6 +104,7 @@ class Play:
         create_sprite(play, 'play.png', 1066, 668, menu_sprites)
 
         while True:
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     terminate()
@@ -114,6 +116,19 @@ class Play:
                         return
 
             self.screen.fill((0, 0, 0))
+            with open(os.path.join(self.path, "statistic.txt")) as statistic:
+                statistic = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
+                    map(lambda a: a.strip('\n'), statistic.readlines())) if line != '' if
+                                                                      line[0] != '#']))
+            with open(os.path.join("data\missions", f"mission_{statistic['mission']}.txt"),
+                      encoding='utf-8') as mission:
+                mission = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
+                    map(lambda a: a.strip('\n'), mission.readlines())) if line != '' if
+                                                                      line[0] != '#']))
+                for j in [[mission['name'], (255, 255, 255), 70, 205, 50],
+                          [mission['mission'], (192, 192, 192), 55, 255, 25]]:
+                    self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]),
+                                     (j[2], j[3]))
             menu_sprites.draw(self.screen)
             pg.display.flip()
             clock.tick(self.fps)
