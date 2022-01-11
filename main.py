@@ -34,8 +34,10 @@ def main():
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
     # PlayWithBot(screen, fps)
-    menu = Menu(screen, fps, f"{path}\Sea Battle")
-    settings, achievements = Settings(screen, fps, config, f"{path}\Sea Battle"), Achievements(
+    menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
+        screen, fps,
+        config,
+        f"{path}\Sea Battle"), Achievements(
         screen, fps, f"{path}\Sea Battle")
     # pygame.mouse.set_visible(False)  # погашаем мышь
     # menu.screensaver()  # заставка
@@ -46,15 +48,18 @@ def main():
         level = format_xp(f"{path}\Sea Battle\statistic.txt")[1]
         for i, val in enumerate(['25', '50', '75', '100'], start=2):
             achievements.set_progress(level / int(val), i)
-        menu, achievements = Menu(
-            screen, fps, f"{path}\Sea Battle"
-        ), Achievements(screen, fps, f"{path}\Sea Battle")  # обновляем достижения и меню
+        menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
+            screen, fps,
+            config,
+            f"{path}\Sea Battle"), Achievements(
+            screen, fps, f"{path}\Sea Battle")  # обновляем достижения, меню и настрйки
         menu.set_n(x)  # и вставим обратно
         result = menu.menu()  # меню
         if result == 'Settings':
             settings.menu()
             if settings:
-                screen, config, fps = create_window(f"{path}\Sea Battle")
+                screen, config, fps = create_window(f"{path}\Sea Battle")  # обновляем экран
+                continue
         elif result == 'Achievements':
             achievements.menu()
         elif result == 'Play_With_Friend':

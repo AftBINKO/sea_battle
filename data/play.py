@@ -81,7 +81,7 @@ class PlayWithFriend(Board):
 
 class Play:
     def __init__(self, screen, fps, path):
-        self.screen, self.fps, self.path = screen, fps, path
+        self.screen, self.size, self.fps, self.path = screen, screen.get_size(), fps, path
 
     def menu(self):
         clock = pg.time.Clock()
@@ -89,18 +89,18 @@ class Play:
         menu_sprites = pg.sprite.Group()
 
         mat = pg.sprite.Sprite()
-        create_sprite(mat, 'mat_5.png', 0, 0, menu_sprites)
+        create_sprite(mat, f'mat_5_{self.size[1]}.png', 0, 0, menu_sprites)
 
         x = pg.sprite.Sprite()
-        create_sprite(x, 'x.png', 1266, 50, menu_sprites)
+        create_sprite(x, 'x.png', self.size[0] - 100, 50, menu_sprites)
 
         title = pg.sprite.Sprite()
         create_sprite(title, 'play_title.png', 50, 50, menu_sprites)
 
         play = pg.sprite.Sprite()
-        create_sprite(play, 'play.png', 1066, 668, menu_sprites)
+        create_sprite(play, 'play.png', self.size[0] - 300, self.size[1] - 100, menu_sprites)
 
-        q, n = 255, 0
+        q, n = 255 if self.size[1] == 768 else 360, 0
         while True:
             self.screen.fill((0, 0, 0))
 
@@ -127,7 +127,7 @@ class Play:
                     except IndexError:
                         running = False
                         break
-                texts.append([text, (192, 192, 192), 55, y, 25])
+                texts.append([text, (192, 192, 192), 55 if self.size[1] == 768 else 75, y, 25])
                 y += 25
             for j in texts:
                 self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]), (j[2], j[3]))
@@ -140,27 +140,36 @@ class Play:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
                     elif event.button == 5:
-                        if n + 1 < len(texts) - 16:
+                        if n + 1 < len(texts) - (16 if self.size == 768 else 23):
                             q, n = q - 25, n + 1
                     if x.rect.collidepoint(event.pos):
                         return
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         return
+                    if event.key == pg.K_UP:
+                        if n - 1 >= 0:
+                            q, n = q + 25, n - 1
+                    elif event.key == pg.K_DOWN:
+                        if n + 1 < len(texts) - (16 if self.size == 768 else 23):
+                            q, n = q - 25, n + 1
 
             menu_sprites.draw(self.screen)
 
-            for j in [[mission['name'], (255, 255, 255), 70, 205, 50],
-                      ['Награда:', (255, 255, 255), 1066, 638, 25],
-                      [f"{mission['reward']} XP", (255, 255, 255), 1150, 638, 25],
-                      ['Сложность:', (255, 255, 255), 1066, 613, 25],
-                      (['Обучение', (255, 255, 255), 1175, 613, 25],
-                       ['Самый лёгкий', (66, 170, 255), 1175, 613, 25],
-                       ['Лёгкий', (0, 255, 0), 1175, 613, 25],
-                       ['Нормальный', (255, 255, 0), 1175, 613, 25],
-                       ['Сложный', (255, 165, 0), 1175, 613, 25],
-                       ['Невозможный', (255, 0, 0), 1175, 613, 25])[
-                          int(mission['difficulty'])]]:
+            for j in [
+                [mission['name'], (255, 255, 255), 70 if self.size[1] == 768 else 80,
+                 205 if self.size[1] == 768 else 310, 50],
+                ['Награда:', (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25],
+                [f"{mission['reward']} XP", (255, 255, 255), self.size[0] - 215, self.size[1] - 130,
+                 25],
+                ['Сложность:', (255, 255, 255), self.size[0] - 300, self.size[1] - 155, 25],
+                (['Обучение', (255, 255, 255), self.size[0] - 190, self.size[1] - 155, 25],
+                 ['Самый лёгкий', (66, 170, 255), self.size[0] - 190, self.size[1] - 155, 25],
+                 ['Лёгкий', (0, 255, 0), self.size[0] - 190, self.size[1] - 155, 25],
+                 ['Нормальный', (255, 255, 0), self.size[0] - 190, self.size[1] - 155, 25],
+                 ['Сложный', (255, 165, 0), self.size[0] - 190, self.size[1] - 155, 25],
+                 ['Невозможный', (255, 0, 0), self.size[0] - 190, self.size[1] - 155, 25])[
+                    int(mission['difficulty'])]]:
                 self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]),
                                  (j[2], j[3]))
 

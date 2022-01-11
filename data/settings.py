@@ -7,10 +7,9 @@ class Settings:
     def __init__(self, screen, fps, config, path):
         self.screen, self.size, self.fps, self.config, self.path = screen, screen.get_size(), fps, \
                                                                    config, path
-        self.values_screensize, self.values_screenmode, self.values_fps = ['1366x768', '1920x1080',
-                                                                           '3840x2160'], [
-                                                                              'window', 'noframe',
-                                                                              'fullscreen'], [
+        self.values_screensize, self.values_screenmode, self.values_fps = ['1366x768', '1920x1080'
+                                                                           ], ['window', 'noframe',
+                                                                               'fullscreen'], [
                                                                               '30', '60', '90',
                                                                               '120']
         self.value_screensize, self.value_screenmode, self.value_fps = self.values_screensize.index(
@@ -46,10 +45,10 @@ class Settings:
         settings_sprites = pygame.sprite.Group()
 
         x = pygame.sprite.Sprite()
-        create_sprite(x, 'x.png', 1266, 50, settings_sprites)
+        create_sprite(x, 'x.png', self.size[0] - 100, 50, settings_sprites)
 
         apply = pygame.sprite.Sprite()
-        create_sprite(apply, 'apply.png', 1066, 668, settings_sprites)
+        create_sprite(apply, 'apply.png', self.size[0] - 300, self.size[1] - 100, settings_sprites)
 
         title = pygame.sprite.Sprite()
         create_sprite(title, 'settings_title.png', 50, 50, settings_sprites)

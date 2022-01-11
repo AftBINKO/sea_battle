@@ -30,7 +30,7 @@ def create_window(path):
         config = dict(map(lambda x: tuple(x.split(': ')),
                           [line for line in list(map(lambda x: x.strip('\n'), config.readlines())) if
                            line != '' if line[0] != '#']))
-    if config['version'] != '1.0 ALPHA':
+    if config['version'] != '1.1 ALPHA':
         raise ValueError('The configuration file version is not supported')
     size = tuple(map(int, config['screensize'].split('x')))  # размеры экрана пока оставим такими
     screen = None
