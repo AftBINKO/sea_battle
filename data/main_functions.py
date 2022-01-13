@@ -77,3 +77,10 @@ def format_xp(path):
     return f"""100 LVL
 {x} XP""", 100, x
 
+
+def get_value(path, *values):
+    with open(path, encoding="utf-8") as file:
+        return tuple([dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
+            map(lambda x: x.strip('\n'), file.readlines())) if line != '' if
+                                                          line[0] != '#']))[value] for value in
+                values])

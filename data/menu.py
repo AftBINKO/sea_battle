@@ -6,16 +6,13 @@ import os
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 from datetime import datetime, date
 
-from data.main_functions import terminate, create_sprite, add_xp, format_xp
+from data.main_functions import terminate, create_sprite, add_xp, format_xp, get_value
 
 
 class Menu:
     def __init__(self, screen, fps, path):
-        self.screen, self.size, self.fps, self.path, self.n = screen, screen.get_size(), fps, path, 0
-        # with open(f"{path}\statistic.txt", encoding="utf-8") as statistic:
-        #     self.statistic = dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
-        #         map(lambda x: x.strip('\n'), statistic.readlines())) if line != '' if
-        #                                                                line[0] != '#']))
+        self.screen, self.fps, self.path, self.size, self.n = screen, fps, path, tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x')))), 0
 
     # функция воспроизведения заставки
     def screensaver(self):
@@ -161,7 +158,8 @@ class Menu:
 
 class Achievements:
     def __init__(self, screen, fps, path):
-        self.screen, self.size, self.fps, self.path = screen, screen.get_size(), fps, path
+        self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
         with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
             cur = con.cursor()
 

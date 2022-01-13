@@ -1,12 +1,12 @@
-from data.main_functions import terminate, create_sprite
+from data.main_functions import terminate, create_sprite, get_value
 import pygame
 import os
 
 
 class Settings:
     def __init__(self, screen, fps, config, path):
-        self.screen, self.size, self.fps, self.config, self.path = screen, screen.get_size(), fps, \
-                                                                   config, path
+        self.screen, self.fps, self.path, self.size, self.config = screen, fps, path, tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x')))), config
         self.values_screensize, self.values_screenmode, self.values_fps = ['1366x768', '1920x1080'
                                                                            ], ['window', 'noframe',
                                                                                'fullscreen'], [

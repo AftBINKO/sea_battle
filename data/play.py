@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, load_image
+from data.main_functions import terminate, create_sprite, load_image, get_value
 import pygame as pg
 import os
 
@@ -81,7 +81,8 @@ class PlayWithFriend(Board):
 
 class Play:
     def __init__(self, screen, fps, path):
-        self.screen, self.size, self.fps, self.path = screen, screen.get_size(), fps, path
+        self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
 
     def menu(self):
         clock = pg.time.Clock()
@@ -108,13 +109,15 @@ class Play:
                 statistic = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
                     map(lambda a: a.strip('\n'), statistic.readlines())) if line != '' if
                                                                       line[0] != '#']))
-            with open(os.path.join("data\missions", f"mission_{statistic['mission']}.txt"),
-                      encoding='utf-8') as mission:
-                mission = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
-                    map(lambda a: a.strip('\n'), mission.readlines())) if line != '' if
-                                                                    line[0] != '#']))
+            # with open(os.path.join("data\missions", f"mission_{statistic['mission']}.txt"),
+            #           encoding='utf-8') as mission:
+            #     mission = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
+            #         map(lambda a: a.strip('\n'), mission.readlines())) if line != '' if
+            #                                                         line[0] != '#']))
 
-            texts, words, y, i, running = [], mission['mission'].split(), q, 0, True
+            mission_file = os.path.join("data\missions", f"mission_{statistic['mission']}.txt")
+            texts, words, y, i, running = [], get_value(mission_file, "mission")[
+                0].split(), q, 0, True
             while running:
                 text, ln = '', 0
                 while True:
@@ -157,11 +160,11 @@ class Play:
             menu_sprites.draw(self.screen)
 
             for j in [
-                [mission['name'], (255, 255, 255), 70 if self.size[1] == 768 else 80,
-                 205 if self.size[1] == 768 else 310, 50],
+                [get_value(mission_file, 'name')[0], (255, 255, 255),
+                 70 if self.size[1] == 768 else 80, 205 if self.size[1] == 768 else 310, 50],
                 ['Награда:', (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25],
-                [f"{mission['reward']} XP", (255, 255, 255), self.size[0] - 215, self.size[1] - 130,
-                 25],
+                [f"{get_value(mission_file, 'reward')[0]} XP", (255, 255, 255), self.size[0] - 215,
+                 self.size[1] - 130, 25],
                 ['Сложность:', (255, 255, 255), self.size[0] - 300, self.size[1] - 155, 25],
                 (['Обучение', (255, 255, 255), self.size[0] - 190, self.size[1] - 155, 25],
                  ['Самый лёгкий', (66, 170, 255), self.size[0] - 190, self.size[1] - 155, 25],
@@ -169,7 +172,7 @@ class Play:
                  ['Нормальный', (255, 255, 0), self.size[0] - 190, self.size[1] - 155, 25],
                  ['Сложный', (255, 165, 0), self.size[0] - 190, self.size[1] - 155, 25],
                  ['Невозможный', (255, 0, 0), self.size[0] - 190, self.size[1] - 155, 25])[
-                    int(mission['difficulty'])]]:
+                    int(get_value(mission_file, 'difficulty')[0])]]:
                 self.screen.blit(pg.font.Font(None, j[4]).render(j[0], True, j[1]),
                                  (j[2], j[3]))
 
