@@ -100,24 +100,33 @@ class Menu:
                 if event.type == pygame.QUIT:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    try:
-                        if left_arrow.rect.collidepoint(event.pos):
-                            x = 300 * self.n + 1
-                            left = True
-                            self.n -= 1
-                    except AttributeError:
-                        pass
-                    try:
-                        if right_arrow.rect.collidepoint(event.pos):
-                            x = 300 * self.n - 1
-                            right = True
-                            self.n += 1
-                    except AttributeError:
-                        pass
-                    if frame.rect.collidepoint(event.pos):
-                        if self.n == 5:
-                            terminate()
-                        return buttons_tuple[self.n]
+                    if event.button == 1:
+                        try:
+                            if left_arrow.rect.collidepoint(event.pos):
+                                x = 300 * self.n + 1
+                                left = True
+                                self.n -= 1
+                        except AttributeError:
+                            pass
+                        try:
+                            if right_arrow.rect.collidepoint(event.pos):
+                                x = 300 * self.n - 1
+                                right = True
+                                self.n += 1
+                        except AttributeError:
+                            pass
+                        if frame.rect.collidepoint(event.pos):
+                            if self.n == 5:
+                                terminate()
+                            return buttons_tuple[self.n]
+                    elif event.button == 4 and self.n - 1 >= 0:
+                        x = 300 * self.n + 1
+                        left = True
+                        self.n -= 1
+                    elif event.button == 5 and self.n + 1 <= 5:
+                        x = 300 * self.n - 1
+                        right = True
+                        self.n += 1
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT and self.n - 1 >= 0:
                         x = 300 * self.n + 1
@@ -196,14 +205,14 @@ class Achievements:
                 if event.type == pygame.QUIT:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 4:
+                    if event.button == 1 and x.rect.collidepoint(event.pos):
+                        return
+                    elif event.button == 4:
                         if f - 1 >= 0:
                             a, f = a + 175, f - 1
                     elif event.button == 5:
                         if f + 1 < len(self.achievements) - (2 if self.size[1] == 768 else 5):
                             a, f = a - 175, f + 1
-                    if x.rect.collidepoint(event.pos):
-                        return
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         if f - 1 >= 0:
