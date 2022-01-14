@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, get_value
+from data.main_functions import terminate, create_sprite, get_value, extract_files
 import pygame
 import os
 
@@ -68,45 +68,66 @@ class Settings:
         right_fps = pygame.sprite.Sprite()
         create_sprite(right_fps, 'right_arrow.png', 800, 300, settings_sprites)
 
+        danger_zone = pygame.sprite.Sprite()
+        create_sprite(danger_zone, 'danger_zone.png', 50, self.size[1] - 250, settings_sprites)
+
+        recovery_settings = pygame.sprite.Sprite()
+        create_sprite(recovery_settings, 'recovery_settings.png', 275, self.size[1] - 125,
+                      settings_sprites)
+
+        new_game = pygame.sprite.Sprite()
+        create_sprite(new_game, 'new_game.png', 575, self.size[1] - 125,
+                      settings_sprites)
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if x.rect.collidepoint(event.pos):
-                        return
-                    elif left_screensize.rect.collidepoint(event.pos):
-                        if self.value_screensize > 0:
-                            self.value_screensize -= 1
-                        else:
-                            self.value_screensize = len(self.values_screensize) - 1
-                    elif right_screensize.rect.collidepoint(event.pos):
-                        if self.value_screensize < len(self.values_screensize) - 1:
-                            self.value_screensize += 1
-                        else:
-                            self.value_screensize = 0
-                    elif left_screenmode.rect.collidepoint(event.pos):
-                        if self.value_screenmode > 0:
-                            self.value_screenmode -= 1
-                        else:
-                            self.value_screenmode = len(self.values_screenmode) - 1
-                    elif right_screenmode.rect.collidepoint(event.pos):
-                        if self.value_screenmode < len(self.values_screenmode) - 1:
-                            self.value_screenmode += 1
-                        else:
-                            self.value_screenmode = 0
-                    elif left_fps.rect.collidepoint(event.pos):
-                        if self.value_fps > 0:
-                            self.value_fps -= 1
-                        else:
-                            self.value_fps = len(self.values_fps) - 1
-                    elif right_fps.rect.collidepoint(event.pos):
-                        if self.value_fps < len(self.values_fps) - 1:
-                            self.value_fps += 1
-                        else:
-                            self.value_fps = 0
-                    elif apply.rect.collidepoint(event.pos):
-                        return self.apply()
+                    if event.button == 1:
+                        if x.rect.collidepoint(event.pos):
+                            return
+                        elif left_screensize.rect.collidepoint(event.pos):
+                            if self.value_screensize > 0:
+                                self.value_screensize -= 1
+                            else:
+                                self.value_screensize = len(self.values_screensize) - 1
+                        elif right_screensize.rect.collidepoint(event.pos):
+                            if self.value_screensize < len(self.values_screensize) - 1:
+                                self.value_screensize += 1
+                            else:
+                                self.value_screensize = 0
+                        elif left_screenmode.rect.collidepoint(event.pos):
+                            if self.value_screenmode > 0:
+                                self.value_screenmode -= 1
+                            else:
+                                self.value_screenmode = len(self.values_screenmode) - 1
+                        elif right_screenmode.rect.collidepoint(event.pos):
+                            if self.value_screenmode < len(self.values_screenmode) - 1:
+                                self.value_screenmode += 1
+                            else:
+                                self.value_screenmode = 0
+                        elif left_fps.rect.collidepoint(event.pos):
+                            if self.value_fps > 0:
+                                self.value_fps -= 1
+                            else:
+                                self.value_fps = len(self.values_fps) - 1
+                        elif right_fps.rect.collidepoint(event.pos):
+                            if self.value_fps < len(self.values_fps) - 1:
+                                self.value_fps += 1
+                            else:
+                                self.value_fps = 0
+                        elif apply.rect.collidepoint(event.pos):
+                            return self.apply()
+                    elif event.button == 3:
+                        result, values = False, None
+                        if recovery_settings.rect.collidepoint(event.pos):
+                            result, values = True, ['config.txt']
+                        elif new_game.rect.collidepoint(event.pos):
+                            result, values = True, ['statistic.txt', 'achievements.sqlite']
+                        if result:
+                            extract_files(os.path.join("data", "files.zip"), self.path, *values)
+                            terminate()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return

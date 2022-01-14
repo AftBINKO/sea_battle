@@ -109,13 +109,8 @@ class Play:
                 statistic = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
                     map(lambda a: a.strip('\n'), statistic.readlines())) if line != '' if
                                                                       line[0] != '#']))
-            # with open(os.path.join("data\missions", f"mission_{statistic['mission']}.txt"),
-            #           encoding='utf-8') as mission:
-            #     mission = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
-            #         map(lambda a: a.strip('\n'), mission.readlines())) if line != '' if
-            #                                                         line[0] != '#']))
-
-            mission_file = os.path.join("data\missions", f"mission_{statistic['mission']}.txt")
+            mission_file = os.path.join("data\missions", "mission_" + get_value(
+                os.path.join(self.path, 'statistic.txt'), 'mission')[0] + ".txt")
             texts, words, y, i, running = [], get_value(mission_file, "mission")[
                 0].split(), q, 0, True
             while running:
@@ -139,14 +134,17 @@ class Play:
                 if event.type == pg.QUIT:
                     terminate()
                 elif event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 4:
+                    if event.button == 1:
+                        if x.rect.collidepoint(event.pos):
+                            return
+                        elif play.rect.collidepoint(event.pos):
+                            pass
+                    elif event.button == 4:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
                     elif event.button == 5:
                         if n + 1 < len(texts) - (16 if self.size == 768 else 23):
                             q, n = q - 25, n + 1
-                    if x.rect.collidepoint(event.pos):
-                        return
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         return
