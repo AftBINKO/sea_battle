@@ -1,6 +1,9 @@
-from data.main_functions import terminate, create_sprite, load_image, get_value
+from data.main_functions import terminate, create_sprite, get_value
 import pygame as pg
 import os
+
+display_width = 0
+display_height = 0
 
 
 class Board:
@@ -9,12 +12,8 @@ class Board:
         self.sc = screen
         self.fps = fps
 
-        sur = pg.display.get_surface()
-        self.display_width = sur.get_width()
-        self.display_height = sur.get_height()
-
-        self.co = int(self.display_width * 0.02)
-        self.size = int(self.display_width * 0.035)
+        self.co = int(display_width * 0.02)
+        self.size = int(display_width * 0.035)
         self.font = pg.font.Font(None, int(self.size * 0.8))
         self.clock = pg.time.Clock()
 
@@ -41,38 +40,104 @@ class Board:
 
 
 class Ship(pg.sprite.Sprite):
-    def __init__(self, n, x, y, *op):
+    def __init__(self, size, n, x, y, *op):
         super().__init__(*op)
-        image = load_image('ship_' + str(n) + '.png', 1)
-        print(image)
-        self.image = image
+        self.image = pg.Surface((size * n + ((n * 10) - 10), size))
+        self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
+        self.hover_x = 0
+        self.hover_y = 0
+        self.hover = False
 
-class PlayWithBot(Board):
-    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
+    def update(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
+            self.hover = True
+            self.hover_x = self.rect.x - event.pos[0]
+            self.hover_y = self.rect.y - event.pos[1]
+
+        if event.type == pg.MOUSEBUTTONUP:
+            self.hover = False
+
+        if self.hover:
+            self.rect.x = self.hover_x + event.pos[0]
+            self.rect.y = self.hover_y + event.pos[1]
+
+
+class Customization:
     def __init__(self, screen, fps):
-        super().__init__(screen, fps)
+        global display_width, display_height
+        self.sc = screen
+        self.fps = fps
+        self.all_sprites = pg.sprite.Group()
+        sur = pg.display.get_surface()
+        display_width = sur.get_width()
+        display_height = sur.get_height()
+        self.clock = pg.time.Clock
+        self.size = int(display_width * 0.035)
+        self.co = int(display_width * 0.02)
+        self.font = pg.font.Font(None, int(self.size * 0.8))
+
+        self.add_ship()
         self.map_customization()
+
+    def map_draw(self, x, y):
+
+        slo = list('АБВГДЕЁЖЗИ')
+
+        for i in range(10):
+            text = self.font.render(str(i), True, (255, 255, 255))
+            self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
+
+        for i, pp in enumerate(slo):
+            text = self.font.render(pp, True, (255, 255, 255))
+            self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
+
+        for i in range(10):
+            for g in range(10):
+                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + x + self.co,
+                                                        g * self.size + y + self.co,
+                                                        self.size, self.size), 1)
+        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
+                                                y + self.co,
+                                                self.size * 10, self.size * 10), 4)
 
     def map_customization(self):
         running = True
-        all_sprites = pg.sprite.Group()
-        Ship(1, 0, 0, all_sprites)
 
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
+                print(event)
                 if event.type == pg.QUIT:
                     terminate()
+                self.all_sprites.update(event)
 
             self.map_draw(30, 30)
-            all_sprites.draw(self.sc)
+            self.all_sprites.draw(self.sc)
             pg.display.flip()
 
         self.clock.tick(self.fps)
+
+    def add_ship(self):
+        x = int(display_width * 0.6)
+        y = int(display_height * 0.25)
+        indent_bottom = 10
+        indent_right = 10
+        size = int(display_width * 0.035) - 10
+
+        for i in range(1, 5):
+            for g in range(i):
+                Ship(size, 5 - i, x + (((size * (5 - i)) + indent_right + (((5 - i) * 10) - 10)) * g),
+                     y + ((size + indent_bottom) * i), self.all_sprites)
+
+
+class PlayWithBot:
+    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
+    def __init__(self, screen, fps):
+        self.player = Customization(screen, fps)
 
 
 class PlayWithFriend(Board):
