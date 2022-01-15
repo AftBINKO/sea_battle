@@ -101,16 +101,16 @@ class Play:
         play = pg.sprite.Sprite()
         create_sprite(play, 'play.png', self.size[0] - 300, self.size[1] - 100, menu_sprites)
 
-        q, n = 255 if self.size[1] == 768 else 360, 0
+        q, n, mission_file = 255 if self.size[1] == 768 else 360, 0, os.path.join("data\missions",
+                                                                                  "mission_" +
+                                                                                  get_value(
+                                                                                      os.path.join(
+                                                                                          self.path,
+                                                                                          'statistic\
+.txt'), 'mission')[0] + ".txt")
         while True:
             self.screen.fill((0, 0, 0))
 
-            with open(os.path.join(self.path, "statistic.txt")) as statistic:
-                statistic = dict(map(lambda a: tuple(a.split(': ')), [line for line in list(
-                    map(lambda a: a.strip('\n'), statistic.readlines())) if line != '' if
-                                                                      line[0] != '#']))
-            mission_file = os.path.join("data\missions", "mission_" + get_value(
-                os.path.join(self.path, 'statistic.txt'), 'mission')[0] + ".txt")
             texts, words, y, i, running = [], get_value(mission_file, "mission")[
                 0].split(), q, 0, True
             while running:
