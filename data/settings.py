@@ -1,4 +1,6 @@
 from data.main_functions import terminate, create_sprite, get_value, extract_files
+
+import webbrowser
 import pygame
 import os
 
@@ -36,7 +38,7 @@ class Settings:
                 else:
                     write.append(config_for_read[i])
             config_for_write.write('\n'.join(write))
-        return True
+        return 'apply'
 
     def menu(self):
         clock = pygame.time.Clock()
@@ -67,6 +69,9 @@ class Settings:
         create_sprite(left_fps, 'left_arrow.png', 450, 300, settings_sprites)
         right_fps = pygame.sprite.Sprite()
         create_sprite(right_fps, 'right_arrow.png', 800, 300, settings_sprites)
+
+        developers = pygame.sprite.Sprite()
+        create_sprite(developers, 'developers.png', 50, self.size[1] - 350, settings_sprites)
 
         danger_zone = pygame.sprite.Sprite()
         create_sprite(danger_zone, 'danger_zone.png', 50, self.size[1] - 250, settings_sprites)
@@ -117,6 +122,8 @@ class Settings:
                                 self.value_fps += 1
                             else:
                                 self.value_fps = 0
+                        elif developers.rect.collidepoint(event.pos):
+                            return 'developers'
                         elif apply.rect.collidepoint(event.pos):
                             return self.apply()
                     elif event.button == 3:
@@ -147,5 +154,64 @@ class Settings:
                       [self.values_fps[self.value_fps], (255, 255, 255), 500, 305, 50]]:
                 self.screen.blit(pygame.font.Font(None, i[4]).render(i[0], True, i[1]), (i[2], i[3]))
 
+            pygame.display.flip()
+            clock.tick(self.fps)
+
+
+class About:
+    def __init__(self, screen, fps, path):
+        self.screen, self.fps, self.size = screen, fps, tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
+
+    def menu(self):
+        clock = pygame.time.Clock()
+
+        about_sprites = pygame.sprite.Group()
+
+        x = pygame.sprite.Sprite()
+        create_sprite(x, 'x.png', self.size[0] - 100, 50, about_sprites)
+
+        title = pygame.sprite.Sprite()
+        create_sprite(title, 'about_title.png', 50, 50, about_sprites)
+
+        aft_games = pygame.sprite.Sprite()
+        create_sprite(aft_games, 'aft_games.png', 50, 150, about_sprites)
+
+        discord = pygame.sprite.Sprite()
+        create_sprite(discord, 'discord.png', 250, 150, about_sprites)
+
+        vk = pygame.sprite.Sprite()
+        create_sprite(vk, 'vk.png', 325, 150, about_sprites)
+
+        youtube = pygame.sprite.Sprite()
+        create_sprite(youtube, 'youtube.png', 400, 150, about_sprites)
+
+        q = 250
+        with open(os.path.join("data", 'titles.txt'), encoding='utf-8') as titles:
+            titles = titles.read().split('\n')
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    terminate()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if x.rect.collidepoint(event.pos):
+                        return
+                    else:
+                        link = None
+                        if discord.rect.collidepoint(event.pos):
+                            link = 'https://discord.gg/6BaXEbkJkw'
+                        elif vk.rect.collidepoint(event.pos):
+                            link = 'https://vk.com/c_aft'
+                        elif youtube.rect.collidepoint(event.pos):
+                            link = 'https://www.youtube.com/c/BINKO_aft'
+                        try:
+                            webbrowser.open(link, new=0)
+                        except TypeError:
+                            pass
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    return
+
+            self.screen.fill((0, 0, 0))
+            about_sprites.draw(self.screen)
             pygame.display.flip()
             clock.tick(self.fps)

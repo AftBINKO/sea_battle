@@ -7,7 +7,7 @@ import os
 from data.main_functions import create_window, format_xp, extract_files
 from data.menu import Menu, Achievements
 from data.play import Play, PlayWithFriend, PlayWithBot
-from data.settings import Settings
+from data.settings import Settings, About
 
 
 # основная функция
@@ -51,10 +51,15 @@ def main():
         menu.set_n(x)  # и вставим обратно
         result = menu.menu()  # меню
         if result == 'Settings':
-            settings.menu()
-            if settings:
-                screen, config, fps = create_window(f"{path}\Sea Battle")  # обновляем экран
-                continue
+            while True:  # цикл был создан для того, чтобы выходить из подменю в меню настройки
+                about, result_settings = About(screen, fps, f"{path}\Sea Battle"), settings.menu()
+                if result_settings == 'apply':
+                    screen, config, fps = create_window(f"{path}\Sea Battle")  # обновляем экран
+                    break
+                elif result_settings == 'developers':
+                    about.menu()
+                else:
+                    break
         elif result == 'Achievements':
             achievements.menu()
         elif result == 'Play_With_Friend':
