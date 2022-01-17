@@ -6,7 +6,8 @@ import os
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 from datetime import datetime, date
 
-from data.main_functions import terminate, create_sprite, put_sprite, add_xp, format_xp, get_value
+from data.main_functions import terminate, load_image, create_sprite, put_sprite, add_xp, \
+    format_xp, get_value
 
 
 class Menu:
@@ -67,18 +68,7 @@ class Menu:
         create_sprite(down_arrow, "down_arrow.png", self.size[0] / 2 - 25,
                       self.size[1] - (250 if self.size[1] == 768 else 350), menu_sprites)
 
-        # left_arrow = pygame.sprite.Sprite()
-        # if self.n - 1 >= 0:
-        #     create_sprite(left_arrow, "left_arrow.png", self.size[0] / 2 - 175,
-        #                   self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
-        #
-        # right_arrow = pygame.sprite.Sprite()
-        # if self.n + 1 <= 5:
-        #     create_sprite(right_arrow, "right_arrow.png", self.size[0] / 2 + 125,
-        #                   self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
-
         left, right = False, False
-
         while True:
             if right:
                 if x < (300 * self.n) - 1:
@@ -102,38 +92,41 @@ class Menu:
             put_sprite(down_arrow, self.size[0] / 2 - 25,
                        self.size[1] - (250 if self.size[1] == 768 else 350))
 
-            # if self.n - 1 >= 0:
-            #     put_sprite(left_arrow, self.size[0] / 2 - 175,
-            #                self.size[1] - (200 if self.size[1] == 768 else 300))
-            # else:
-            #     left_arrow.kill()
-            #
-            # right_arrow = pygame.sprite.Sprite()
-            # if self.n + 1 <= 5:
-            #     put_sprite(right_arrow, self.size[0] / 2 + 125,
-            #                self.size[1] - (200 if self.size[1] == 768 else 300))
-            # else:
-            #     right_arrow.kill()
+            arrow_sprites = pygame.sprite.Group()
+
+            left_arrow = pygame.sprite.Sprite()
+            if self.n - 1 >= 0:
+                create_sprite(left_arrow, "left_arrow.png", self.size[0] / 2 - 175,
+                              self.size[1] - (200 if self.size[1] == 768 else 300), arrow_sprites)
+            else:
+                left_arrow.kill()
+
+            right_arrow = pygame.sprite.Sprite()
+            if self.n + 1 <= 5:
+                create_sprite(right_arrow, "right_arrow.png", self.size[0] / 2 + 125,
+                              self.size[1] - (200 if self.size[1] == 768 else 300), arrow_sprites)
+            else:
+                right_arrow.kill()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        # try:
-                        #     if left_arrow.rect.collidepoint(event.pos):
-                        #         x = 300 * self.n + 1
-                        #         left = True
-                        #         self.n -= 1
-                        # except AttributeError:
-                        #     pass
-                        # try:
-                        #     if right_arrow.rect.collidepoint(event.pos):
-                        #         x = 300 * self.n - 1
-                        #         right = True
-                        #         self.n += 1
-                        # except AttributeError:
-                        #     pass
+                        try:
+                            if left_arrow.rect.collidepoint(event.pos):
+                                x = 300 * self.n + 1
+                                left = True
+                                self.n -= 1
+                        except AttributeError:
+                            pass
+                        try:
+                            if right_arrow.rect.collidepoint(event.pos):
+                                x = 300 * self.n - 1
+                                right = True
+                                self.n += 1
+                        except AttributeError:
+                            pass
                         if frame.rect.collidepoint(event.pos):
                             if self.n == 5:
                                 terminate()
@@ -163,6 +156,7 @@ class Menu:
             # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
             menu_sprites.draw(self.screen)
+            arrow_sprites.draw(self.screen)
             text = format_xp(f"{self.path}/statistic.txt")[0].split('\n')
             y = 0
             for line in text:
