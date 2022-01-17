@@ -9,6 +9,42 @@ all_sprites_cell = pg.sprite.Group()
 all_sprites = pg.sprite.Group()
 
 test_hover_map = False
+test_hover_map_num = 0
+if_yes_rect_map = []
+
+list_pos_if_yes = []
+
+board = [[0] * 10 for _ in range(10)]
+
+
+def test_board(list_009):
+    opa = []
+    for tt in list_009:
+        i = tt[0]
+        g = tt[1]
+        if i == 0 and g == 0:
+            spi = list(map(lambda x: x[g:g + 2], board[i:i + 2]))
+        elif g == 0:
+            spi = list(map(lambda x: x[g:g + 2], board[i - 1:i + 2]))
+        elif i == 0:
+            spi = list(map(lambda x: x[g - 1:g + 2], board[i:i + 2]))
+        else:
+            spi = list(map(lambda x: x[g - 1:g + 2], board[i - 1:i + 2]))
+
+        for h in spi:
+            opa.extend(h)
+
+    num = opa.count(1)
+    print(opa)
+    if num == 0:
+        downloads_tic_tac(list_009)
+        return True
+    return False
+
+
+def downloads_tic_tac(list_008):
+    for i in list_008:
+        board[i[0]][i[1]] = 1
 
 
 def flip_image(image):
@@ -59,8 +95,26 @@ class Cell(pg.sprite.Sprite):
         self.rect.y = y + 1
 
     def update(self, event, list_007=None, n=0):
-        if n == 1:
-            self.test(list_007)
+
+        if n == 1 and list_007:
+            global test_hover_map, test_hover_map_num, if_yes_rect_map, list_pos_if_yes
+            n = 0
+            for i in list_007:
+                if self.rect.collidepoint(i):
+                    test_hover_map_num += 1
+                    list_pos_if_yes.append(self.pos)
+                    if n == 0:
+                        if_yes_rect_map = (self.rect.x + 5, self.rect.y + 5)
+
+                n += 1
+                if n == len(list_007):
+                    break
+
+            if test_hover_map_num == len(list_007) and test_board(list_pos_if_yes):
+                test_hover_map = True
+                test_hover_map_num = 0
+                del list_pos_if_yes[:]
+
         else:
             self.image.fill((0, 0, 0))
             try:
@@ -70,20 +124,6 @@ class Cell(pg.sprite.Sprite):
                             self.image.fill((255, 0, 0))
             except AttributeError:
                 pass
-
-    def test(self, list_007):
-        global test_hover_map
-        gg = 0
-        for i in list_007:
-
-            if self.rect.collidepoint(i):
-                gg += 1
-
-        if gg == len(list_007):
-            test_hover_map = True
-        else:
-            test_hover_map = False
-        print(list_007)
 
 
 class Ship(pg.sprite.Sprite):
@@ -105,67 +145,88 @@ class Ship(pg.sprite.Sprite):
         self.hover = False
         self.flip = False
 
+        self.installed_map = False
+
     def update(self, screen, event):
-        if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
-            self.hover = True
-            self.hover_x = self.rect.x - event.pos[0]
-            self.hover_y = self.rect.y - event.pos[1]
-
-        if event.type == pg.MOUSEBUTTONUP:
-
-            list_008 = []
-            for i in range(self.n):
-                if self.flip:
-                    list_008.append((int(self.rect.x + self.size * 0.5),
-                                     int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
-                else:
-                    list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
-                                     int(self.rect.y + self.size * 0.5)))
-
-            all_sprites_cell.update(0, list_008, 1)
-            if test_hover_map:
-                print('Yes')
-
-            else:
-                self.rect.x = self.old_x
-                self.rect.y = self.old_y
-
-                if self.flip:
-                    self.image = flip_image(self.image)
-                    self.flip = False
-
-            self.hover = False
-
-        if self.hover and event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-            self.image = flip_image(self.image)
-            if self.flip:
-                self.flip = False
-            else:
-                self.flip = True
-
-        try:
-            if self.hover:
-                self.rect.x = self.hover_x + event.pos[0]
-                self.rect.y = self.hover_y + event.pos[1]
-
-        except AttributeError:
+        if self.installed_map:
             pass
+        else:
+            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
+                self.hover = True
+                self.hover_x = self.rect.x - event.pos[0]
+                self.hover_y = self.rect.y - event.pos[1]
 
-        if self.hover:
-            list_008 = []
-            for i in range(self.n):
-                if self.flip:
-                    list_008.append(
-                        (
-                            int(self.rect.x + self.size * 0.5),
-                            int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)
-                        )
-                    )
+            if event.type == pg.MOUSEBUTTONUP and self.hover:
+
+                list_008 = []
+                for i in range(self.n):
+                    if self.flip:
+                        list_008.append((int(self.rect.x + self.size * 0.5),
+                                         int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
+                    else:
+                        list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
+                                         int(self.rect.y + self.size * 0.5)))
+
+                all_sprites_cell.update(0, list_008, 1)
+                global test_hover_map, test_hover_map_num
+                if test_hover_map:
+                    self.installed_map = True
+                    test_hover_map = False
+                    test_hover_map_num = 0
+                    self.rect.x = if_yes_rect_map[0]
+                    self.rect.y = if_yes_rect_map[1]
+
                 else:
-                    list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
-                                    int(self.rect.y + self.size * 0.5)))
+                    if self.flip:
+                        self.image = flip_image(self.image)
+                        self.flip = False
+                        x_00 = self.rect.x
+                        y_00 = self.rect.y
+                        self.rect = self.image.get_rect()
+                        self.rect.x = x_00
+                        self.rect.y = y_00
 
-            all_sprites_cell.update(0, list_008)
+                    test_hover_map_num = 0
+                    self.rect.x = self.old_x
+                    self.rect.y = self.old_y
+
+                self.hover = False
+
+            if self.hover and event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                self.image = flip_image(self.image)
+                x_00 = self.rect.x
+                y_00 = self.rect.y
+                self.rect = self.image.get_rect()
+                self.rect.x = x_00
+                self.rect.y = y_00
+                if self.flip:
+                    self.flip = False
+                else:
+                    self.flip = True
+
+            try:
+                if self.hover:
+                    self.rect.x = self.hover_x + event.pos[0]
+                    self.rect.y = self.hover_y + event.pos[1]
+
+            except AttributeError:
+                pass
+
+            if self.hover:
+                list_008 = []
+                for i in range(self.n):
+                    if self.flip:
+                        list_008.append(
+                            (
+                                int(self.rect.x + self.size * 0.5),
+                                int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)
+                            )
+                        )
+                    else:
+                        list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
+                                        int(self.rect.y + self.size * 0.5)))
+
+                all_sprites_cell.update(0, list_008)
 
 
 class Customization:
