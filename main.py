@@ -32,7 +32,7 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    # PlayWithBot(screen, fps)
+    PlayWithBot(screen, fps)
     menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
         screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
     # pygame.mouse.set_visible(False)  # погашаем мышь

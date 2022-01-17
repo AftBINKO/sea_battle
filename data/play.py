@@ -5,6 +5,13 @@ import os
 display_width = 0
 display_height = 0
 
+all_sprites_cell = pg.sprite.Group()
+all_sprites = pg.sprite.Group()
+
+
+def flip_image(image):
+    return pg.transform.rotate(image, 90)
+
 
 class Board:
     def __init__(self, screen, fps):
@@ -39,48 +46,109 @@ class Board:
                                                 self.size * 10, self.size * 10), 4)
 
 
+class Cell(pg.sprite.Sprite):
+    def __init__(self, rect, size, x, y, *op):
+        super().__init__(*op)
+        self.pos = rect
+        self.image = pg.Surface((size - 1, size - 1))
+        self.image.fill((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = x + 1
+        self.rect.y = y + 1
+
+    def update(self, event, list_007=None):
+        try:
+            if list_007:
+                for i in list_007:
+                    if self.rect.collidepoint(i):
+                        self.image.fill((255, 0, 0))
+                    else:
+                        self.image.fill((0, 0, 0))
+                        pass
+        except AttributeError:
+            pass
+
+
 class Ship(pg.sprite.Sprite):
     def __init__(self, size, n, x, y, *op):
         super().__init__(*op)
+        self.n = n
+        self.size = size
         self.image = pg.Surface((size * n + ((n * 10) - 10), size))
         self.image.fill((0, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
+        self.old_x = x
+        self.old_y = y
+
         self.hover_x = 0
         self.hover_y = 0
         self.hover = False
+        self.flip = False
 
-    def update(self, event):
+    def update(self, screen, event):
         if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
             self.hover = True
             self.hover_x = self.rect.x - event.pos[0]
             self.hover_y = self.rect.y - event.pos[1]
 
         if event.type == pg.MOUSEBUTTONUP:
+            if self.flip:
+                self.image = flip_image(self.image)
+                self.flip = False
             self.hover = False
+            self.rect.x = self.old_x
+            self.rect.y = self.old_y
 
+        if self.hover and event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+            self.image = flip_image(self.image)
+            if self.flip:
+                self.flip = False
+            else:
+                self.flip = True
+
+        try:
+            if self.hover:
+                self.rect.x = self.hover_x + event.pos[0]
+                self.rect.y = self.hover_y + event.pos[1]
+
+        except AttributeError:
+            pass
+
+        list_008 = []
         if self.hover:
-            self.rect.x = self.hover_x + event.pos[0]
-            self.rect.y = self.hover_y + event.pos[1]
+            for i in range(self.n):
+                if self.flip:
+                    list_008.append((int(self.rect.x + self.size * 0.5),
+                                     int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
+                else:
+                    list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
+                                    int(self.rect.y + self.size * 0.5)))
+
+        all_sprites_cell.update(0, list_008)
 
 
 class Customization:
     def __init__(self, screen, fps):
         global display_width, display_height
+        self.board = [[0] * 10 for _ in range(10)]
         self.sc = screen
         self.fps = fps
         self.all_sprites = pg.sprite.Group()
         sur = pg.display.get_surface()
         display_width = sur.get_width()
         display_height = sur.get_height()
-        self.clock = pg.time.Clock
+        self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.co = int(display_width * 0.02)
-        # я поменял длину и шрифт, надеюсь ты не против
-        self.font = pg.font.Font(os.path.join("data", 'font_2.ttf'), int(self.size * 0.6))
+        self.font = pg.font.Font(None, int(self.size * 0.8))
 
+        self.map_indent_top = 50
+        self.map_indent_left = 50
+
+        self.add_cells()
         self.add_ship()
         self.map_customization()
 
@@ -96,11 +164,13 @@ class Customization:
             text = self.font.render(pp, True, (255, 255, 255))
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
-        for i in range(10):
-            for g in range(10):
-                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + x + self.co,
-                                                        g * self.size + y + self.co,
-                                                        self.size, self.size), 1)
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+                         (x + self.co + self.size * i, y + self.co + self.size * 10))
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+                         (x + self.co + self.size * 10, y + self.co + self.size * i))
+
         pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
                                                 y + self.co,
                                                 self.size * 10, self.size * 10), 4)
@@ -111,16 +181,16 @@ class Customization:
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
-                print(event)
                 if event.type == pg.QUIT:
-                    terminate()
-                self.all_sprites.update(event)
+                    running = False
+                all_sprites_cell.update(event)
+                all_sprites.update(self.sc, event)
 
-            self.map_draw(30, 30)
-            self.all_sprites.draw(self.sc)
+            self.map_draw(self.map_indent_left, self.map_indent_top)
+            all_sprites_cell.draw(self.sc)
+            all_sprites.draw(self.sc)
+            self.clock.tick(self.fps)
             pg.display.flip()
-
-        self.clock.tick(self.fps)
 
     def add_ship(self):
         x = int(display_width * 0.6)
@@ -131,9 +201,15 @@ class Customization:
 
         for i in range(1, 5):
             for g in range(i):
-                Ship(size, 5 - i,
-                     x + (((size * (5 - i)) + indent_right + (((5 - i) * 10) - 10)) * g),
-                     y + ((size + indent_bottom) * i), self.all_sprites)
+                Ship(size, 5 - i, x + (((size * (5 - i)) + indent_right + (((5 - i) * 10) - 10)) * g),
+                     y + ((size + indent_bottom) * i), all_sprites)
+
+    def add_cells(self):
+
+        for i in range(10):
+            for g in range(10):
+                Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
+                     self.size * g + self.co + self.map_indent_top, all_sprites_cell)
 
 
 class PlayWithBot:
