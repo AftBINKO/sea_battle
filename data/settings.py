@@ -145,14 +145,16 @@ class Settings:
             settings_sprites.draw(self.screen)
 
             for i in [[f"Версия конфигурационного файла: {self.config['version']}",
-                       (128, 128, 128), 50, 155, 25],
-                      ["Размер экрана: ", (255, 255, 255), 50, 205, 50],
-                      [self.values_screensize[self.value_screensize], (255, 255, 255), 500, 205, 50],
-                      ["Режим экрана: ", (255, 255, 255), 50, 255, 50],
-                      [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 255, 50],
-                      ["FPS: ", (255, 255, 255), 50, 305, 50],
-                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 305, 50]]:
-                self.screen.blit(pygame.font.Font(None, i[4]).render(i[0], True, i[1]), (i[2], i[3]))
+                       (128, 128, 128), 50, 155, 25, 2],
+                      ["Размер экрана: ", (255, 255, 255), 50, 205, 50, 1],
+                      [self.values_screensize[self.value_screensize], (255, 255, 255), 500, 205, 50,
+                       2], ["Режим экрана: ", (255, 255, 255), 50, 255, 50, 1],
+                      [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 255, 50,
+                       2], ["FPS: ", (255, 255, 255), 50, 305, 50, 1],
+                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 305, 50, 2]]:
+                self.screen.blit(
+                    pygame.font.Font(os.path.join("data", f'font_{str(i[5])}.ttf'), i[4]).render(
+                        i[0], True, i[1]), (i[2], i[3]))
 
             pygame.display.flip()
             clock.tick(self.fps)
@@ -171,24 +173,42 @@ class About:
         x = pygame.sprite.Sprite()
         create_sprite(x, 'x.png', self.size[0] - 100, 50, about_sprites)
 
-        title = pygame.sprite.Sprite()
-        create_sprite(title, 'about_title.png', 50, 50, about_sprites)
-
-        aft_games = pygame.sprite.Sprite()
-        create_sprite(aft_games, 'aft_games.png', 50, 150, about_sprites)
-
-        discord = pygame.sprite.Sprite()
-        create_sprite(discord, 'discord.png', 250, 150, about_sprites)
-
-        vk = pygame.sprite.Sprite()
-        create_sprite(vk, 'vk.png', 325, 150, about_sprites)
-
-        youtube = pygame.sprite.Sprite()
-        create_sprite(youtube, 'youtube.png', 400, 150, about_sprites)
-
-        q = 250
+        y = 50
         with open(os.path.join("data", 'titles.txt'), encoding='utf-8') as titles:
             titles = titles.read().split('\n')
+
+        title = pygame.sprite.Sprite()
+        create_sprite(title, 'about_title.png', 50, y, about_sprites)
+        y += 100
+
+        aft_games = pygame.sprite.Sprite()
+        create_sprite(aft_games, 'aft_games.png', 50, y, about_sprites)
+
+        discord = pygame.sprite.Sprite()
+        create_sprite(discord, 'discord.png', 250, y, about_sprites)
+
+        vk = pygame.sprite.Sprite()
+        create_sprite(vk, 'vk.png', 325, y, about_sprites)
+
+        youtube = pygame.sprite.Sprite()
+        create_sprite(youtube, 'youtube.png', 400, y, about_sprites)
+        y += 100
+
+        self.screen.fill((0, 0, 0))
+
+        c = 20 if self.size[1] == 768 else 30
+        for line in titles:
+            count = 1
+            for symbol in line:
+                if symbol == '#':
+                    count += 1
+                else:
+                    break
+            text = pygame.font.Font(os.path.join("data", 'font_2.ttf'), c * count).render(
+                line.lstrip('#' * (count - 1) + ' '), True, (255, 255, 255))
+            self.screen.blit(text, text.get_rect(center=(self.size[0] // 2, y)))
+            y += c
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -211,7 +231,6 @@ class About:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
 
-            self.screen.fill((0, 0, 0))
             about_sprites.draw(self.screen)
             pygame.display.flip()
             clock.tick(self.fps)

@@ -19,11 +19,15 @@ def load_image(name, c=None):
     return image
 
 
+def put_sprite(sprite, x, y):  # функция редактирует расположение sprite
+    sprite.rect.x = x
+    sprite.rect.y = y
+
+
 def create_sprite(sprite, name, x, y, group):  # функция помогает быстрее поставить sprite
     sprite.image = load_image(name)
     sprite.rect = sprite.image.get_rect()
-    sprite.rect.x = x
-    sprite.rect.y = y
+    put_sprite(sprite, x, y)
     group.add(sprite)
 
 
