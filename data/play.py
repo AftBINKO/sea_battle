@@ -8,6 +8,8 @@ display_height = 0
 all_sprites_cell = pg.sprite.Group()
 all_sprites = pg.sprite.Group()
 
+test_hover_map = False
+
 
 def flip_image(image):
     return pg.transform.rotate(image, 90)
@@ -56,17 +58,32 @@ class Cell(pg.sprite.Sprite):
         self.rect.x = x + 1
         self.rect.y = y + 1
 
-    def update(self, event, list_007=None):
-        try:
-            if list_007:
-                for i in list_007:
-                    if self.rect.collidepoint(i):
-                        self.image.fill((255, 0, 0))
-                    else:
-                        self.image.fill((0, 0, 0))
-                        pass
-        except AttributeError:
-            pass
+    def update(self, event, list_007=None, n=0):
+        if n == 1:
+            self.test(list_007)
+        else:
+            self.image.fill((0, 0, 0))
+            try:
+                if list_007:
+                    for i in list_007:
+                        if self.rect.collidepoint(i):
+                            self.image.fill((255, 0, 0))
+            except AttributeError:
+                pass
+
+    def test(self, list_007):
+        global test_hover_map
+        gg = 0
+        for i in list_007:
+
+            if self.rect.collidepoint(i):
+                gg += 1
+
+        if gg == len(list_007):
+            test_hover_map = True
+        else:
+            test_hover_map = False
+        print(list_007)
 
 
 class Ship(pg.sprite.Sprite):
@@ -95,12 +112,29 @@ class Ship(pg.sprite.Sprite):
             self.hover_y = self.rect.y - event.pos[1]
 
         if event.type == pg.MOUSEBUTTONUP:
-            if self.flip:
-                self.image = flip_image(self.image)
-                self.flip = False
+
+            list_008 = []
+            for i in range(self.n):
+                if self.flip:
+                    list_008.append((int(self.rect.x + self.size * 0.5),
+                                     int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
+                else:
+                    list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
+                                     int(self.rect.y + self.size * 0.5)))
+
+            all_sprites_cell.update(0, list_008, 1)
+            if test_hover_map:
+                print('Yes')
+
+            else:
+                self.rect.x = self.old_x
+                self.rect.y = self.old_y
+
+                if self.flip:
+                    self.image = flip_image(self.image)
+                    self.flip = False
+
             self.hover = False
-            self.rect.x = self.old_x
-            self.rect.y = self.old_y
 
         if self.hover and event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
             self.image = flip_image(self.image)
@@ -117,17 +151,21 @@ class Ship(pg.sprite.Sprite):
         except AttributeError:
             pass
 
-        list_008 = []
         if self.hover:
+            list_008 = []
             for i in range(self.n):
                 if self.flip:
-                    list_008.append((int(self.rect.x + self.size * 0.5),
-                                     int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
+                    list_008.append(
+                        (
+                            int(self.rect.x + self.size * 0.5),
+                            int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)
+                        )
+                    )
                 else:
                     list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
                                     int(self.rect.y + self.size * 0.5)))
 
-        all_sprites_cell.update(0, list_008)
+            all_sprites_cell.update(0, list_008)
 
 
 class Customization:
