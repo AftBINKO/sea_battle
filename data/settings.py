@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, get_value, extract_files
+from data.main_functions import terminate, load_image, create_sprite, get_value, extract_files
 
 import webbrowser
 import pygame
@@ -162,8 +162,8 @@ class Settings:
 
 class About:
     def __init__(self, screen, fps, path):
-        self.screen, self.fps, self.size = screen, fps, tuple(
-            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
+        self.screen, self.fps, self.size, self.update = screen, fps, tuple(map(int,
+                (get_value(f"{path}\config.txt", "screensize")[0].split('x')))), pygame.USEREVENT + 1
 
     def menu(self):
         clock = pygame.time.Clock()
@@ -173,46 +173,37 @@ class About:
         x = pygame.sprite.Sprite()
         create_sprite(x, 'x.png', self.size[0] - 100, 50, about_sprites)
 
-        y = 50
         with open(os.path.join("data", 'titles.txt'), encoding='utf-8') as titles:
             titles = titles.read().split('\n')
 
         title = pygame.sprite.Sprite()
-        create_sprite(title, 'about_title.png', 50, y, about_sprites)
-        y += 100
-
-        aft_games = pygame.sprite.Sprite()
-        create_sprite(aft_games, 'aft_games.png', 50, y, about_sprites)
+        create_sprite(title, 'about_title.png', 50, 50, about_sprites)
 
         discord = pygame.sprite.Sprite()
-        create_sprite(discord, 'discord.png', 250, y, about_sprites)
+        create_sprite(discord, 'discord.png', 250, 150, about_sprites)
 
         vk = pygame.sprite.Sprite()
-        create_sprite(vk, 'vk.png', 325, y, about_sprites)
+        create_sprite(vk, 'vk.png', 325, 150, about_sprites)
 
         youtube = pygame.sprite.Sprite()
-        create_sprite(youtube, 'youtube.png', 400, y, about_sprites)
-        y += 100
+        create_sprite(youtube, 'youtube.png', 400, 150, about_sprites)
 
-        self.screen.fill((0, 0, 0))
+        pygame.time.set_timer(self.update, 200)
+        n = 1
 
-        c = 20 if self.size[1] == 768 else 30
-        for line in titles:
-            count = 1
-            for symbol in line:
-                if symbol == '#':
-                    count += 1
-                else:
-                    break
-            text = pygame.font.Font(os.path.join("data", 'font_2.ttf'), c * count).render(
-                line.lstrip('#' * (count - 1) + ' '), True, (255, 255, 255))
-            self.screen.blit(text, text.get_rect(center=(self.size[0] // 2, y)))
-            y += c
-
+        aft_games = pygame.sprite.Sprite()
+        create_sprite(aft_games, os.path.join('animate', f'animate_{n}.png'), 50, 150,
+                      about_sprites)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
+                elif event.type == self.update:
+                    if n >= 5:
+                        pygame.time.set_timer(self.update, 0)
+                    else:
+                        n += 1
+                        aft_games.image = load_image(os.path.join('animate', f'animate_{n}.png'))
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if x.rect.collidepoint(event.pos):
                         return
@@ -230,6 +221,21 @@ class About:
                             pass
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
+
+            self.screen.fill((0, 0, 0))
+
+            c, y = 20 if self.size[1] == 768 else 30, 300
+            for line in titles:
+                count = 1
+                for symbol in line:
+                    if symbol == '#':
+                        count += 1
+                    else:
+                        break
+                text = pygame.font.Font(os.path.join("data", 'font_2.ttf'), c * count).render(
+                    line.lstrip('#' * (count - 1) + ' '), True, (255, 255, 255))
+                self.screen.blit(text, text.get_rect(center=(self.size[0] // 2, y)))
+                y += c
 
             about_sprites.draw(self.screen)
             pygame.display.flip()
