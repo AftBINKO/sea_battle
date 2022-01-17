@@ -49,14 +49,14 @@ class Menu:
         title = pygame.sprite.Sprite()
         create_sprite(title, "title.png", 50, 200 if self.size[1] == 768 else 300, menu_sprites)
 
-        mat = pygame.sprite.Sprite()
-        create_sprite(mat, f"mat_{self.size[1]}.png", 0,
-                      self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
-
         x = 300 * self.n
 
         buttons = pygame.sprite.Sprite()
         create_sprite(buttons, "buttons.png", self.size[0] / 2 - 125 - x,
+                      self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
+
+        mat = pygame.sprite.Sprite()
+        create_sprite(mat, f"mat_{self.size[1]}.png", 0,
                       self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
 
         frame = pygame.sprite.Sprite()
@@ -120,20 +120,20 @@ class Menu:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        try:
-                            if left_arrow.rect.collidepoint(event.pos):
-                                x = 300 * self.n + 1
-                                left = True
-                                self.n -= 1
-                        except AttributeError:
-                            pass
-                        try:
-                            if right_arrow.rect.collidepoint(event.pos):
-                                x = 300 * self.n - 1
-                                right = True
-                                self.n += 1
-                        except AttributeError:
-                            pass
+                        # try:
+                        #     if left_arrow.rect.collidepoint(event.pos):
+                        #         x = 300 * self.n + 1
+                        #         left = True
+                        #         self.n -= 1
+                        # except AttributeError:
+                        #     pass
+                        # try:
+                        #     if right_arrow.rect.collidepoint(event.pos):
+                        #         x = 300 * self.n - 1
+                        #         right = True
+                        #         self.n += 1
+                        # except AttributeError:
+                        #     pass
                         if frame.rect.collidepoint(event.pos):
                             if self.n == 5:
                                 terminate()
