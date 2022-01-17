@@ -6,7 +6,7 @@ import os
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 from datetime import datetime, date
 
-from data.main_functions import terminate, create_sprite, add_xp, format_xp, get_value
+from data.main_functions import terminate, create_sprite, put_sprite, add_xp, format_xp, get_value
 
 
 class Menu:
@@ -54,11 +54,32 @@ class Menu:
                       self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
 
         x = 300 * self.n
+
+        buttons = pygame.sprite.Sprite()
+        create_sprite(buttons, "buttons.png", self.size[0] / 2 - 125 - x,
+                      self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
+
+        frame = pygame.sprite.Sprite()
+        create_sprite(frame, "frame_6.png", self.size[0] / 2 - 125,
+                      self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
+
+        down_arrow = pygame.sprite.Sprite()
+        create_sprite(down_arrow, "down_arrow.png", self.size[0] / 2 - 25,
+                      self.size[1] - (250 if self.size[1] == 768 else 350), menu_sprites)
+
+        # left_arrow = pygame.sprite.Sprite()
+        # if self.n - 1 >= 0:
+        #     create_sprite(left_arrow, "left_arrow.png", self.size[0] / 2 - 175,
+        #                   self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
+        #
+        # right_arrow = pygame.sprite.Sprite()
+        # if self.n + 1 <= 5:
+        #     create_sprite(right_arrow, "right_arrow.png", self.size[0] / 2 + 125,
+        #                   self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
+
         left, right = False, False
 
         while True:
-            buttons_sprites = pygame.sprite.Group()
-
             if right:
                 if x < (300 * self.n) - 1:
                     x += 50
@@ -72,29 +93,27 @@ class Menu:
                     x -= 1
                     left = False
 
-            buttons = pygame.sprite.Sprite()
-            create_sprite(buttons, "buttons.png", self.size[0] / 2 - 125 - x,
-                          self.size[1] - (200 if self.size[1] == 768 else 300), buttons_sprites)
+            put_sprite(buttons, self.size[0] / 2 - 125 - x,
+                       self.size[1] - (200 if self.size[1] == 768 else 300))
 
-            frame = pygame.sprite.Sprite()
-            create_sprite(frame, "frame_6.png", self.size[0] / 2 - 125,
-                          self.size[1] - (200 if self.size[1] == 768 else 300), buttons_sprites)
+            put_sprite(frame, self.size[0] / 2 - 125,
+                       self.size[1] - (200 if self.size[1] == 768 else 300))
 
-            arrows_sprites = pygame.sprite.Group()
+            put_sprite(down_arrow, self.size[0] / 2 - 25,
+                       self.size[1] - (250 if self.size[1] == 768 else 350))
 
-            down_arrow = pygame.sprite.Sprite()
-            create_sprite(down_arrow, "down_arrow.png", self.size[0] / 2 - 25,
-                          self.size[1] - (250 if self.size[1] == 768 else 350), arrows_sprites)
-
-            left_arrow = pygame.sprite.Sprite()
-            if self.n - 1 >= 0:
-                create_sprite(left_arrow, "left_arrow.png", self.size[0] / 2 - 175,
-                              self.size[1] - (200 if self.size[1] == 768 else 300), arrows_sprites)
-
-            right_arrow = pygame.sprite.Sprite()
-            if self.n + 1 <= 5:
-                create_sprite(right_arrow, "right_arrow.png", self.size[0] / 2 + 125,
-                              self.size[1] - (200 if self.size[1] == 768 else 300), arrows_sprites)
+            # if self.n - 1 >= 0:
+            #     put_sprite(left_arrow, self.size[0] / 2 - 175,
+            #                self.size[1] - (200 if self.size[1] == 768 else 300))
+            # else:
+            #     left_arrow.kill()
+            #
+            # right_arrow = pygame.sprite.Sprite()
+            # if self.n + 1 <= 5:
+            #     put_sprite(right_arrow, self.size[0] / 2 + 125,
+            #                self.size[1] - (200 if self.size[1] == 768 else 300))
+            # else:
+            #     right_arrow.kill()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -143,16 +162,14 @@ class Menu:
 
             # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
             self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
-
-            buttons_sprites.draw(self.screen)
             menu_sprites.draw(self.screen)
-            arrows_sprites.draw(self.screen)
-
             text = format_xp(f"{self.path}/statistic.txt")[0].split('\n')
             y = 0
             for line in text:
-                self.screen.blit(pygame.font.Font(None, 50).render(line, True, (255, 255, 255)),
-                                 (0, y))
+                self.screen.blit(
+                    pygame.font.Font(os.path.join("data", 'font_1.ttf'), 50).render(line, True,
+                                                                                    (255, 255, 255)),
+                    (0, y))
                 y += 50
 
             pygame.display.flip()
@@ -247,21 +264,22 @@ class Achievements:
 
                 achievement_sprites.draw(self.screen)
 
-                for j in [[str(i + 1), (255, 255, 255), 75, y + 25, 75],
-                          [achievement[1], (255, 255, 255), 400, y + 25, 75],
-                          [achievement[2], (192, 192, 192), 400, y + 100, 25],
+                for j in [[str(i + 1), (255, 255, 255), 75, y + 25, 50, 1],
+                          [achievement[1], (255, 255, 255), 400, y + 25, 50, 1],
+                          [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
                           ["Прогресс", (192, 192, 192), 1000 if self.size[1] == 768 else 1100,
-                           y + 10, 25],
+                           y + 10, 25, 2],
                           [f"{int(achievement[4] * 100)}%", (255, 255, 255),
-                           1000 if self.size[1] == 768 else 1100, y + 45, 50],
+                           1000 if self.size[1] == 768 else 1100, y + 45, 50, 1],
                           ["Награда", (192, 192, 192), 1150 if self.size[1] == 768 else 1500, y + 10,
-                           25],
+                           25, 2],
                           [f"{achievement[6]} XP", (255, 255, 255),
-                           1150 if self.size[1] == 768 else 1500, y + 45, 50],
+                           1150 if self.size[1] == 768 else 1500, y + 45, 50, 1],
                           [achievement[5], (255, 255, 255), 1150 if self.size[1] == 768 else 1500,
-                           y + 100, 25]]:
-                    self.screen.blit(pygame.font.Font(None, j[4]).render(j[0], True, j[1]),
-                                     (j[2], j[3]))
+                           y + 100, 25, 2]]:
+                    self.screen.blit(
+                        pygame.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(
+                            j[0], True, j[1]), (j[2], j[3]))
 
                 y += 175
 
