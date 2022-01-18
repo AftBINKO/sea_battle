@@ -35,10 +35,11 @@ def test_board(list_009):
             opa.extend(h)
 
     num = opa.count(1)
-    print(opa)
-    if num == 0:
+    if num == 0 and len(list_009) != 0:
         downloads_tic_tac(list_009)
         return True
+
+    del list_pos_if_yes[:]
     return False
 
 
