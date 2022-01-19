@@ -1,3 +1,4 @@
+from datetime import datetime
 from zipfile import ZipFile
 
 import pygame
@@ -24,11 +25,24 @@ def put_sprite(sprite, x, y):  # функция редактирует расп�
     sprite.rect.y = y
 
 
-def create_sprite(sprite, name, x, y, group):  # функция помогает быстрее поставить sprite
-    sprite.image = load_image(name)
+def create_sprite(sprite, name, x, y, group, transform=None):
+    """функция помогает быстрее поставить sprite"""
+    image = load_image(name)
+    if transform:
+        image = pygame.transform.scale(image, transform)
+    sprite.image = image
     sprite.rect = sprite.image.get_rect()
     put_sprite(sprite, x, y)
     group.add(sprite)
+
+
+def add_fon(theme_value, size):
+    return pygame.transform.scale(load_image('fon_1.png'), size) if theme_value == 'day' or (
+                theme_value == 'by_time_of_day' and 8 <= int(datetime.now().time().strftime('%H')
+                                                             ) <= 18) else (
+        pygame.transform.scale(load_image('fon_2.png'), size) if theme_value == 'night' or (
+                    theme_value == 'by_time_of_day' and not (
+                        8 <= int(datetime.now().time().strftime('%H')) <= 18)) else None)
 
 
 def add_xp(path, number):
@@ -67,8 +81,8 @@ def format_xp(path):
 def get_file(path):
     with open(path, encoding="utf-8") as file:
         return dict(map(lambda x: tuple(x.split(': ')), [line for line in list(
-                map(lambda x: x.strip('\n'), file.readlines())) if line != '' if
-                                                              line[0] != '#']))
+            map(lambda x: x.strip('\n'), file.readlines())) if line != '' if
+                                                         line[0] != '#']))
 
 
 def get_value(path, *values):
@@ -83,7 +97,7 @@ def extract_files(path_archive, path_extract, *values):
 
 def create_window(path):
     config = get_file(f"{path}\config.txt")
-    if config['version'] != '1.1 ALPHA':
+    if config['version'] != '1.0 BETA':
         raise ValueError('The configuration file version is not supported')
     size, screen = tuple(map(int, config['screensize'].split('x'))), None
     if config['screenmode'] == 'window':

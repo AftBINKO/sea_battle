@@ -7,7 +7,7 @@ from cv2 import VideoCapture  # для воспроизвдения застав
 from datetime import datetime, date
 
 from data.main_functions import terminate, load_image, create_sprite, put_sprite, add_xp, \
-    format_xp, get_value
+    format_xp, get_value, add_fon
 
 
 class Menu:
@@ -42,6 +42,7 @@ class Menu:
 
     def menu(self):
         buttons_tuple = ('Play', 'Play_With_Friend', 'Play_With_Bot', 'Settings', 'Achievements')
+        fon = add_fon(get_value(f"{self.path}\config.txt", 'theme')[0], self.size)
 
         clock = pygame.time.Clock()
 
@@ -72,13 +73,13 @@ class Menu:
         while True:
             if right:
                 if x < (300 * self.n) - 1:
-                    x += 50
+                    x += 150
                 else:
                     x += 1  # корректировка
                     right = False
             if left:
                 if x > (300 * self.n) + 1:
-                    x -= 50
+                    x -= 150
                 else:
                     x -= 1
                     left = False
@@ -153,8 +154,7 @@ class Menu:
                             terminate()
                         return buttons_tuple[self.n]
 
-            # fon = pygame.transform.scale(load_image('fon.jpg'), self.size)
-            self.screen.fill((0, 0, 0))  # self.screen.blit(fon, (0, 0))
+            self.screen.blit(fon, (0, 0))
             menu_sprites.draw(self.screen)
             arrow_sprites.draw(self.screen)
             text = format_xp(f"{self.path}/statistic.txt")[0].split('\n')
@@ -197,6 +197,8 @@ class Achievements:
                                        key=lambda x: float(x[4]), reverse=True)
 
     def menu(self):
+        fon = pygame.transform.scale(load_image('fon_4.png'), self.size)
+
         clock = pygame.time.Clock()
 
         menu_sprites = pygame.sprite.Group()
@@ -233,18 +235,16 @@ class Achievements:
                             a, f = a - 175, f + 1
                     elif event.key == pygame.K_ESCAPE:
                         return
-            self.screen.fill((0, 0, 0))
 
-            y = a
+            self.screen.blit(fon, (0, 0))
+
+            achievement_sprites, y, text = pygame.sprite.Group(), a, []
             for i in range(len(self.achievements)):
-                achievement_sprites = pygame.sprite.Group()
-
                 achievement = self.achievements[i]
 
                 mat = pygame.sprite.Sprite()
                 create_sprite(mat, f'mat_{str(achievement[4]).split(".")[0]}_{self.size[1]}.png', 50,
-                              y,
-                              achievement_sprites)
+                              y, achievement_sprites)
 
                 frame = pygame.sprite.Sprite()
                 create_sprite(frame, f'frame_{achievement[3]}.png', 145, y + 25,
@@ -256,26 +256,25 @@ class Achievements:
                 except TypeError:
                     pass
 
-                achievement_sprites.draw(self.screen)
-
-                for j in [[str(i + 1), (255, 255, 255), 75, y + 25, 50, 1],
-                          [achievement[1], (255, 255, 255), 400, y + 25, 50, 1],
-                          [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
-                          ["Прогресс", (192, 192, 192), 1000 if self.size[1] == 768 else 1100,
-                           y + 10, 25, 2],
-                          [f"{int(achievement[4] * 100)}%", (255, 255, 255),
-                           1000 if self.size[1] == 768 else 1100, y + 45, 50, 1],
-                          ["Награда", (192, 192, 192), 1150 if self.size[1] == 768 else 1500, y + 10,
-                           25, 2],
-                          [f"{achievement[6]} XP", (255, 255, 255),
-                           1150 if self.size[1] == 768 else 1500, y + 45, 50, 1],
-                          [achievement[5], (255, 255, 255), 1150 if self.size[1] == 768 else 1500,
-                           y + 100, 25, 2]]:
-                    self.screen.blit(
-                        pygame.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(
-                            j[0], True, j[1]), (j[2], j[3]))
-
+                text.extend([[str(i + 1), (255, 255, 255), 75, y + 25, 50, 1],
+                             [achievement[1], (255, 255, 255), 400, y + 25, 50, 1],
+                             [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
+                             ["Прогресс", (192, 192, 192), 1000 if self.size[1] == 768 else 1100,
+                              y + 10, 25, 2], [f"{int(achievement[4] * 100)}%", (255, 255, 255),
+                                               1000 if self.size[1] == 768 else 1100, y + 45, 50, 1],
+                             ["Награда", (192, 192, 192), 1150 if self.size[1] == 768 else 1500,
+                              y + 10, 25, 2], [f"{achievement[6]} XP", (255, 255, 255),
+                                               1150 if self.size[1] == 768 else 1500, y + 45, 50, 1],
+                             [achievement[5], (255, 255, 255), 1150 if self.size[1] == 768 else 1500,
+                              y + 100, 25, 2]])
                 y += 175
+
+            achievement_sprites.draw(self.screen)
+
+            for j in text:
+                self.screen.blit(
+                    pygame.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(
+                        j[0], True, j[1]), (j[2], j[3]))
 
             menu_sprites.draw(self.screen)
 

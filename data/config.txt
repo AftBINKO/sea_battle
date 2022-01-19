@@ -1,11 +1,14 @@
 # Версия файла. НЕ МЕНЯТЬ ЕЁ, ИНАЧЕ ИГРА НЕ БУДЕТ РАБОТАТЬ!!!
-version: 1.1 ALPHA
+version: 1.0 BETA
 
 # Размер экрана (БЕТА), значения: 1366x768, 1920x1080
 screensize: 1366x768
 
-# Режим окна, значения: fullscreen, window, noframe
+# Режим окна (БЕТА), значения: fullscreen, window, noframe
 screenmode: window
 
 # Количество кадов в секунду
 fps: 60
+
+# Фон, значения: day, night, by_time_of_day
+theme: by_time_of_day
