@@ -13,16 +13,20 @@ list_pos_if_yes = []  # позиции которые попадают в кле
 
 if_downloads = False  # можно ли ставить корабль на данную позицыю
 
+test_007 = 0  # тест все ли корабли установлены
+
 board = [[0] * 10 for _ in range(10)]  # игровое поле
 
 
 def up_per():
-    global if_downloads, if_yes_rect_map, list_pos_if_yes, board
+    global if_downloads, if_yes_rect_map, list_pos_if_yes, board, test_007
     if_yes_rect_map = []  # позиция корабля на поле
 
     list_pos_if_yes = []  # позиции которые попадают в клетки
 
     if_downloads = False  # можно ли ставить корабль на данную позицыю
+
+    test_007 = 0
 
     for i in all_sprites:
         i.kill()
@@ -144,9 +148,10 @@ class Ship(pg.sprite.Sprite):
                 all_sprites_cell.update(0, self.return_pos(), 1)
                 del list_pos_if_yes[:]
 
-                global if_downloads
+                global if_downloads, test_007
                 if if_downloads:
                     if_downloads = False
+                    test_007 += 1
 
                     self.installed_map = True
                     self.rect.x = if_yes_rect_map[0]
@@ -297,8 +302,8 @@ class Customization:
                         self.add_ship()
                         self.add_cells()
 
-                    elif go.rect.collidepoint(event.pos):
-                        return board
+                    elif go.rect.collidepoint(event.pos) and test_007 == 10:
+                        return
 
                 all_sprites_cell.update(event)
                 all_sprites.update(self.sc, event)
@@ -309,7 +314,6 @@ class Customization:
             self.all_sprite_gg.draw(self.sc)
             self.clock.tick(self.fps)
             pg.display.flip()
-
 
     def add_ship(self):
         x = int(display_width * 0.6)
@@ -329,3 +333,6 @@ class Customization:
             for g in range(10):
                 Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
                      self.size * g + self.co + self.map_indent_top, all_sprites_cell)
+
+    def bir(self):
+        return board, all_sprites

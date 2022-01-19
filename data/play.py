@@ -2,25 +2,76 @@ from data.main_functions import terminate, create_sprite, get_value
 from data.custom_map import Customization
 import pygame as pg
 import os
+import random
 
 display_width = 0
 display_height = 0
 
 
-class Board:
+class Cell(pg.sprite.Sprite):
+    def __init__(self, rect, size, x, y, *op):
+        super().__init__(*op)
+        self.pos = rect
+        self.image = pg.Surface((size - 1, size - 1))
+        self.image.fill((0, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = x + 1
+        self.rect.y = y + 1
+
+
+class PlayWithBot:
+    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
     def __init__(self, screen, fps):
         global display_width, display_height
-        self.sc = screen
-        self.fps = fps
+        self.board, self.ships = Customization(screen, fps).bir()
+
+        self.all_sprites_1 = pg.sprite.Group()
+        self.all_sprites_2 = pg.sprite.Group()
+        self.all_sprite_gg = pg.sprite.Group()
 
         sur = pg.display.get_surface()
         display_width = sur.get_width()
         display_height = sur.get_height()
 
-        self.co = int(display_width * 0.02)
-        self.size = int(display_width * 0.035)
-        self.font = pg.font.Font(None, int(self.size * 0.8))
+        self.sc = screen
+        self.fps = fps
         self.clock = pg.time.Clock()
+        self.size = int(display_width * 0.035)
+        self.co = int(display_width * 0.02)
+        self.font = pg.font.Font(None, int(self.size * 0.8))
+
+        self.map_indent_top = 50
+        self.map_indent_left = 50
+
+        self.add_cell()
+        self.main()
+
+    def main(self):
+        running = True
+
+        x = pg.sprite.Sprite()
+        create_sprite(x, 'x.png', display_width - 75, 30, self.all_sprite_gg)
+
+        while running:
+            self.sc.fill((0, 0, 0))
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    return
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if x.rect.collidepoint(event.pos):
+                        return
+
+            self.map_draw(self.map_indent_left, self.map_indent_top)
+            self.map_draw_2(self.map_indent_left + int(display_width * 0.5), self.map_indent_top)
+
+            self.all_sprites_1.draw(self.sc)
+            self.all_sprites_2.draw(self.sc)
+            self.all_sprite_gg.draw(self.sc)
+            self.ships.draw(self.sc)
+
+            self.clock.tick(self.fps)
+            pg.display.flip()
 
     def map_draw(self, x, y):
 
@@ -34,40 +85,62 @@ class Board:
             text = self.font.render(pp, True, (255, 255, 255))
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
-        for i in range(10):
-            for g in range(10):
-                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + x + self.co,
-                                                        g * self.size + y + self.co,
-                                                        self.size, self.size), 1)
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+                         (x + self.co + self.size * i, y + self.co + self.size * 10))
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+                         (x + self.co + self.size * 10, y + self.co + self.size * i))
+
         pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
                                                 y + self.co,
                                                 self.size * 10, self.size * 10), 4)
 
+        pg.draw.line(self.sc, (255, 255, 255), (int(display_width * 0.5), 0),
+                     (int(display_width * 0.5), display_height), 4)
 
-class PlayWithBot:
-    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
-    def __init__(self, screen, fps):
-        self.board = Customization(screen, fps)
-        self.sc = screen
-        self.fps = fps
-        self.clock = pg.time.Clock()
-        self.main()
+        font = pg.font.Font(None, self.size)
 
-    def main(self):
-        running = True
+        text = font.render('Бот', True, (255, 255, 255))
+        self.sc.blit(text, (200, 10))
 
-        while running:
-            self.sc.fill((0, 0, 0))
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    return
+        text = font.render('Компьютер', True, (255, 255, 255))
+        self.sc.blit(text, (display_width // 2 + 200, 10))
 
-            self.clock.tick(self.fps)
-            pg.display.flip()
+    def map_draw_2(self, x, y):
 
+        slo = list('АБВГДЕЁЖЗИ')
 
-class PlayWithFriend(Board):
-    pass
+        for i in range(10):
+            text = self.font.render(str(i), True, (255, 255, 255))
+            self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
+
+        for i, pp in enumerate(slo):
+            text = self.font.render(pp, True, (255, 255, 255))
+            self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
+
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+                         (x + self.co + self.size * i, y + self.co + self.size * 10))
+        for i in range(1, 10):
+            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+                         (x + self.co + self.size * 10, y + self.co + self.size * i))
+
+        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
+                                                y + self.co,
+                                                self.size * 10, self.size * 10), 4)
+
+    def add_cell(self):
+
+        for i in range(10):
+            for g in range(10):
+                Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
+                     self.size * g + self.co + self.map_indent_top, self.all_sprites_1)
+
+        for i in range(10):
+            for g in range(10):
+                Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left + int(display_width * 0.5),
+                     self.size * g + self.co + self.map_indent_top, self.all_sprites_2)
 
 
 class Play:
@@ -173,3 +246,44 @@ class Play:
 
             pg.display.flip()
             clock.tick(self.fps)
+
+
+class Board:
+    def __init__(self, screen, fps):
+        global display_width, display_height
+        self.sc = screen
+        self.fps = fps
+
+        sur = pg.display.get_surface()
+        display_width = sur.get_width()
+        display_height = sur.get_height()
+
+        self.co = int(display_width * 0.02)
+        self.size = int(display_width * 0.035)
+        self.font = pg.font.Font(None, int(self.size * 0.8))
+        self.clock = pg.time.Clock()
+
+    def map_draw(self, x, y):
+
+        slo = list('АБВГДЕЁЖЗИ')
+
+        for i in range(10):
+            text = self.font.render(str(i), True, (255, 255, 255))
+            self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
+
+        for i, pp in enumerate(slo):
+            text = self.font.render(pp, True, (255, 255, 255))
+            self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
+
+        for i in range(10):
+            for g in range(10):
+                pg.draw.rect(self.sc, (255, 255, 255), (i * self.size + x + self.co,
+                                                        g * self.size + y + self.co,
+                                                        self.size, self.size), 1)
+        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
+                                                y + self.co,
+                                                self.size * 10, self.size * 10), 4)
+
+
+class PlayWithFriend(Board):
+    pass
