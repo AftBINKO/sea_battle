@@ -3,12 +3,19 @@ from data.custom_map import Customization
 import pygame as pg
 import os
 
+display_width = 0
+display_height = 0
+
 
 class Board:
     def __init__(self, screen, fps):
-        self.board = [[0] * 10 for _ in range(10)]
+        global display_width, display_height
         self.sc = screen
         self.fps = fps
+
+        sur = pg.display.get_surface()
+        display_width = sur.get_width()
+        display_height = sur.get_height()
 
         self.co = int(display_width * 0.02)
         self.size = int(display_width * 0.035)
@@ -40,7 +47,23 @@ class Board:
 class PlayWithBot:
     # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
     def __init__(self, screen, fps):
-        self.player = Customization(screen, fps)
+        self.board = Customization(screen, fps)
+        self.sc = screen
+        self.fps = fps
+        self.clock = pg.time.Clock()
+        self.main()
+
+    def main(self):
+        running = True
+
+        while running:
+            self.sc.fill((0, 0, 0))
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    return
+
+            self.clock.tick(self.fps)
+            pg.display.flip()
 
 
 class PlayWithFriend(Board):
