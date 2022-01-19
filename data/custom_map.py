@@ -6,20 +6,17 @@ display_height = 0
 all_sprites_cell = pg.sprite.Group()
 all_sprites = pg.sprite.Group()
 
-test_hover_map = False
-test_hover_map_num = 0
-if_yes_rect_map = []
+if_yes_rect_map = []  # позиция корабля на поле
 
-list_pos_if_yes = []
+list_pos_if_yes = []  # позиции которые попадают в клетки
 
-if_downloads = False
+if_downloads = False  # можно ли ставить корабль на данную позицыю
 
-board = [[0] * 10 for _ in range(10)]
+board = [[0] * 10 for _ in range(10)]  # игровое поле
 
 
-def test_board(list_009):
+def test_board(list_009, n_hh=0):
     opa = []
-    pos_all = []
 
     for tt in list_009:
         i = tt[0]
@@ -33,21 +30,12 @@ def test_board(list_009):
         else:
             spi = list(map(lambda x: x[g - 1:g + 2], board[i - 1:i + 2]))
 
-        pos_all.append((i - 1, g - 1))
-        pos_all.append((i - 1, g))
-        pos_all.append((i - 1, g + 1))
-        pos_all.append((i + 1, g - 1))
-        pos_all.append((i + 1, g))
-        pos_all.append((i + 1, g + 1))
-        pos_all.append((i, g - 1))
-        pos_all.append((i, g))
-        pos_all.append((i, g + 1))
-
         for h in spi:
             opa.extend(h)
 
     num = opa.count(1)
-    if num == 0 and len(list_009) != 0:
+
+    if num == 0 and len(list_009) != 0 and n_hh == 1:
         downloads_tic_tac(list_009)
         return True
 
@@ -74,65 +62,33 @@ class Cell(pg.sprite.Sprite):
         self.rect.x = x + 1
         self.rect.y = y + 1
 
-    def update(self, event, list_007=None, n=0):
+    def update(self, event, list_007=(), n_hh=0):
+        n = 0
 
-        if n == 1 and list_007:
-            global test_hover_map, test_hover_map_num, if_yes_rect_map, list_pos_if_yes
-            n = 0
+        global if_downloads, if_yes_rect_map, list_pos_if_yes
+        self.image.fill((0, 0, 0))
+
+        for i in list_007:
+            if self.rect.collidepoint(i):
+                list_pos_if_yes.append(self.pos)
+                if n == 0:
+                    if_yes_rect_map = (self.rect.x + 5, self.rect.y + 5)
+
+            n += 1
+            if n == len(list_007):
+                break
+
+        if len(list_pos_if_yes) == len(list_007) and test_board(list_pos_if_yes, n_hh):
+            if_downloads = True
+            del list_pos_if_yes[:]
+
+        try:
             for i in list_007:
                 if self.rect.collidepoint(i):
-                    test_hover_map_num += 1
-                    list_pos_if_yes.append(self.pos)
-                    if n == 0:
-                        if_yes_rect_map = (self.rect.x + 5, self.rect.y + 5)
+                    self.image.fill((255, 0, 0))
 
-                n += 1
-                if n == len(list_007):
-                    break
-
-            if test_hover_map_num == len(list_007) and test_board(list_pos_if_yes):
-                test_hover_map = True
-                test_hover_map_num = 0
-                del list_pos_if_yes[:]
-
-        else:
-            self.image.fill((0, 0, 0))
-            try:
-                if list_007:
-                    opa = self.test_007(list_007)
-                    if len(opa) != 0:
-                        print(opa)
-                        for i in opa:
-                            if self.pos == i:
-
-                                if if_downloads:
-                                    self.image.fill((0, 0, 255))
-                                else:
-                                    self.image.fill((0, 255, 255))
-
-                    for i in list_007:
-                        if self.rect.collidepoint(i):
-                            self.image.fill((255, 0, 0))
-
-            except AttributeError:
-                pass
-
-    def test_007(self, list_009):
-        pos_all = []
-
-        for tt in list_009:
-            if self.rect.collidepoint(tt):
-                i, g = self.pos[0], self.pos[1]
-                pos_all.append((i - 1, g - 1))
-                pos_all.append((i - 1, g))
-                pos_all.append((i - 1, g + 1))
-                pos_all.append((i + 1, g - 1))
-                pos_all.append((i + 1, g))
-                pos_all.append((i + 1, g + 1))
-                pos_all.append((i, g - 1))
-                pos_all.append((i, g))
-                pos_all.append((i, g + 1))
-        return pos_all
+        except AttributeError:
+            pass
 
 
 class Ship(pg.sprite.Sprite):
@@ -151,6 +107,7 @@ class Ship(pg.sprite.Sprite):
 
         self.hover_x = 0
         self.hover_y = 0
+
         self.hover = False
         self.flip = False
 
@@ -166,22 +123,13 @@ class Ship(pg.sprite.Sprite):
                 self.hover_y = self.rect.y - event.pos[1]
 
             if event.type == pg.MOUSEBUTTONUP and self.hover:
+                all_sprites_cell.update(0, self.return_pos(), 1)
 
-                list_008 = []
-                for i in range(self.n):
-                    if self.flip:
-                        list_008.append((int(self.rect.x + self.size * 0.5),
-                                         int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)))
-                    else:
-                        list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
-                                         int(self.rect.y + self.size * 0.5)))
+                global if_downloads
+                if if_downloads:
+                    if_downloads = False
 
-                all_sprites_cell.update(0, list_008, 1)
-                global test_hover_map, test_hover_map_num
-                if test_hover_map:
                     self.installed_map = True
-                    test_hover_map = False
-                    test_hover_map_num = 0
                     self.rect.x = if_yes_rect_map[0]
                     self.rect.y = if_yes_rect_map[1]
 
@@ -195,7 +143,6 @@ class Ship(pg.sprite.Sprite):
                         self.rect.x = x_00
                         self.rect.y = y_00
 
-                    test_hover_map_num = 0
                     self.rect.x = self.old_x
                     self.rect.y = self.old_y
 
@@ -222,20 +169,23 @@ class Ship(pg.sprite.Sprite):
                 pass
 
             if self.hover:
-                list_008 = []
-                for i in range(self.n):
-                    if self.flip:
-                        list_008.append(
-                            (
-                                int(self.rect.x + self.size * 0.5),
-                                int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)
-                            )
-                        )
-                    else:
-                        list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
-                                        int(self.rect.y + self.size * 0.5)))
+                all_sprites_cell.update(0, self.return_pos())
 
-                all_sprites_cell.update(0, list_008)
+    def return_pos(self):
+        if self.hover:
+            list_008 = []
+            for i in range(self.n):
+                if self.flip:
+                    list_008.append(
+                        (
+                            int(self.rect.x + self.size * 0.5),
+                            int(self.rect.y + self.size * 0.5 + self.size * i + i * 10)
+                        )
+                    )
+                else:
+                    list_008.append((int(self.rect.x + self.size * 0.5 + self.size * i + i * 10),
+                                     int(self.rect.y + self.size * 0.5)))
+            return list_008
 
 
 class Customization:
