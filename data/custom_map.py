@@ -1,4 +1,5 @@
 import pygame as pg
+from data.main_functions import create_sprite
 
 display_width = 0
 display_height = 0
@@ -190,14 +191,19 @@ class Ship(pg.sprite.Sprite):
 
 class Customization:
     def __init__(self, screen, fps):
-        global display_width, display_height
-        self.board = [[0] * 10 for _ in range(10)]
+        global display_width, display_height, board
+        board = [[0] * 10 for _ in range(10)]
         self.sc = screen
         self.fps = fps
-        self.all_sprites = pg.sprite.Group()
+
+        self.all_sprite_gg = pg.sprite.Group()
+
         sur = pg.display.get_surface()
         display_width = sur.get_width()
         display_height = sur.get_height()
+        for i in all_sprites:
+            i.kill()
+
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.co = int(display_width * 0.02)
@@ -205,6 +211,9 @@ class Customization:
 
         self.map_indent_top = 50
         self.map_indent_left = 50
+
+        self.x_ship = int(display_width * 0.6)
+        self.y_ship = int(display_height * 0.25)
 
         self.add_cells()
         self.add_ship()
@@ -233,20 +242,41 @@ class Customization:
                                                 y + self.co,
                                                 self.size * 10, self.size * 10), 4)
 
+        pg.draw.rect(self.sc, (255, 255, 255), (self.x_ship - 30, self.y_ship - 10,
+                                                (int(display_width * 0.035)) * 7,
+                                                (int(display_width * 0.035)) * 6), 4)
+        text = self.font.render('Корабли:', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship, self.y_ship))
+
+        font = pg.font.Font(None, int(self.size * 0.5))
+        text = font.render('Для поворота корабля нажмите пробел', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69)))
+
+        text = font.render('Если корабль не ставиться значит там его нельзя поставить!!!!', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69 + 18)))
+
     def map_customization(self):
         running = True
+
+        x = pg.sprite.Sprite()
+        create_sprite(x, 'x.png', display_width - 75, 30, self.all_sprite_gg)
 
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    running = False
+                    return
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if x.rect.collidepoint(event.pos):
+                        return
                 all_sprites_cell.update(event)
                 all_sprites.update(self.sc, event)
 
             self.map_draw(self.map_indent_left, self.map_indent_top)
             all_sprites_cell.draw(self.sc)
             all_sprites.draw(self.sc)
+            self.all_sprite_gg.draw(self.sc)
             self.clock.tick(self.fps)
             pg.display.flip()
 
