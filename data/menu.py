@@ -41,7 +41,7 @@ class Menu:
         s.stop()
 
     def menu(self):
-        buttons_tuple = ('Play', 'Play_With_Friend', 'Play_With_Bot', 'Settings', 'Achievements')
+        buttons_tuple = ('Play', 'Play_With_Bot', 'Settings', 'Achievements')
         fon = add_fon(get_value(f"{self.path}\config.txt", 'theme')[0], self.size)
 
         clock = pygame.time.Clock()
@@ -65,11 +65,12 @@ class Menu:
         create_sprite(frame, "frame_6.png", self.size[0] / 2 - 125,
                       self.size[1] - (200 if self.size[1] == 768 else 300), menu_sprites)
 
+        c = (250 if self.size[1] == 768 else 350)
         down_arrow = pygame.sprite.Sprite()
         create_sprite(down_arrow, "down_arrow.png", self.size[0] / 2 - 25,
                       self.size[1] - (250 if self.size[1] == 768 else 350), menu_sprites)
 
-        left, right = False, False
+        left, right, down = False, False, True
         while True:
             if right:
                 if x < (300 * self.n) - 1:
@@ -83,15 +84,20 @@ class Menu:
                 else:
                     x -= 1
                     left = False
+            if down:
+                c -= 2
+                if c <= (230 if self.size[1] == 768 else 330):
+                    down = False
+            else:
+                c += 2
+                if c >= (250 if self.size[1] == 768 else 350):
+                    down = True
 
             put_sprite(buttons, self.size[0] / 2 - 125 - x,
                        self.size[1] - (200 if self.size[1] == 768 else 300))
 
-            put_sprite(frame, self.size[0] / 2 - 125,
-                       self.size[1] - (200 if self.size[1] == 768 else 300))
-
             put_sprite(down_arrow, self.size[0] / 2 - 25,
-                       self.size[1] - (250 if self.size[1] == 768 else 350))
+                       self.size[1] - c)
 
             arrow_sprites = pygame.sprite.Group()
 
@@ -103,7 +109,7 @@ class Menu:
                 left_arrow.kill()
 
             right_arrow = pygame.sprite.Sprite()
-            if self.n + 1 <= 5:
+            if self.n + 1 <= 4:
                 create_sprite(right_arrow, "right_arrow.png", self.size[0] / 2 + 125,
                               self.size[1] - (200 if self.size[1] == 768 else 300), arrow_sprites)
             else:
@@ -114,8 +120,10 @@ class Menu:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
                         try:
                             if left_arrow.rect.collidepoint(event.pos):
+                                s.play()
                                 x = 300 * self.n + 1
                                 left = True
                                 self.n -= 1
@@ -123,34 +131,40 @@ class Menu:
                             pass
                         try:
                             if right_arrow.rect.collidepoint(event.pos):
+                                s.play()
                                 x = 300 * self.n - 1
                                 right = True
                                 self.n += 1
                         except AttributeError:
                             pass
                         if frame.rect.collidepoint(event.pos):
-                            if self.n == 5:
+                            pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                            if self.n == 4:
                                 terminate()
                             return buttons_tuple[self.n]
                     elif event.button == 4 and self.n - 1 >= 0:
                         x = 300 * self.n + 1
                         left = True
                         self.n -= 1
-                    elif event.button == 5 and self.n + 1 <= 5:
+                    elif event.button == 5 and self.n + 1 <= 4:
                         x = 300 * self.n - 1
                         right = True
                         self.n += 1
                 elif event.type == pygame.KEYDOWN:
+                    s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
                     if event.key == pygame.K_LEFT and self.n - 1 >= 0:
+                        s.play()
                         x = 300 * self.n + 1
                         left = True
                         self.n -= 1
-                    elif event.key == pygame.K_RIGHT and self.n + 1 <= 5:
+                    elif event.key == pygame.K_RIGHT and self.n + 1 <= 4:
+                        s.play()
                         x = 300 * self.n - 1
                         right = True
                         self.n += 1
                     elif event.key == pygame.K_RETURN:
-                        if self.n == 5:
+                        pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        if self.n == 4:
                             terminate()
                         return buttons_tuple[self.n]
 
@@ -219,6 +233,7 @@ class Achievements:
                     terminate()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1 and x.rect.collidepoint(event.pos):
+                        pygame.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
                     elif event.button == 4:
                         if f - 1 >= 0:
@@ -234,6 +249,7 @@ class Achievements:
                         if f + 1 < len(self.achievements) - (2 if self.size[1] == 768 else 5):
                             a, f = a - 175, f + 1
                     elif event.key == pygame.K_ESCAPE:
+                        pygame.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
 
             self.screen.blit(fon, (0, 0))

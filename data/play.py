@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, get_value
+from data.main_functions import terminate, create_sprite, get_value, add_fon
 from data.custom_map import Customization
 import pygame as pg
 import os
@@ -38,13 +38,10 @@ class Board:
 
 
 class PlayWithBot:
-    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
-    def __init__(self, screen, fps):
+    # TODO: Добавь ещё в конструктор Customization уровень сложности,
+    #  если сложность 1, она очень лёгкая, если 5, то невозможная ну и так далее
+    def __init__(self, screen, fps, difficulty):
         self.player = Customization(screen, fps)
-
-
-class PlayWithFriend(Board):
-    pass
 
 
 class Play:
@@ -107,9 +104,11 @@ class Play:
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if x.rect.collidepoint(event.pos):
+                            pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                             return
                         elif play.rect.collidepoint(event.pos):
-                            pass
+                            pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                            return int(get_value(mission_file, 'difficulty')[0])
                     elif event.button == 4:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
@@ -118,8 +117,12 @@ class Play:
                             q, n = q - 25, n + 1
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
-                    if event.key == pg.K_UP:
+                    elif event.key == pg.K_RETURN:
+                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        return int(get_value(mission_file, 'difficulty')[0])
+                    elif event.key == pg.K_UP:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
                     elif event.key == pg.K_DOWN:

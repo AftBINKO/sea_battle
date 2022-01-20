@@ -4,9 +4,9 @@ import pygame
 import sys
 import os
 
-from data.main_functions import create_window, format_xp, extract_files
+from data.main_functions import create_window, format_xp, extract_files, get_value
 from data.menu import Menu, Achievements
-from data.play import Play, PlayWithFriend, PlayWithBot
+from data.play import Play, PlayWithBot
 from data.settings import Settings, About
 
 
@@ -32,7 +32,7 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    PlayWithBot(screen, fps)
+    # PlayWithBot(screen, fps)
     menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
         screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
     # pygame.mouse.set_visible(False)  # погашаем мышь
@@ -62,13 +62,14 @@ def main():
                     break
         elif result == 'Achievements':
             achievements.menu()
-        elif result == 'Play_With_Friend':
-            play = PlayWithFriend(screen, fps)
         elif result == 'Play_With_Bot':
-            play = PlayWithBot(screen, fps)
+            play = PlayWithBot(screen, fps, ['easiest', 'easy', 'normal', 'hard', 'hardest'].index(
+                get_value(f"{path}\Sea Battle\config.txt", 'difficulty')[0]))
         elif result == 'Play':
             play = Play(screen, fps, f"{path}\Sea Battle")
-            play.menu()
+            result_play = play.menu()
+            if result_play in range(6):
+                play = PlayWithBot(screen, fps, result_play)
 
 
 if __name__ == '__main__':

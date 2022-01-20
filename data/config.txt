@@ -1,5 +1,5 @@
 # Версия файла. НЕ МЕНЯТЬ ЕЁ, ИНАЧЕ ИГРА НЕ БУДЕТ РАБОТАТЬ!!!
-version: 1.0 BETA
+version: 1.1 BETA
 
 # Размер экрана (БЕТА), значения: 1366x768, 1920x1080
 screensize: 1366x768
@@ -9,6 +9,9 @@ screenmode: window
 
 # Количество кадов в секунду
 fps: 60
+
+# Сложность игры против бота, значения: easiest, easy, normal, hard, hardest
+difficulty: normal
 
 # Фон, значения: day, night, by_time_of_day
 theme: by_time_of_day

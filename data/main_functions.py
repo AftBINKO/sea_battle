@@ -97,7 +97,7 @@ def extract_files(path_archive, path_extract, *values):
 
 def create_window(path):
     config = get_file(f"{path}\config.txt")
-    if config['version'] != '1.0 BETA':
+    if config['version'] != '1.1 BETA':
         raise ValueError('The configuration file version is not supported')
     size, screen = tuple(map(int, config['screensize'].split('x'))), None
     if config['screenmode'] == 'window':
