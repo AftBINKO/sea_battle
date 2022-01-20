@@ -285,7 +285,7 @@ class Customization:
         create_sprite(reset, 'reset.png', display_width - 300, display_height - 100, self.all_sprite_gg)
 
         go = pg.sprite.Sprite()
-        create_sprite(go, 'go.png', display_width - 470, display_height - 100, self.all_sprite_gg)
+        create_sprite(go, 'go.png', display_width - 600, display_height - 100, self.all_sprite_gg)
 
         while running:
             self.sc.fill((0, 0, 0))
