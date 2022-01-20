@@ -1,12 +1,82 @@
 from data.main_functions import terminate, create_sprite, get_value, add_fon
 from data.custom_map import Customization
-from data.Level import Level
 import pygame as pg
 import os
 import random
 
 display_width = 0
 display_height = 0
+
+
+class Bot:
+    def __init__(self):
+        self.p = [[0] * 10 for _ in range(10)]
+
+        for x1 in range(1, 5):
+            for _ in range(x1):
+                for tt in self.test(5 - x1):
+                    self.p[tt[1]][tt[0]] = 1
+
+    def test(self, n):
+        coords = []
+        rect = (random.randint(0, 9), random.randint(0, 9))
+        nap = random.randint(0, 3)
+        coords.append(rect)
+
+        x_007 = rect[0]
+        y_007 = rect[1]
+        if nap == 0:
+            for i in range(1, n):
+                coords.append((x_007 + i, y_007))
+
+        elif nap == 1:
+            for i in range(1, n):
+                coords.append((x_007, y_007 + i))
+
+        elif nap == 2:
+            for i in range(1, n):
+                coords.append((x_007 - i, y_007))
+
+        elif nap == 3:
+            for i in range(1, n):
+                coords.append((x_007, y_007 - i))
+
+        ref = True
+
+        for i in coords:
+            if 0 <= i[0] <= 9 and 0 <= i[1] <= 9:
+                pass
+            else:
+                ref = False
+                break
+
+        if ref:
+            opa = []
+            for tt in coords:
+
+                i = tt[1]
+                g = tt[0]
+                if i == 0 and g == 0:
+                    spi = list(map(lambda x: x[g:g + 2], self.p[i:i + 2]))
+                elif g == 0:
+                    spi = list(map(lambda x: x[g:g + 2], self.p[i - 1:i + 2]))
+                elif i == 0:
+                    spi = list(map(lambda x: x[g - 1:g + 2], self.p[i:i + 2]))
+                else:
+                    spi = list(map(lambda x: x[g - 1:g + 2], self.p[i - 1:i + 2]))
+
+                for h in spi:
+                    opa.extend(h)
+
+            if 1 not in opa:
+                return coords
+            else:
+                return self.test(n)
+        else:
+            return self.test(n)
+
+    def bir(self):
+        return self.p
 
 
 class Cell(pg.sprite.Sprite):
@@ -19,6 +89,9 @@ class Cell(pg.sprite.Sprite):
         self.rect.x = x + 1
         self.rect.y = y + 1
 
+    def update(self):
+        p = 1
+
 
 class PlayWithBot:
     # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
@@ -27,6 +100,7 @@ class PlayWithBot:
         #  если сложность 0, это обучение, если 5, то невозможная ну и так далее
         global display_width, display_height
         self.board, self.ships = Customization(screen, fps).bir()
+        self.board_bot = Bot().bir()
 
         self.all_sprites_1 = pg.sprite.Group()
         self.all_sprites_2 = pg.sprite.Group()
