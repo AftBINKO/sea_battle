@@ -1,4 +1,5 @@
 import pygame as pg
+from data.main_functions import create_sprite
 
 display_width = 0
 display_height = 0
@@ -12,15 +13,39 @@ list_pos_if_yes = []  # позиции которые попадают в кле
 
 if_downloads = False  # можно ли ставить корабль на данную позицыю
 
+test_007 = 0  # тест все ли корабли установлены
+
 board = [[0] * 10 for _ in range(10)]  # игровое поле
 
 
-def test_board(list_009, n_hh=0):
+def up_per():
+    global if_downloads, if_yes_rect_map, list_pos_if_yes, board, test_007
+    if_yes_rect_map = []  # позиция корабля на поле
+
+    list_pos_if_yes = []  # позиции которые попадают в клетки
+
+    if_downloads = False  # можно ли ставить корабль на данную позицыю
+
+    test_007 = 0
+
+    for i in all_sprites:
+        i.kill()
+
+    for i in all_sprites_cell:
+        i.kill()
+
+    board = [[0] * 10 for _ in range(10)]  # игровое поле
+
+
+def test_board(list_009, hh=0):
     opa = []
+    if len(list_009) == 0:
+        return
 
     for tt in list_009:
-        i = tt[0]
-        g = tt[1]
+        i = tt[1]
+        g = tt[0]
+
         if i == 0 and g == 0:
             spi = list(map(lambda x: x[g:g + 2], board[i:i + 2]))
         elif g == 0:
@@ -33,19 +58,15 @@ def test_board(list_009, n_hh=0):
         for h in spi:
             opa.extend(h)
 
-    num = opa.count(1)
-
-    if num == 0 and len(list_009) != 0 and n_hh == 1:
-        downloads_tic_tac(list_009)
+    if 1 not in opa and hh == 1:
         return True
 
-    del list_pos_if_yes[:]
     return False
 
 
 def downloads_tic_tac(list_008):
     for i in list_008:
-        board[i[0]][i[1]] = 1
+        board[i[1]][i[0]] = 1
 
 
 def flip_image(image):
@@ -62,25 +83,26 @@ class Cell(pg.sprite.Sprite):
         self.rect.x = x + 1
         self.rect.y = y + 1
 
-    def update(self, event, list_007=(), n_hh=0):
-        n = 0
+    def update(self, event, list_007=(), hh=0):
+        if hh == 1:
+            global if_downloads, if_yes_rect_map, list_pos_if_yes
+            n = 0
+            for i in list_007:
+                if self.rect.collidepoint(i):
+                    list_pos_if_yes.append(self.pos)
+                    if n == 0:
+                        if_yes_rect_map = (self.rect.x + 5, self.rect.y + 5)
 
-        global if_downloads, if_yes_rect_map, list_pos_if_yes
+                n += 1
+                if n == len(list_007):
+                    break
+
+            if len(list_pos_if_yes) == len(list_007) and test_board(list_pos_if_yes, hh):
+                if_downloads = True
+                downloads_tic_tac(list_pos_if_yes)
+                del list_pos_if_yes[:]
+
         self.image.fill((0, 0, 0))
-
-        for i in list_007:
-            if self.rect.collidepoint(i):
-                list_pos_if_yes.append(self.pos)
-                if n == 0:
-                    if_yes_rect_map = (self.rect.x + 5, self.rect.y + 5)
-
-            n += 1
-            if n == len(list_007):
-                break
-
-        if len(list_pos_if_yes) == len(list_007) and test_board(list_pos_if_yes, n_hh):
-            if_downloads = True
-            del list_pos_if_yes[:]
 
         try:
             for i in list_007:
@@ -124,10 +146,12 @@ class Ship(pg.sprite.Sprite):
 
             if event.type == pg.MOUSEBUTTONUP and self.hover:
                 all_sprites_cell.update(0, self.return_pos(), 1)
+                del list_pos_if_yes[:]
 
-                global if_downloads
+                global if_downloads, test_007
                 if if_downloads:
                     if_downloads = False
+                    test_007 += 1
 
                     self.installed_map = True
                     self.rect.x = if_yes_rect_map[0]
@@ -162,14 +186,12 @@ class Ship(pg.sprite.Sprite):
 
             try:
                 if self.hover:
+                    all_sprites_cell.update(0, self.return_pos())
                     self.rect.x = self.hover_x + event.pos[0]
                     self.rect.y = self.hover_y + event.pos[1]
 
             except AttributeError:
                 pass
-
-            if self.hover:
-                all_sprites_cell.update(0, self.return_pos())
 
     def return_pos(self):
         if self.hover:
@@ -191,13 +213,17 @@ class Ship(pg.sprite.Sprite):
 class Customization:
     def __init__(self, screen, fps):
         global display_width, display_height
-        self.board = [[0] * 10 for _ in range(10)]
         self.sc = screen
         self.fps = fps
-        self.all_sprites = pg.sprite.Group()
+
+        self.all_sprite_gg = pg.sprite.Group()
+
         sur = pg.display.get_surface()
         display_width = sur.get_width()
         display_height = sur.get_height()
+        for i in all_sprites:
+            i.kill()
+        up_per()
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.co = int(display_width * 0.02)
@@ -205,6 +231,9 @@ class Customization:
 
         self.map_indent_top = 50
         self.map_indent_left = 50
+
+        self.x_ship = int(display_width * 0.6)
+        self.y_ship = int(display_height * 0.25)
 
         self.add_cells()
         self.add_ship()
@@ -233,20 +262,56 @@ class Customization:
                                                 y + self.co,
                                                 self.size * 10, self.size * 10), 4)
 
+        pg.draw.rect(self.sc, (255, 255, 255), (self.x_ship - 30, self.y_ship - 10,
+                                                (int(display_width * 0.035)) * 7,
+                                                (int(display_width * 0.035)) * 6), 4)
+        text = self.font.render('Корабли:', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship, self.y_ship))
+
+        font = pg.font.Font(None, int(self.size * 0.5))
+        text = font.render('Для поворота корабля нажмите пробел', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69)))
+
+        text = font.render('Если корабль не ставиться значит там его нельзя поставить!!!!', True, (255, 255, 255))
+        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69 + 18)))
+
     def map_customization(self):
         running = True
+
+        x = pg.sprite.Sprite()
+        create_sprite(x, 'x.png', display_width - 75, 30, self.all_sprite_gg)
+
+        reset = pg.sprite.Sprite()
+        create_sprite(reset, 'reset.png', display_width - 300, display_height - 100, self.all_sprite_gg)
+
+        go = pg.sprite.Sprite()
+        create_sprite(go, 'go.png', display_width - 470, display_height - 100, self.all_sprite_gg)
 
         while running:
             self.sc.fill((0, 0, 0))
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    running = False
+                    return
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if x.rect.collidepoint(event.pos):
+                        return
+
+                    elif reset.rect.collidepoint(event.pos):
+                        up_per()
+                        self.add_ship()
+                        self.add_cells()
+
+                    elif go.rect.collidepoint(event.pos) and test_007 == 10:
+                        return
+
                 all_sprites_cell.update(event)
                 all_sprites.update(self.sc, event)
 
             self.map_draw(self.map_indent_left, self.map_indent_top)
             all_sprites_cell.draw(self.sc)
             all_sprites.draw(self.sc)
+            self.all_sprite_gg.draw(self.sc)
             self.clock.tick(self.fps)
             pg.display.flip()
 
@@ -268,3 +333,6 @@ class Customization:
             for g in range(10):
                 Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
                      self.size * g + self.co + self.map_indent_top, all_sprites_cell)
+
+    def bir(self):
+        return board, all_sprites
