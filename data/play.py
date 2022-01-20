@@ -1,5 +1,6 @@
 from data.main_functions import terminate, create_sprite, get_value, add_fon
 from data.custom_map import Customization
+from data.Level import Level
 import pygame as pg
 import os
 import random
@@ -25,6 +26,7 @@ class PlayWithBot:
         # TODO: Добавь ещё в конструктор Customization уровень сложности,
         #  если сложность 0, это обучение, если 5, то невозможная ну и так далее
         global display_width, display_height
+        self.level = Level(screen, fps)
         self.board, self.ships = Customization(screen, fps).bir()
 
         self.all_sprites_1 = pg.sprite.Group()
@@ -104,7 +106,7 @@ class PlayWithBot:
         font = pg.font.Font(None, self.size)
 
         text = font.render('Бот', True, (255, 255, 255))
-        self.sc.blit(text, (200, 10))
+        self.sc.blit(text, (display_width // 4, 10))
 
         text = font.render('Компьютер', True, (255, 255, 255))
         self.sc.blit(text, (display_width // 2 + 200, 10))
