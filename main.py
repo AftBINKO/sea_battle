@@ -35,9 +35,9 @@ def main():
     # PlayWithBot(screen, fps)
     menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
         screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
-    # pygame.mouse.set_visible(False)  # погашаем мышь
-    # menu.screensaver()  # заставка
-    # pygame.mouse.set_visible(True)  # показываем мышь
+    pygame.mouse.set_visible(False)  # погашаем мышь
+    menu.screensaver()  # заставка
+    pygame.mouse.set_visible(True)  # показываем мышь
     achievements.set_progress(1, 1, True)
     while True:
         x = menu.get_n()  # сохраним значение x в переменную

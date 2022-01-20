@@ -197,8 +197,8 @@ class Achievements:
         with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
             cur = con.cursor()
 
-            # эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
-            # если имеется, сложности и наконец, по проценту выполнения
+            """Эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
+            если имеется, сложности и наконец, по проценту выполнения"""
             s = sorted(sorted(sorted(
                 sorted(cur.execute("""SELECT * FROM achievements""").fetchall(), key=lambda x: x[2]),
                 key=lambda x: x[1]), key=lambda x: int(x[0])), key=lambda x: int(x[6]), reverse=True)
