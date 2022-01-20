@@ -11,6 +11,7 @@ class Level:
         sur = pg.display.get_surface()
         self.display_width = sur.get_width()
         self.display_height = sur.get_height()
+        self.level = int()
 
         self.main()
 
@@ -54,18 +55,23 @@ class Level:
                         return
 
                     if lev_1.rect.collidepoint(event.pos):
+                        self.level = 1
                         return
 
                     if lev_2.rect.collidepoint(event.pos):
+                        self.level = 2
                         return
 
                     if lev_3.rect.collidepoint(event.pos):
+                        self.level = 3
                         return
 
                     if lev_4.rect.collidepoint(event.pos):
+                        self.level = 4
                         return
 
                     if lev_5.rect.collidepoint(event.pos):
+                        self.level = 5
                         return
 
             self.all_sprite.draw(self.sc)
@@ -73,4 +79,7 @@ class Level:
 
             self.clock.tick(self.fps)
             pg.display.flip()
+
+    def bir(self):
+        return self.level
 

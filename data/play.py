@@ -26,7 +26,6 @@ class PlayWithBot:
         # TODO: Добавь ещё в конструктор Customization уровень сложности,
         #  если сложность 0, это обучение, если 5, то невозможная ну и так далее
         global display_width, display_height
-        self.level = Level(screen, fps)
         self.board, self.ships = Customization(screen, fps).bir()
 
         self.all_sprites_1 = pg.sprite.Group()
