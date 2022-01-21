@@ -1,5 +1,7 @@
 import pygame as pg
-from data.main_functions import create_sprite
+import os
+
+from data.main_functions import create_sprite, get_value, terminate
 
 display_width = 0
 display_height = 0
@@ -74,11 +76,12 @@ def flip_image(image):
 
 
 class Cell(pg.sprite.Sprite):
-    def __init__(self, rect, size, x, y, *op):
+    def __init__(self, rect, size, x, y, theme, *op):
         super().__init__(*op)
         self.pos = rect
+        self.t = theme
         self.image = pg.Surface((size - 1, size - 1))
-        self.image.fill((0, 0, 0))
+        self.image.fill(theme)
         self.rect = self.image.get_rect()
         self.rect.x = x + 1
         self.rect.y = y + 1
@@ -102,7 +105,7 @@ class Cell(pg.sprite.Sprite):
                 downloads_tic_tac(list_pos_if_yes)
                 del list_pos_if_yes[:]
 
-        self.image.fill((0, 0, 0))
+        self.image.fill(self.t)
 
         try:
             for i in list_007:
@@ -211,10 +214,13 @@ class Ship(pg.sprite.Sprite):
 
 
 class Customization:
-    def __init__(self, screen, fps):
+    def __init__(self, screen, fps, path, theme):
         global display_width, display_height
+
         self.sc = screen
         self.fps = fps
+        self.path = path
+        self.t = theme
 
         self.all_sprite_gg = pg.sprite.Group()
 
@@ -226,8 +232,10 @@ class Customization:
         up_per()
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
+        self.screensize = tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
         self.co = int(display_width * 0.02)
-        self.font = pg.font.Font(None, int(self.size * 0.8))
+        self.font = pg.font.Font(os.path.join("data", f'font_2.ttf'), int(self.size * 0.8))
 
         self.map_indent_top = 50
         self.map_indent_left = 50
@@ -241,57 +249,59 @@ class Customization:
 
     def map_draw(self, x, y):
 
-        slo = list('АБВГДЕЁЖЗИ')
+        slo = list('АБВГДЕЖЗИК')  # буквы ё не существует)
 
         for i in range(10):
-            text = self.font.render(str(i), True, (255, 255, 255))
+            text = self.font.render(str(i), True, self.t[1])
             self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
 
         for i, pp in enumerate(slo):
-            text = self.font.render(pp, True, (255, 255, 255))
+            text = self.font.render(pp, True, self.t[1])
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+            pg.draw.line(self.sc, self.t[1], (x + self.co + self.size * i, y + self.co),
                          (x + self.co + self.size * i, y + self.co + self.size * 10))
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+            pg.draw.line(self.sc, self.t[1], (x + self.co, y + self.co + self.size * i),
                          (x + self.co + self.size * 10, y + self.co + self.size * i))
 
-        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
-                                                y + self.co,
-                                                self.size * 10, self.size * 10), 4)
+        pg.draw.rect(self.sc, self.t[1], (x + self.co, y + self.co, self.size * 10, self.size * 10),
+                     4)
 
-        pg.draw.rect(self.sc, (255, 255, 255), (self.x_ship - 30, self.y_ship - 10,
-                                                (int(display_width * 0.035)) * 7,
-                                                (int(display_width * 0.035)) * 6), 4)
-        text = self.font.render('Корабли:', True, (255, 255, 255))
+        pg.draw.rect(self.sc, self.t[1], (self.x_ship - 30, self.y_ship - 10,
+                                          (int(display_width * 0.035)) * 7,
+                                          (int(display_width * 0.035)) * 6), 4)
+        text = self.font.render('Корабли:', True, self.t[1])
         self.sc.blit(text, (self.x_ship, self.y_ship))
 
-        font = pg.font.Font(None, int(self.size * 0.5))
-        text = font.render('Для поворота корабля нажмите пробел', True, (255, 255, 255))
+        font = pg.font.Font(os.path.join("data", f'font_2.ttf'), int(self.size * 0.4))
+        text = font.render('Для поворота корабля нажмите пробел', True, self.t[1])
         self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69)))
 
-        text = font.render('Если корабль не ставиться значит там его нельзя поставить!!!!', True, (255, 255, 255))
-        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69 + 18)))
+        text = font.render('Если корабль не ставиться значит там его нельзя поставить!!!!', True,
+                           self.t[1])  # логично
+        self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.4 + 240)))
 
     def map_customization(self):
         running = True
 
         x = pg.sprite.Sprite()
-        create_sprite(x, 'x.png', display_width - 75, 30, self.all_sprite_gg)
+        create_sprite(x, 'x' + ('_black' if self.t[0] == (255, 255, 255) else '') + '.png',
+                      display_width - 75, 30, self.all_sprite_gg)
 
         reset = pg.sprite.Sprite()
-        create_sprite(reset, 'reset.png', display_width - 300, display_height - 100, self.all_sprite_gg)
+        create_sprite(reset, 'reset' + ('_black' if self.t[0] == (255, 255, 255) else '') + '.png',
+                      display_width - 300, display_height - 100, self.all_sprite_gg)
 
         go = pg.sprite.Sprite()
         create_sprite(go, 'go.png', display_width - 600, display_height - 100, self.all_sprite_gg)
 
         while running:
-            self.sc.fill((0, 0, 0))
+            self.sc.fill(self.t[0])
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    return
+                    terminate()
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
@@ -324,7 +334,8 @@ class Customization:
 
         for i in range(1, 5):
             for g in range(i):
-                Ship(size, 5 - i, x + (((size * (5 - i)) + indent_right + (((5 - i) * 10) - 10)) * g),
+                Ship(size, 5 - i,
+                     x + (((size * (5 - i)) + indent_right + (((5 - i) * 10) - 10)) * g),
                      y + ((size + indent_bottom) * i), all_sprites)
 
     def add_cells(self):
@@ -332,7 +343,7 @@ class Customization:
         for i in range(10):
             for g in range(10):
                 Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
-                     self.size * g + self.co + self.map_indent_top, all_sprites_cell)
+                     self.size * g + self.co + self.map_indent_top, self.t[0], all_sprites_cell)
 
     def bir(self):
         return board, all_sprites

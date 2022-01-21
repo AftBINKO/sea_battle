@@ -4,6 +4,8 @@ import pygame
 import sys
 import os
 
+from datetime import datetime
+
 from data.main_functions import create_window, format_xp, extract_files, get_value
 from data.menu import Menu, Achievements
 from data.play import Play, PlayWithBot
@@ -32,7 +34,6 @@ def main():
 
     pygame.init()  # инициализируем pygame
     screen, config, fps = create_window(f"{path}\Sea Battle")
-    PlayWithBot(screen, fps, 0)
     menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
         screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps, f"{path}\Sea Battle")
     pygame.mouse.set_visible(False)  # погашаем мышь
@@ -63,13 +64,22 @@ def main():
         elif result == 'Achievements':
             achievements.menu()
         elif result == 'Play_With_Bot':
-            play = PlayWithBot(screen, fps, ['easiest', 'easy', 'normal', 'hard', 'hardest'].index(
-                get_value(f"{path}\Sea Battle\config.txt", 'difficulty')[0]))
+            d = ['easiest', 'easy', 'normal', 'hard', 'hardest'].index(
+                get_value(f"{path}\Sea Battle\config.txt", 'difficulty')[0])  # получаем сложность
+            theme_value = get_value(f"{path}\Sea Battle\config.txt", 'theme')[0]
+            play = PlayWithBot(screen, fps, f"{path}\Sea Battle",
+                               [0, 150, 300, 600, 1200, 100000][d], d, theme_value == 'day' or (
+                                       theme_value == 'by_time_of_\
+day' and 8 <= int(datetime.now().time().strftime('%H')) <= 18))
         elif result == 'Play':
             play = Play(screen, fps, f"{path}\Sea Battle")
+            theme_value = get_value(f"{path}\Sea Battle\config.txt", 'theme')[0]
             result_play = play.menu()
-            if result_play in range(6):
-                play = PlayWithBot(screen, fps, result_play)
+            if result_play:
+                play = PlayWithBot(screen, fps, f"{path}\Sea Battle", *result_play,
+                                   theme_value == 'day' or (
+                                           theme_value == 'by_time_of_\
+day' and 8 <= int(datetime.now().time().strftime('%H')) <= 18))
 
 
 if __name__ == '__main__':

@@ -107,5 +107,6 @@ def create_window(path):
         screen = pygame.display.set_mode(size, pygame.NOFRAME)
     elif config['screenmode'] == 'fullscreen':
         screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+    pygame.display.set_icon(load_image('SeaBattleIcon.ico'))
     fps = int(config['fps'])  # ставим количество кадров в секунду
     return screen, config, fps

@@ -48,9 +48,6 @@ class Menu:
 
         menu_sprites = pygame.sprite.Group()
 
-        title = pygame.sprite.Sprite()
-        create_sprite(title, "title.png", 50, 200 if self.size[1] == 768 else 300, menu_sprites)
-
         x = 300 * self.n
 
         buttons = pygame.sprite.Sprite()
@@ -179,6 +176,10 @@ class Menu:
                                                                                     (255, 255, 255)),
                     (0, y))
                 y += 50
+            self.screen.blit(
+                pygame.font.Font(os.path.join("data", 'font_1.ttf'), 50).render('Морской Бой', True,
+                                                                                (255, 255, 255)), (
+                    50, 200 if self.size[1] == 768 else 300))
 
             pygame.display.flip()
             clock.tick(self.fps)
@@ -197,8 +198,8 @@ class Achievements:
         with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
             cur = con.cursor()
 
-            # эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
-            # если имеется, сложности и наконец, по проценту выполнения
+            """Эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
+            если имеется, сложности и наконец, по проценту выполнения"""
             s = sorted(sorted(sorted(
                 sorted(cur.execute("""SELECT * FROM achievements""").fetchall(), key=lambda x: x[2]),
                 key=lambda x: x[1]), key=lambda x: int(x[0])), key=lambda x: int(x[6]), reverse=True)

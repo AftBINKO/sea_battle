@@ -80,26 +80,27 @@ class Bot:
 
 
 class Cell(pg.sprite.Sprite):
-    def __init__(self, rect, size, x, y, *op):
+    def __init__(self, rect, size, x, y, theme, *op):
         super().__init__(*op)
         self.pos = rect
         self.image = pg.Surface((size - 1, size - 1))
-        self.image.fill((0, 0, 0))
+        self.image.fill(theme)
         self.rect = self.image.get_rect()
         self.rect.x = x + 1
         self.rect.y = y + 1
 
-    def update(self):
-        p = 1
-
 
 class PlayWithBot:
-    # в главном файле передаётсязначение fps. Тебе стоит добавить fps в конструктор
-    def __init__(self, screen, fps, difficulty):
-        # TODO: Добавь ещё в конструктор Customization уровень сложности,
-        #  если сложность 0, это обучение, если 5, то невозможная ну и так далее
+    def __init__(self, screen, fps, path, xp, difficulty, theme):
         global display_width, display_height
-        self.board, self.ships = Customization(screen, fps).bir()
+        # self.level = Level(screen, fps)  # я тебе немного помог
+
+        if theme:
+            self.t = (255, 255, 255), (0, 0, 0)
+        else:
+            self.t = (0, 0, 0), (255, 255, 255)
+
+        self.board, self.ships = Customization(screen, fps, path, self.t).bir()
         self.board_bot = Bot().bir()
 
         self.all_sprites_1 = pg.sprite.Group()
@@ -112,10 +113,15 @@ class PlayWithBot:
 
         self.sc = screen
         self.fps = fps
+        self.path = path
+        self.xp = xp
+        self.difficulty = difficulty
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
+        self.screensize = tuple(
+            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
         self.co = int(display_width * 0.02)
-        self.font = pg.font.Font(None, int(self.size * 0.8))
+        self.font = pg.font.Font(os.path.join("data", f'font_2.ttf'), int(self.size * 0.5))
 
         self.map_indent_top = 50
         self.map_indent_left = 50
@@ -127,13 +133,14 @@ class PlayWithBot:
         running = True
 
         x = pg.sprite.Sprite()
-        create_sprite(x, 'x.png', display_width - 75, 30, self.all_sprite_gg)
+        create_sprite(x, 'x' + ('_black' if self.t[0] == (255, 255, 255) else '') + '.png',
+                      display_width - 75, 30, self.all_sprite_gg)
 
         while running:
-            self.sc.fill((0, 0, 0))
+            self.sc.fill(self.t[0])
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    return
+                    terminate()
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
@@ -152,36 +159,35 @@ class PlayWithBot:
 
     def map_draw(self, x, y):
 
-        slo = list('АБВГДЕЁЖЗИ')
+        slo = list('АБВГДЕЖЗИК')
 
         for i in range(10):
-            text = self.font.render(str(i), True, (255, 255, 255))
+            text = self.font.render(str(i), True, self.t[1])
             self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
 
         for i, pp in enumerate(slo):
-            text = self.font.render(pp, True, (255, 255, 255))
+            text = self.font.render(pp, True, self.t[1])
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+            pg.draw.line(self.sc, self.t[1], (x + self.co + self.size * i, y + self.co),
                          (x + self.co + self.size * i, y + self.co + self.size * 10))
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+            pg.draw.line(self.sc, self.t[1], (x + self.co, y + self.co + self.size * i),
                          (x + self.co + self.size * 10, y + self.co + self.size * i))
 
-        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
-                                                y + self.co,
-                                                self.size * 10, self.size * 10), 4)
+        pg.draw.rect(self.sc, self.t[1], (x + self.co, y + self.co, self.size * 10, self.size * 10),
+                     4)
 
-        pg.draw.line(self.sc, (255, 255, 255), (int(display_width * 0.5), 0),
+        pg.draw.line(self.sc, self.t[1], (int(display_width * 0.5), 0),
                      (int(display_width * 0.5), display_height), 4)
 
-        font = pg.font.Font(None, self.size)
+        font = pg.font.Font(os.path.join("data", f'font_1.ttf'), self.size)
 
-        text = font.render('Бот', True, (255, 255, 255))
+        text = font.render('Бот', True, self.t[1])
         self.sc.blit(text, (display_width // 4, 10))
 
-        text = font.render('Компьютер', True, (255, 255, 255))
+        text = font.render('Компьютер', True, self.t[1])
         self.sc.blit(text, (display_width // 2 + 200, 10))
 
     def map_draw_2(self, x, y):
@@ -189,35 +195,35 @@ class PlayWithBot:
         slo = list('АБВГДЕЁЖЗИ')
 
         for i in range(10):
-            text = self.font.render(str(i), True, (255, 255, 255))
+            text = self.font.render(str(i), True, self.t[1])
             self.sc.blit(text, (i * self.size + x + 15 + self.co, 3 + y))
 
         for i, pp in enumerate(slo):
-            text = self.font.render(pp, True, (255, 255, 255))
+            text = self.font.render(pp, True, self.t[1])
             self.sc.blit(text, (x, i * self.size + y + 10 + self.co))
 
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co + self.size * i, y + self.co),
+            pg.draw.line(self.sc, self.t[1], (x + self.co + self.size * i, y + self.co),
                          (x + self.co + self.size * i, y + self.co + self.size * 10))
         for i in range(1, 10):
-            pg.draw.line(self.sc, (255, 255, 255), (x + self.co, y + self.co + self.size * i),
+            pg.draw.line(self.sc, self.t[1], (x + self.co, y + self.co + self.size * i),
                          (x + self.co + self.size * 10, y + self.co + self.size * i))
 
-        pg.draw.rect(self.sc, (255, 255, 255), (x + self.co,
-                                                y + self.co,
-                                                self.size * 10, self.size * 10), 4)
+        pg.draw.rect(self.sc, self.t[1], (x + self.co, y + self.co, self.size * 10, self.size * 10),
+                     4)
 
     def add_cell(self):
 
         for i in range(10):
             for g in range(10):
                 Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left,
-                     self.size * g + self.co + self.map_indent_top, self.all_sprites_1)
+                     self.size * g + self.co + self.map_indent_top, self.t[0], self.all_sprites_1)
 
         for i in range(10):
             for g in range(10):
-                Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left + int(display_width * 0.5),
-                     self.size * g + self.co + self.map_indent_top, self.all_sprites_2)
+                Cell((i, g), self.size, self.size * i + self.co + self.map_indent_left + int(
+                    display_width * 0.5), self.size * g + self.co + self.map_indent_top, self.t[0],
+                     self.all_sprites_2)
 
 
 class Play:
@@ -284,7 +290,7 @@ class Play:
                             return
                         elif play.rect.collidepoint(event.pos):
                             pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                            return int(get_value(mission_file, 'difficulty')[0])
+                            return tuple(map(int, get_value(mission_file, 'reward', 'difficulty')))
                     elif event.button == 4:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
@@ -297,7 +303,7 @@ class Play:
                         return
                     elif event.key == pg.K_RETURN:
                         pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                        return int(get_value(mission_file, 'difficulty')[0])
+                        return tuple(map(int, get_value(mission_file, 'reward', 'difficulty')))
                     elif event.key == pg.K_UP:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
