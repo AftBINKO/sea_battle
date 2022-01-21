@@ -45,7 +45,7 @@ def main():
         level = format_xp(f"{path}\Sea Battle\statistic.txt")[1]
         for i, val in enumerate(['25', '50', '75', '100'], start=2):
             achievements.set_progress(level / int(val), i)
-        # обновляем достижения, меню и настрйки
+        # обновляем достижения, меню и настройки
         menu, settings, achievements = Menu(screen, fps, f"{path}\Sea Battle"), Settings(
             screen, fps, config, f"{path}\Sea Battle"), Achievements(screen, fps,
                                                                      f"{path}\Sea Battle")
@@ -68,17 +68,20 @@ def main():
                 get_value(f"{path}\Sea Battle\config.txt", 'difficulty')[0])  # получаем сложность
             theme_value = get_value(f"{path}\Sea Battle\config.txt", 'theme')[0]
             play = PlayWithBot(screen, fps, f"{path}\Sea Battle",
-                               [0, 150, 300, 600, 1200, 100000][d], d, theme_value == 'day' or (
+                               [0, 150, 300, 600, 1200, 10000][d], d, theme_value == 'day' or (
                                        theme_value == 'by_time_of_\
 day' and 8 <= int(datetime.now().time().strftime('%H')) <= 18))
         elif result == 'Play':
-            play = Play(screen, fps, f"{path}\Sea Battle")
-            theme_value = get_value(f"{path}\Sea Battle\config.txt", 'theme')[0]
-            result_play = play.menu()
-            if result_play:
-                play = PlayWithBot(screen, fps, f"{path}\Sea Battle", *result_play,
-                                   theme_value == 'day' or (
-                                           theme_value == 'by_time_of_\
+            while True:
+                play = Play(screen, fps, f"{path}\Sea Battle")
+                theme_value = get_value(f"{path}\Sea Battle\config.txt", 'theme')[0]
+                result_play = play.menu()
+                if result_play is None:
+                    break
+                elif result_play != 'replay':
+                    play = PlayWithBot(screen, fps, f"{path}\Sea Battle", *result_play,
+                                       theme_value == 'day' or (
+                                               theme_value == 'by_time_of_\
 day' and 8 <= int(datetime.now().time().strftime('%H')) <= 18))
 
 

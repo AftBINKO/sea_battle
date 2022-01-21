@@ -310,7 +310,7 @@ class About:
 
             about_sprites.draw(self.screen)
 
-            c, y = 15 if self.size[1] == 768 else 25, 250
+            c, y = 20 if self.size[1] == 768 else 30, 250
             for line in titles:
                 count = 1
                 for symbol in line:

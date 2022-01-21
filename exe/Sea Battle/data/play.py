@@ -245,26 +245,31 @@ class Play:
         title = pg.sprite.Sprite()
         create_sprite(title, 'play_title.png', 50, 50, menu_sprites)
 
-        play = pg.sprite.Sprite()
-        create_sprite(play, 'play.png', self.size[0] - 300, self.size[1] - 100, menu_sprites)
+        q, n, mission_file = 255 if self.size[1] == 768 else 360, 0, os.path.join("data\
+\missions", "mission_" + get_value(os.path.join(self.path, 'statistic.txt'), 'mission')[0] + ".txt")
+        mission = get_value(mission_file, "mission")[0]
 
-        q, n, mission_file = 255 if self.size[1] == 768 else 360, 0, os.path.join("data\missions",
-                                                                                  "mission_" +
-                                                                                  get_value(
-                                                                                      os.path.join(
-                                                                                          self.path,
-                                                                                          'statistic\
-.txt'), 'mission')[0] + ".txt")
+        play, surrender = None, None
+        if get_value(mission_file, "mode")[0] == 'normal':
+            play = pg.sprite.Sprite()
+            create_sprite(play, 'play.png', self.size[0] - 300, self.size[1] - 100, menu_sprites)
+        elif get_value(mission_file, "mode")[0] == 'choice':
+            surrender = pg.sprite.Sprite()
+            create_sprite(surrender, 'surrender.png', self.size[0] - 300, self.size[1] - 100,
+                          menu_sprites)
+
+            play = pg.sprite.Sprite()
+            create_sprite(play, 'play_mini.png', self.size[0] - 150, self.size[1] - 100,
+                          menu_sprites)
         while True:
             self.screen.fill((0, 0, 0))
 
-            texts, words, y, i, running = [], get_value(mission_file, "mission")[
-                0].split(), q, 0, True
+            texts, words, y, i, running = [], mission.split(), q, 0, True
             while running:
                 text, ln = '', 0
                 while True:
                     try:
-                        if ln + len(words[i]) < 57 and '\\n' not in words[i]:
+                        if ln + len(words[i]) < 53 and '\\n' not in words[i]:
                             text, ln, i = text + words[i] + ' ', ln + len(words[i]), i + 1
                         else:
                             words[i] = words[i].strip('\\n')
@@ -288,14 +293,39 @@ class Play:
                         if x.rect.collidepoint(event.pos):
                             pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                             return
-                        elif play.rect.collidepoint(event.pos):
-                            pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                            return tuple(map(int, get_value(mission_file, 'reward', 'difficulty')))
+                        try:
+                            if play.rect.collidepoint(event.pos):
+                                pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                                return tuple(
+                                    map(int, get_value(mission_file, 'reward', 'difficulty')))
+                        except AttributeError:
+                            pass
+                        try:
+                            if surrender.rect.collidepoint(event.pos):
+                                pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+
+                                with open(f"{self.path}\statistic.txt",
+                                          encoding="utf-8") as file_for_read:
+                                    file_for_read = list(
+                                        map(lambda a: a.strip('\n'), file_for_read.readlines()))
+                                with open(f"{self.path}\statistic.txt", 'w',
+                                          encoding="utf-8") as file_for_write:
+                                    write = []
+                                    for i in range(len(file_for_read)):
+                                        if file_for_read[i].split(': ')[0] == 'mission':
+                                            write.append(f"mission: 8b")
+                                        else:
+                                            write.append(file_for_read[i])
+                                    file_for_write.write('\n'.join(write))
+
+                                    return 'replay'
+                        except AttributeError:
+                            pass
                     elif event.button == 4:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
                     elif event.button == 5:
-                        if n + 1 < len(texts) - (16 if self.size == 768 else 23):
+                        if n + 1 < len(texts) - 19:
                             q, n = q - 25, n + 1
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
@@ -308,30 +338,33 @@ class Play:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
                     elif event.key == pg.K_DOWN:
-                        if n + 1 < len(texts) - (16 if self.size == 768 else 23):
+                        if n + 1 < len(texts) - 19:
                             q, n = q - 25, n + 1
 
             menu_sprites.draw(self.screen)
 
-            for j in [
-                [get_value(mission_file, 'name')[0], (255, 255, 255),
-                 70 if self.size[1] == 768 else 80, 200 if self.size[1] == 768 else 300, 50, 1],
-                ['Награда:', (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25, 1],
-                [f"{get_value(mission_file, 'reward')[0]} XP", (255, 255, 255), self.size[0] - 215,
-                 self.size[1] - 130, 25, 1],
-                ['Сложность:', (255, 255, 255), self.size[0] - 300, self.size[1] - 155, 25, 1],
-                (['Обучение', (255, 255, 255), self.size[0] - 190, self.size[1] - 155, 25, 1],
-                 ['Самый лёгкий', (66, 170, 255), self.size[0] - 190, self.size[1] - 155, 25, 1],
-                 ['Лёгкий', (0, 255, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
-                 ['Нормальный', (255, 255, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
-                 ['Сложный', (255, 165, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
-                 ['Невозможный', (255, 0, 0), self.size[0] - 190, self.size[1] - 155, 25, 1])[
-                    int(get_value(mission_file, 'difficulty')[0])]]:
-                self.screen.blit(
-                    pg.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(j[0],
-                                                                                             True,
-                                                                                             j[1]),
-                    (j[2], j[3]))
+            if get_value(mission_file, "mode")[0] != 'text':
+                for j in [
+                    ['Награда:', (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25, 1],
+                    [f"{get_value(mission_file, 'reward')[0]} XP", (255, 255, 255),
+                     self.size[0] - 215,
+                     self.size[1] - 130, 25, 1],
+                    ['Сложность:', (255, 255, 255), self.size[0] - 300, self.size[1] - 155, 25, 1],
+                    (['Обучение', (255, 255, 255), self.size[0] - 190, self.size[1] - 155, 25, 1],
+                     ['Самый лёгкий', (66, 170, 255), self.size[0] - 190, self.size[1] - 155, 25, 1],
+                     ['Лёгкий', (0, 255, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
+                     ['Нормальный', (255, 255, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
+                     ['Сложный', (255, 165, 0), self.size[0] - 190, self.size[1] - 155, 25, 1],
+                     ['Невозможный', (255, 0, 0), self.size[0] - 190, self.size[1] - 155, 25, 1])[
+                        int(get_value(mission_file, 'difficulty')[0])]]:
+                    self.screen.blit(
+                        pg.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(
+                            j[0], True, j[1]), (j[2], j[3]))
+
+            self.screen.blit(
+                pg.font.Font(os.path.join("data", 'font_1.ttf'), 50).render(
+                    get_value(mission_file, 'name')[0], True, (255, 255, 255)),
+                (70 if self.size[1] == 768 else 80, 200 if self.size[1] == 768 else 300))
 
             pg.display.flip()
             clock.tick(self.fps)
