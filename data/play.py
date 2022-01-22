@@ -306,6 +306,10 @@ class PlayWithBot:
                     if x.rect.collidepoint(event.pos):
                         return
 
+                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+
+                    return
+
                 if n_player == 20:
                     print('Ты выйграл')
                     return
