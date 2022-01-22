@@ -1,4 +1,4 @@
-from data.main_functions import terminate, get_value, create_sprite, get_value, add_fon, load_image
+from data.main_functions import terminate, get_value, create_sprite, get_value, add_fon, load_image, add_xp
 from data.custom_map import Customization
 import pygame as pg
 import os
@@ -307,15 +307,15 @@ class PlayWithBot:
                         return
 
                 if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-
                     return
 
                 if n_player == 20:
+                    add_xp(self.path, self.xp)
                     print('Ты выйграл')
-                    return
+                    return True
                 elif n_bot == 20:
                     print('Ты проиграл')
-                    return
+                    return False
 
                 if num % 2 == 1:
                     rect = self.bot.xod_008()
