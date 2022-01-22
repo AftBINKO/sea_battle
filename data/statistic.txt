@@ -1,2 +1,6 @@
 XP: 0
+games: 0
+victories: 0
+defeats: 0
+impossible_levels: 0
 mission: 1

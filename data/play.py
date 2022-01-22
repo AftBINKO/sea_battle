@@ -1,4 +1,5 @@
-from data.main_functions import terminate, get_value, create_sprite, get_value, add_fon, load_image
+from data.main_functions import terminate, create_sprite, get_value, load_image, set_statistic, \
+    add_fon
 from data.custom_map import Customization
 import pygame as pg
 import os
@@ -220,45 +221,121 @@ class Cell(pg.sprite.Sprite):
                     n_bot += 1
 
                 else:
-                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
                     num += 1
 
         elif n == 20:
             for hh in event:
                 if self.pos == hh:
-                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
 
         elif n == 30:
             for hh in event:
                 if self.pos == hh:
-                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
                     open_cell_player.append(self.pos)
 
         else:
-            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos) and\
+            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos) and \
                     self.pos not in open_cell_player:
                 if board[self.pos[1]][self.pos[0]] == 1:
                     self.image = pg.transform.scale(Cell.image_popal, (self.size - 1, self.size - 1))
                     n_player += 1
                 else:
-                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
                     num += 1
                 open_cell_player.append(self.pos)
 
 
+class GameOver:
+    def __init__(self, screen, fps, path, win, score, xp, difficulty, mission=None):
+        self.screen, self.fps, self.size, self.path, self.win, self.score, self.xp = screen, fps, \
+                                                                                     tuple(map(int, (
+                                                                                         get_value(
+                                                                                             f"\
+{path}\config.txt", "screensize")[0].split('x')))), path, win, score, xp
+
+        for val in [[1, 'games'], [1, 'victories' if win else 'defeats']]:
+            set_statistic(os.path.join(path, "statistic.txt"), val[0], value=val[1])
+
+        if mission is not None and win:
+            if mission not in ['8', '8a', '8b']:
+                set_statistic(os.path.join(path, "statistic.txt"), 1, value='mission')
+            elif mission == '8':
+                set_statistic(os.path.join(path, "statistic.txt"), '8a', value='mission', add=False)
+
+        set_statistic(os.path.join(path, "statistic.txt"), xp)
+
+        if difficulty == 5:
+            set_statistic(os.path.join(path, "statistic.txt"), 1, value='impossible_levels')
+
+        self.menu()
+
+    def menu(self):
+        fon = add_fon(get_value(f"{self.path}\config.txt", 'theme')[0], self.size)
+
+        clock = pg.time.Clock()
+
+        game_over_sprites = pg.sprite.Group()
+
+        mat = pg.sprite.Sprite()
+        create_sprite(mat, f'mat_7_{self.size[1]}.png', 50, 50, game_over_sprites)
+
+        in_main_menu = pg.sprite.Sprite()
+        create_sprite(in_main_menu, f'in_main_menu.png', self.size[0] // 2 - 125, self.size[1] - 150,
+                      game_over_sprites)
+
+        texts = []
+        for line in [[('Победа' if self.win else 'Поражение'), 100, 100, 1],
+                     [f"Счёт: {self.score}", self.size[1] // 2 - 25, 25, 2],
+                     [f"Награда: {self.xp} XP", self.size[1] // 2, 25, 2]]:
+            text = pg.font.Font(os.path.join("data", f'font_{line[3]}.ttf'), line[2]).render(
+                line[0], True, (255, 255, 255))
+            texts.append([text, text.get_rect(center=(self.size[0] // 2, line[1]))])
+
+        while True:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1 \
+                        and in_main_menu.rect.collidepoint(event.pos):
+                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    return
+                elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    return
+
+            self.screen.blit(fon, (0, 0))
+
+            game_over_sprites.draw(self.screen)
+
+            for text in texts:
+                self.screen.blit(text[0], text[1])
+
+            pg.display.flip()
+            clock.tick(self.fps)
+
+
 class PlayWithBot:
-    def __init__(self, screen, fps, path, xp, difficulty, theme):
+    def __init__(self, screen, fps, path, xp, difficulty, theme, mission=None, name='Игрок'):
 
         all_remove()
         global display_width, display_height, list_pos_ship_bot, list_pos_ship_player
-        # self.level = Level(screen, fps)  # я тебе немного помог
 
         if theme:
             self.t = (255, 255, 255), (0, 0, 0)
         else:
             self.t = (0, 0, 0), (255, 255, 255)
 
-        self.board, self.ships, list_pos_ship_player = Customization(screen, fps, path, theme).bir()
+        try:
+            self.board, self.ships, list_pos_ship_player = Customization(screen, fps, path,
+                                                                         theme).bir()
+        except SystemExit:
+            return
         self.bot = Bot(difficulty, list_pos_ship_player)
         self.board_bot, list_pos_ship_bot = self.bot.bir()
 
@@ -275,6 +352,8 @@ class PlayWithBot:
         self.path = path
         self.xp = xp
         self.difficulty = difficulty
+        self.mission = mission
+        self.name = name
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.screensize = tuple(
@@ -300,18 +379,19 @@ class PlayWithBot:
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    return
+                    terminate()
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
 
                 if n_player == 20:
-                    print('Ты выйграл')
-                    return
+                    return GameOver(self.sc, self.fps, self.path, True, n_player, self.xp,
+                                    self.difficulty, mission=self.mission)
                 elif n_bot == 20:
-                    print('Ты проиграл')
-                    return
+                    return GameOver(self.sc, self.fps, self.path, False, n_player, 0,
+                                    self.difficulty, mission=self.mission)
 
                 if num % 2 == 1:
                     rect = self.bot.xod_008()
@@ -361,7 +441,7 @@ class PlayWithBot:
 
         font = pg.font.Font(os.path.join("data", f'font_1.ttf'), self.size)
 
-        text = font.render('Бот', True, self.t[1])
+        text = font.render(self.name, True, self.t[1])
         self.sc.blit(text, (display_width // 4, 10))
 
         text = font.render('Компьютер', True, self.t[1])
@@ -369,7 +449,7 @@ class PlayWithBot:
 
     def map_draw_2(self, x, y):
 
-        slo = list('АБВГДЕЁЖЗИ')
+        slo = list('АБВГДЕЖЗИК')
 
         for i in range(10):
             text = self.font.render(str(i), True, self.t[1])
@@ -407,6 +487,25 @@ class Play:
     def __init__(self, screen, fps, path):
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
+
+    def surrender(self):
+        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+
+        with open(f"{self.path}\statistic.txt",
+                  encoding="utf-8") as file_for_read:
+            file_for_read = list(
+                map(lambda a: a.strip('\n'), file_for_read.readlines()))
+        with open(f"{self.path}\statistic.txt", 'w',
+                  encoding="utf-8") as file_for_write:
+            write = []
+            for i in range(len(file_for_read)):
+                if file_for_read[i].split(': ')[0] == 'mission':
+                    write.append(f"mission: 8b")
+                else:
+                    write.append(file_for_read[i])
+            file_for_write.write('\n'.join(write))
+
+            return 'replay'
 
     def menu(self):
         clock = pg.time.Clock()
@@ -479,23 +578,7 @@ class Play:
                             pass
                         try:
                             if surrender.rect.collidepoint(event.pos):
-                                pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-
-                                with open(f"{self.path}\statistic.txt",
-                                          encoding="utf-8") as file_for_read:
-                                    file_for_read = list(
-                                        map(lambda a: a.strip('\n'), file_for_read.readlines()))
-                                with open(f"{self.path}\statistic.txt", 'w',
-                                          encoding="utf-8") as file_for_write:
-                                    write = []
-                                    for i in range(len(file_for_read)):
-                                        if file_for_read[i].split(': ')[0] == 'mission':
-                                            write.append(f"mission: 8b")
-                                        else:
-                                            write.append(file_for_read[i])
-                                    file_for_write.write('\n'.join(write))
-
-                                    return 'replay'
+                                return self.surrender()
                         except AttributeError:
                             pass
                     elif event.button == 4:
@@ -508,9 +591,12 @@ class Play:
                     if event.key == pg.K_ESCAPE:
                         pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
-                    elif event.key == pg.K_RETURN:
+                    elif event.key == pg.K_RETURN and get_value(mission_file, "mode")[0] != 'text':
                         pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                         return tuple(map(int, get_value(mission_file, 'reward', 'difficulty')))
+                    elif event.key == pg.K_BACKSPACE and get_value(
+                            mission_file, "mode")[0] == 'choice':
+                        return self.surrender()
                     elif event.key == pg.K_UP:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1

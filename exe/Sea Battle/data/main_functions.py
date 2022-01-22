@@ -38,26 +38,24 @@ def create_sprite(sprite, name, x, y, group, transform=None):
 
 def add_fon(theme_value, size):
     return pygame.transform.scale(load_image('fon_1.png'), size) if theme_value == 'day' or (
-                theme_value == 'by_time_of_day' and 8 <= int(datetime.now().time().strftime('%H')
-                                                             ) <= 18) else (
+            theme_value == 'by_time_of_day' and 8 <= int(datetime.now().time().strftime('%H')
+                                                         ) <= 18) else (
         pygame.transform.scale(load_image('fon_2.png'), size) if theme_value == 'night' or (
-                    theme_value == 'by_time_of_day' and not (
-                        8 <= int(datetime.now().time().strftime('%H')) <= 18)) else None)
+                theme_value == 'by_time_of_day' and not (8 <= int(datetime.now().time().strftime('%H'
+                                                                                                 )
+                                                                  ) <= 18)) else None)
 
 
-def add_xp(path, number):
+def set_statistic(path, number, value='XP', add=True):
     with open(path, encoding="utf-8") as statistic_for_read:
         statistic_for_read = list(
             map(lambda a: a.strip('\n'), statistic_for_read.readlines()))
     with open(path, 'w', encoding="utf-8") as statistic_for_write:
-        write = []
-        for i in range(len(statistic_for_read)):
-            if statistic_for_read[i].split(': ')[0] == 'XP':
-                n = str(int(statistic_for_read[i].split(': ')[1]) + number)
-                write.append(f"XP: {n}")
-            else:
-                write.append(statistic_for_read[i])
-        statistic_for_write.write('\n'.join(write))
+        statistic_for_write.write(
+            '\n'.join([f"{value}: \
+{str(int(statistic_for_read[i].split(': ')[1]) + number) if add else number}" if
+                       statistic_for_read[i].split(': ')[0] == value else statistic_for_read[i] for i
+                       in range(len(statistic_for_read))]))
 
 
 def format_xp(path):
@@ -97,7 +95,7 @@ def extract_files(path_archive, path_extract, *values):
 
 def create_window(path):
     config = get_file(f"{path}\config.txt")
-    if config['version'] != '1.1 BETA':
+    if config['version'] != '1.2 BETA':
         raise ValueError('The configuration file version is not supported')
     size, screen = tuple(map(int, config['screensize'].split('x'))), None
     if config['screenmode'] == 'window':

@@ -6,7 +6,7 @@ import os
 from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
 from datetime import datetime, date
 
-from data.main_functions import terminate, load_image, create_sprite, put_sprite, add_xp, \
+from data.main_functions import terminate, load_image, create_sprite, put_sprite, set_statistic, \
     format_xp, get_value, add_fon
 
 
@@ -112,58 +112,61 @@ class Menu:
             else:
                 right_arrow.kill()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    terminate()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
+            try:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        terminate()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
+                            try:
+                                if left_arrow.rect.collidepoint(event.pos):
+                                    s.play()
+                                    x = 300 * self.n + 1
+                                    left = True
+                                    self.n -= 1
+                            except AttributeError:
+                                pass
+                            try:
+                                if right_arrow.rect.collidepoint(event.pos):
+                                    s.play()
+                                    x = 300 * self.n - 1
+                                    right = True
+                                    self.n += 1
+                            except AttributeError:
+                                pass
+                            if frame.rect.collidepoint(event.pos):
+                                pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                                if self.n == 4:
+                                    terminate()
+                                return buttons_tuple[self.n]
+                        elif event.button == 4 and self.n - 1 >= 0:
+                            x = 300 * self.n + 1
+                            left = True
+                            self.n -= 1
+                        elif event.button == 5 and self.n + 1 <= 4:
+                            x = 300 * self.n - 1
+                            right = True
+                            self.n += 1
+                    elif event.type == pygame.KEYDOWN:
                         s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
-                        try:
-                            if left_arrow.rect.collidepoint(event.pos):
-                                s.play()
-                                x = 300 * self.n + 1
-                                left = True
-                                self.n -= 1
-                        except AttributeError:
-                            pass
-                        try:
-                            if right_arrow.rect.collidepoint(event.pos):
-                                s.play()
-                                x = 300 * self.n - 1
-                                right = True
-                                self.n += 1
-                        except AttributeError:
-                            pass
-                        if frame.rect.collidepoint(event.pos):
+                        if event.key == pygame.K_LEFT and self.n - 1 >= 0:
+                            s.play()
+                            x = 300 * self.n + 1
+                            left = True
+                            self.n -= 1
+                        elif event.key == pygame.K_RIGHT and self.n + 1 <= 4:
+                            s.play()
+                            x = 300 * self.n - 1
+                            right = True
+                            self.n += 1
+                        elif event.key == pygame.K_RETURN:
                             pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                             if self.n == 4:
                                 terminate()
                             return buttons_tuple[self.n]
-                    elif event.button == 4 and self.n - 1 >= 0:
-                        x = 300 * self.n + 1
-                        left = True
-                        self.n -= 1
-                    elif event.button == 5 and self.n + 1 <= 4:
-                        x = 300 * self.n - 1
-                        right = True
-                        self.n += 1
-                elif event.type == pygame.KEYDOWN:
-                    s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
-                    if event.key == pygame.K_LEFT and self.n - 1 >= 0:
-                        s.play()
-                        x = 300 * self.n + 1
-                        left = True
-                        self.n -= 1
-                    elif event.key == pygame.K_RIGHT and self.n + 1 <= 4:
-                        s.play()
-                        x = 300 * self.n - 1
-                        right = True
-                        self.n += 1
-                    elif event.key == pygame.K_RETURN:
-                        pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                        if self.n == 4:
-                            terminate()
-                        return buttons_tuple[self.n]
+            except pygame.error:
+                terminate()
 
             self.screen.blit(fon, (0, 0))
             menu_sprites.draw(self.screen)
@@ -278,10 +281,10 @@ class Achievements:
                              [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
                              ["Прогресс", (192, 192, 192), 1000 if self.size[1] == 768 else 1100,
                               y + 10, 25, 2], [f"{int(achievement[4] * 100)}%", (255, 255, 255),
-                                               1000 if self.size[1] == 768 else 1100, y + 45, 50, 1],
+                                               1000 if self.size[1] == 768 else 1100, y + 45, 40, 1],
                              ["Награда", (192, 192, 192), 1150 if self.size[1] == 768 else 1500,
                               y + 10, 25, 2], [f"{achievement[6]} XP", (255, 255, 255),
-                                               1150 if self.size[1] == 768 else 1500, y + 45, 50, 1],
+                                               1150 if self.size[1] == 768 else 1500, y + 45, 40, 1],
                              [achievement[5], (255, 255, 255), 1150 if self.size[1] == 768 else 1500,
                               y + 100, 25, 2]])
                 y += 175
@@ -319,6 +322,6 @@ WHERE id = {i}""").fetchone()[0]) == 1:
 SET date_of_completion = '{datetime.now().date().strftime('%d.%m.%Y')}'
 WHERE id = {i}""")
                     con.commit()
-                    add_xp(f"{self.path}\statistic.txt", int(cur.execute(
+                    set_statistic(f"{self.path}\statistic.txt", int(cur.execute(
                         f"""SELECT experience FROM achievements
 WHERE id = {i}""").fetchone()[0]))

@@ -15,7 +15,7 @@ if_yes_rect_map = []  # позиция корабля на поле
 
 list_pos_if_yes = []  # позиции которые попадают в клетки
 
-if_downloads = False  # можно ли ставить корабль на данную позицыю
+if_downloads = False  # можно ли ставить корабль на данную позицию
 
 test_007 = 0  # тест все ли корабли установлены
 
@@ -314,14 +314,17 @@ class Customization:
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
-                        return
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        raise SystemExit
 
                     elif reset.rect.collidepoint(event.pos):
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         up_per()
                         self.add_ship()
                         self.add_cells()
 
                     elif go.rect.collidepoint(event.pos) and test_007 == 10:
+                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                         return
 
                 all_sprites_cell.update(event)

@@ -13,7 +13,7 @@ class Settings:
         self.values_screensize = ['1366x768', '1920x1080']
         self.values_screenmode = ['window', 'noframe', 'fullscreen']
         self.values_fps = ['30', '60', '90', '120']
-        self.values_difficulty = ['easiest', 'easy', 'normal', 'hard', 'hardest']
+        self.values_difficulty = ['easiest', 'easy', 'normal', 'hard', 'impossible']
         self.values_theme = ['day', 'night', 'by_time_of_day']
         self.value_screensize = self.values_screensize.index(config['screensize'])
         self.value_screenmode = self.values_screenmode.index(config['screenmode'])

@@ -82,4 +82,3 @@ class Level:
 
     def bir(self):
         return self.level
-

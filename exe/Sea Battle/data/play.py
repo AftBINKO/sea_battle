@@ -1,4 +1,5 @@
-from data.main_functions import terminate, create_sprite, get_value, add_fon
+from data.main_functions import terminate, create_sprite, get_value, load_image, set_statistic, \
+    add_fon
 from data.custom_map import Customization
 import pygame as pg
 import os
@@ -7,14 +8,102 @@ import random
 display_width = 0
 display_height = 0
 
+open_cell_player = []
+open_cell_bot = []
+
+list_pos_ship_bot = []
+list_pos_ship_player = []
+
+image_popal_bot_group = pg.sprite.Group()
+
+num = 0
+
+n_bot = 0
+n_player = 0
+
+
+def test_bax(n=0):
+    opa = []
+    if n == 0:
+        list_007 = list_pos_ship_bot
+        list_008 = open_cell_player
+
+    else:
+        list_007 = list_pos_ship_player
+        list_008 = open_cell_bot
+
+    for i in list_007:
+        n = 0
+        for g in i:
+            if g in list_008:
+                n += 1
+
+        if n == len(i):
+
+            for g in i:
+                x = g[0]
+                y = g[1]
+                if x - 1 != -1 and y - 1 != -1 and (x - 1, y - 1) not in list_008:
+                    opa.append((x - 1, y - 1))
+
+                if x - 1 != -1 and y + 1 != 10 and (x - 1, y + 1) not in list_008:
+                    opa.append((x - 1, y + 1))
+
+                if x - 1 != -1 and (x - 1, y) not in list_008:
+                    opa.append((x - 1, y))
+
+                if x + 1 != 10 and y - 1 != -1 and (x + 1, y - 1) not in list_008:
+                    opa.append((x + 1, y - 1))
+
+                if x + 1 != 10 and y + 1 != 10 and (x + 1, y + 1) not in list_008:
+                    opa.append((x + 1, y + 1))
+
+                if x + 1 != 10 and (x + 1, y) not in list_008:
+                    opa.append((x + 1, y))
+
+                if y - 1 != -1 and (x, y - 1) not in list_008:
+                    opa.append((x, y - 1))
+
+                if y + 1 != 10 and (x, y + 1) not in list_008:
+                    opa.append((x, y + 1))
+
+            del list_007[list_007.index(i)]
+    return opa
+
+
+def all_remove():
+    global open_cell_player, open_cell_bot, num, list_pos_ship_bot, n_bot, n_player, list_pos_ship_player
+
+    open_cell_player = []
+    open_cell_bot = []
+
+    list_pos_ship_bot = []
+    list_pos_ship_player = []
+
+    num = 0
+
+    n_bot = 0
+    n_player = 0
+
+    for i in image_popal_bot_group:
+        i.kill()
+
 
 class Bot:
-    def __init__(self):
+    def __init__(self, n, board):
+        self.board_player = []
+        for i in board:
+            self.board_player.extend(i)
+        self.list_as_xod = [1] + [0] * (5 - n)
+        self.pos = []
+        self.level = n
         self.p = [[0] * 10 for _ in range(10)]
 
         for x1 in range(1, 5):
             for _ in range(x1):
-                for tt in self.test(5 - x1):
+                vv = self.test(5 - x1)
+                self.pos.append(vv)
+                for tt in vv:
                     self.p[tt[1]][tt[0]] = 1
 
     def test(self, n):
@@ -76,32 +165,179 @@ class Bot:
             return self.test(n)
 
     def bir(self):
-        return self.p
+        return self.p, self.pos
+
+    def xod_008(self):
+        if random.choice(self.list_as_xod) == 1:
+            rect = self.board_player[0]
+            while rect in open_cell_bot:
+                del self.board_player[0]
+                rect = self.board_player[0]
+            open_cell_bot.append(rect)
+            return rect
+        else:
+            rect = (random.randint(0, 9), random.randint(0, 9))
+            while rect in open_cell_bot:
+                rect = (random.randint(0, 9), random.randint(0, 9))
+            open_cell_bot.append(rect)
+            return rect
+
+
+class Image_popal(pg.sprite.Sprite):
+    image_popal = load_image('bot_popal.png')
+
+    def __init__(self, rect, size, x, y, *op):
+        super().__init__(*op)
+
+        self.pos = rect
+        self.size = size
+        self.image = pg.transform.scale(Image_popal.image_popal, (self.size - 11, self.size - 11))
+        self.rect = self.image.get_rect()
+        self.rect.x = x + 6
+        self.rect.y = y + 6
 
 
 class Cell(pg.sprite.Sprite):
+    image_popal = load_image('popal.png')
+    image_ne_popal = load_image('nepopal.png')
+
     def __init__(self, rect, size, x, y, theme, *op):
         super().__init__(*op)
+        self.color = theme
         self.pos = rect
+        self.size = size
         self.image = pg.Surface((size - 1, size - 1))
         self.image.fill(theme)
         self.rect = self.image.get_rect()
         self.rect.x = x + 1
         self.rect.y = y + 1
 
+    def update(self, board, event, n=0):
+        global num, n_bot, n_player
+        if n == 1:
+            if self.pos == event:
+                if board[event[1]][event[0]] == 1:
+                    Image_popal(self.pos, self.size, self.rect.x, self.rect.y, image_popal_bot_group)
+                    n_bot += 1
+
+                else:
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
+                    num += 1
+
+        elif n == 20:
+            for hh in event:
+                if self.pos == hh:
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
+
+        elif n == 30:
+            for hh in event:
+                if self.pos == hh:
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
+                    open_cell_player.append(self.pos)
+
+        else:
+            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos) and \
+                    self.pos not in open_cell_player:
+                if board[self.pos[1]][self.pos[0]] == 1:
+                    self.image = pg.transform.scale(Cell.image_popal, (self.size - 1, self.size - 1))
+                    n_player += 1
+                else:
+                    self.image = pg.transform.scale(Cell.image_ne_popal,
+                                                    (self.size - 1, self.size - 1))
+                    num += 1
+                open_cell_player.append(self.pos)
+
+
+class GameOver:
+    def __init__(self, screen, fps, path, win, score, xp, difficulty, mission=None):
+        self.screen, self.fps, self.size, self.path, self.win, self.score, self.xp = screen, fps, \
+                                                                                     tuple(map(int, (
+                                                                                         get_value(
+                                                                                             f"\
+{path}\config.txt", "screensize")[0].split('x')))), path, win, score, xp
+
+        for val in [[1, 'games'], [1, 'victories' if win else 'defeats']]:
+            set_statistic(os.path.join(path, "statistic.txt"), val[0], value=val[1])
+
+        if mission is not None and win:
+            if mission not in ['8', '8a', '8b']:
+                set_statistic(os.path.join(path, "statistic.txt"), 1, value='mission')
+            elif mission == '8':
+                set_statistic(os.path.join(path, "statistic.txt"), '8a', value='mission', add=False)
+
+        set_statistic(os.path.join(path, "statistic.txt"), xp)
+
+        if difficulty == 5:
+            set_statistic(os.path.join(path, "statistic.txt"), 1, value='impossible_levels')
+
+        self.menu()
+
+    def menu(self):
+        fon = add_fon(get_value(f"{self.path}\config.txt", 'theme')[0], self.size)
+
+        clock = pg.time.Clock()
+
+        game_over_sprites = pg.sprite.Group()
+
+        mat = pg.sprite.Sprite()
+        create_sprite(mat, f'mat_7_{self.size[1]}.png', 50, 50, game_over_sprites)
+
+        in_main_menu = pg.sprite.Sprite()
+        create_sprite(in_main_menu, f'in_main_menu.png', self.size[0] // 2 - 125, self.size[1] - 150,
+                      game_over_sprites)
+
+        texts = []
+        for line in [[('Победа' if self.win else 'Поражение'), 100, 100, 1],
+                     [f"Счёт: {self.score}", self.size[1] // 2 - 25, 25, 2],
+                     [f"Награда: {self.xp} XP", self.size[1] // 2, 25, 2]]:
+            text = pg.font.Font(os.path.join("data", f'font_{line[3]}.ttf'), line[2]).render(
+                line[0], True, (255, 255, 255))
+            texts.append([text, text.get_rect(center=(self.size[0] // 2, line[1]))])
+
+        while True:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    terminate()
+                elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1 \
+                        and in_main_menu.rect.collidepoint(event.pos):
+                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    return
+                elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    return
+
+            self.screen.blit(fon, (0, 0))
+
+            game_over_sprites.draw(self.screen)
+
+            for text in texts:
+                self.screen.blit(text[0], text[1])
+
+            pg.display.flip()
+            clock.tick(self.fps)
+
 
 class PlayWithBot:
-    def __init__(self, screen, fps, path, xp, difficulty, theme):
-        global display_width, display_height
-        # self.level = Level(screen, fps)  # я тебе немного помог
+    def __init__(self, screen, fps, path, xp, difficulty, theme, mission=None, name='Игрок'):
+
+        all_remove()
+        global display_width, display_height, list_pos_ship_bot, list_pos_ship_player
 
         if theme:
             self.t = (255, 255, 255), (0, 0, 0)
         else:
             self.t = (0, 0, 0), (255, 255, 255)
 
-        self.board, self.ships = Customization(screen, fps, path, self.t).bir()
-        self.board_bot = Bot().bir()
+        try:
+            self.board, self.ships, list_pos_ship_player = Customization(screen, fps, path,
+                                                                         theme).bir()
+        except SystemExit:
+            return
+        self.bot = Bot(difficulty, list_pos_ship_player)
+        self.board_bot, list_pos_ship_bot = self.bot.bir()
 
         self.all_sprites_1 = pg.sprite.Group()
         self.all_sprites_2 = pg.sprite.Group()
@@ -116,6 +352,8 @@ class PlayWithBot:
         self.path = path
         self.xp = xp
         self.difficulty = difficulty
+        self.mission = mission
+        self.name = name
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.screensize = tuple(
@@ -138,13 +376,31 @@ class PlayWithBot:
 
         while running:
             self.sc.fill(self.t[0])
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     terminate()
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
+
+                if n_player == 20:
+                    return GameOver(self.sc, self.fps, self.path, True, n_player, self.xp,
+                                    self.difficulty, mission=self.mission)
+                elif n_bot == 20:
+                    return GameOver(self.sc, self.fps, self.path, False, n_player, 0,
+                                    self.difficulty, mission=self.mission)
+
+                if num % 2 == 1:
+                    rect = self.bot.xod_008()
+                    self.all_sprites_1.update(self.board, rect, 1)
+                    self.all_sprites_1.update(self.board, test_bax(1), 20)
+
+                else:
+                    self.all_sprites_2.update(self.board_bot, event)
+                    self.all_sprites_2.update(self.board, test_bax(), 30)
 
             self.map_draw(self.map_indent_left, self.map_indent_top)
             self.map_draw_2(self.map_indent_left + int(display_width * 0.5), self.map_indent_top)
@@ -153,6 +409,7 @@ class PlayWithBot:
             self.all_sprites_2.draw(self.sc)
             self.all_sprite_gg.draw(self.sc)
             self.ships.draw(self.sc)
+            image_popal_bot_group.draw(self.sc)
 
             self.clock.tick(self.fps)
             pg.display.flip()
@@ -184,7 +441,7 @@ class PlayWithBot:
 
         font = pg.font.Font(os.path.join("data", f'font_1.ttf'), self.size)
 
-        text = font.render('Бот', True, self.t[1])
+        text = font.render(self.name, True, self.t[1])
         self.sc.blit(text, (display_width // 4, 10))
 
         text = font.render('Компьютер', True, self.t[1])
@@ -192,7 +449,7 @@ class PlayWithBot:
 
     def map_draw_2(self, x, y):
 
-        slo = list('АБВГДЕЁЖЗИ')
+        slo = list('АБВГДЕЖЗИК')
 
         for i in range(10):
             text = self.font.render(str(i), True, self.t[1])
@@ -230,6 +487,25 @@ class Play:
     def __init__(self, screen, fps, path):
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
+
+    def surrender(self):
+        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+
+        with open(f"{self.path}\statistic.txt",
+                  encoding="utf-8") as file_for_read:
+            file_for_read = list(
+                map(lambda a: a.strip('\n'), file_for_read.readlines()))
+        with open(f"{self.path}\statistic.txt", 'w',
+                  encoding="utf-8") as file_for_write:
+            write = []
+            for i in range(len(file_for_read)):
+                if file_for_read[i].split(': ')[0] == 'mission':
+                    write.append(f"mission: 8b")
+                else:
+                    write.append(file_for_read[i])
+            file_for_write.write('\n'.join(write))
+
+            return 'replay'
 
     def menu(self):
         clock = pg.time.Clock()
@@ -302,23 +578,7 @@ class Play:
                             pass
                         try:
                             if surrender.rect.collidepoint(event.pos):
-                                pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-
-                                with open(f"{self.path}\statistic.txt",
-                                          encoding="utf-8") as file_for_read:
-                                    file_for_read = list(
-                                        map(lambda a: a.strip('\n'), file_for_read.readlines()))
-                                with open(f"{self.path}\statistic.txt", 'w',
-                                          encoding="utf-8") as file_for_write:
-                                    write = []
-                                    for i in range(len(file_for_read)):
-                                        if file_for_read[i].split(': ')[0] == 'mission':
-                                            write.append(f"mission: 8b")
-                                        else:
-                                            write.append(file_for_read[i])
-                                    file_for_write.write('\n'.join(write))
-
-                                    return 'replay'
+                                return self.surrender()
                         except AttributeError:
                             pass
                     elif event.button == 4:
@@ -331,9 +591,12 @@ class Play:
                     if event.key == pg.K_ESCAPE:
                         pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         return
-                    elif event.key == pg.K_RETURN:
+                    elif event.key == pg.K_RETURN and get_value(mission_file, "mode")[0] != 'text':
                         pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                         return tuple(map(int, get_value(mission_file, 'reward', 'difficulty')))
+                    elif event.key == pg.K_BACKSPACE and get_value(
+                            mission_file, "mode")[0] == 'choice':
+                        return self.surrender()
                     elif event.key == pg.K_UP:
                         if n - 1 >= 0:
                             q, n = q + 25, n - 1
