@@ -312,6 +312,9 @@ class Customization:
                 if event.type == pg.QUIT:
                     terminate()
 
+                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                    return
+
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
                         pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
