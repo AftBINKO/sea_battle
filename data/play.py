@@ -89,7 +89,11 @@ def all_remove():
 
 
 class Bot:
-    def __init__(self, n):
+    def __init__(self, n, board):
+        self.board_player = []
+        for i in board:
+            self.board_player.extend(i)
+        self.list_as_xod = [1] + [0] * (5 - n)
         self.pos = []
         self.level = n
         self.p = [[0] * 10 for _ in range(10)]
@@ -163,11 +167,19 @@ class Bot:
         return self.p, self.pos
 
     def xod_008(self):
-        rect = (random.randint(0, 9), random.randint(0, 9))
-        while rect in open_cell_bot:
+        if random.choice(self.list_as_xod) == 1:
+            rect = self.board_player[0]
+            while rect in open_cell_bot:
+                del self.board_player[0]
+                rect = self.board_player[0]
+            open_cell_bot.append(rect)
+            return rect
+        else:
             rect = (random.randint(0, 9), random.randint(0, 9))
-        open_cell_bot.append(rect)
-        return rect
+            while rect in open_cell_bot:
+                rect = (random.randint(0, 9), random.randint(0, 9))
+            open_cell_bot.append(rect)
+            return rect
 
 
 class Image_popal(pg.sprite.Sprite):
@@ -247,7 +259,7 @@ class PlayWithBot:
             self.t = (0, 0, 0), (255, 255, 255)
 
         self.board, self.ships, list_pos_ship_player = Customization(screen, fps, path, theme).bir()
-        self.bot = Bot(difficulty)
+        self.bot = Bot(difficulty, list_pos_ship_player)
         self.board_bot, list_pos_ship_bot = self.bot.bir()
 
         self.all_sprites_1 = pg.sprite.Group()
