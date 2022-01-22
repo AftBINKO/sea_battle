@@ -1,4 +1,4 @@
-from data.main_functions import terminate, create_sprite, get_value, add_fon
+from data.main_functions import terminate, get_value, create_sprite, get_value, add_fon, load_image
 from data.custom_map import Customization
 import pygame as pg
 import os
@@ -7,14 +7,98 @@ import random
 display_width = 0
 display_height = 0
 
+open_cell_player = []
+open_cell_bot = []
+
+list_pos_ship_bot = []
+list_pos_ship_player = []
+
+image_popal_bot_group = pg.sprite.Group()
+
+num = 0
+
+n_bot = 0
+n_player = 0
+
+
+def test_bax(n=0):
+    opa = []
+    if n == 0:
+        list_007 = list_pos_ship_bot
+        list_008 = open_cell_player
+
+    else:
+        list_007 = list_pos_ship_player
+        list_008 = open_cell_bot
+
+    for i in list_007:
+        n = 0
+        for g in i:
+            if g in list_008:
+                n += 1
+
+        if n == len(i):
+
+            for g in i:
+                x = g[0]
+                y = g[1]
+                if x - 1 != -1 and y - 1 != -1 and (x - 1, y - 1) not in list_008:
+                    opa.append((x - 1, y - 1))
+
+                if x - 1 != -1 and y + 1 != 10 and (x - 1, y + 1) not in list_008:
+                    opa.append((x - 1, y + 1))
+
+                if x - 1 != -1 and (x - 1, y) not in list_008:
+                    opa.append((x - 1, y))
+
+                if x + 1 != 10 and y - 1 != -1 and (x + 1, y - 1) not in list_008:
+                    opa.append((x + 1, y - 1))
+
+                if x + 1 != 10 and y + 1 != 10 and (x + 1, y + 1) not in list_008:
+                    opa.append((x + 1, y + 1))
+
+                if x + 1 != 10 and (x + 1, y) not in list_008:
+                    opa.append((x + 1, y))
+
+                if y - 1 != -1 and (x, y - 1) not in list_008:
+                    opa.append((x, y - 1))
+
+                if y + 1 != 10 and (x, y + 1) not in list_008:
+                    opa.append((x, y + 1))
+
+            del list_007[list_007.index(i)]
+    return opa
+
+
+def all_remove():
+    global open_cell_player, open_cell_bot, num, list_pos_ship_bot, n_bot, n_player, list_pos_ship_player
+
+    open_cell_player = []
+    open_cell_bot = []
+
+    list_pos_ship_bot = []
+    list_pos_ship_player = []
+
+    num = 0
+
+    n_bot = 0
+    n_player = 0
+
+    for i in image_popal_bot_group:
+        i.kill()
+
 
 class Bot:
-    def __init__(self):
+    def __init__(self, n):
+        self.pos = []
+        self.level = n
         self.p = [[0] * 10 for _ in range(10)]
 
         for x1 in range(1, 5):
             for _ in range(x1):
-                for tt in self.test(5 - x1):
+                vv = self.test(5 - x1)
+                self.pos.append(vv)
+                for tt in vv:
                     self.p[tt[1]][tt[0]] = 1
 
     def test(self, n):
@@ -76,23 +160,85 @@ class Bot:
             return self.test(n)
 
     def bir(self):
-        return self.p
+        return self.p, self.pos
+
+    def xod_008(self):
+        rect = (random.randint(0, 9), random.randint(0, 9))
+        while rect in open_cell_bot:
+            rect = (random.randint(0, 9), random.randint(0, 9))
+        open_cell_bot.append(rect)
+        return rect
+
+
+class Image_popal(pg.sprite.Sprite):
+    image_popal = load_image('bot_popal.png')
+
+    def __init__(self, rect, size, x, y, *op):
+        super().__init__(*op)
+
+        self.pos = rect
+        self.size = size
+        self.image = pg.transform.scale(Image_popal.image_popal, (self.size - 11, self.size - 11))
+        self.rect = self.image.get_rect()
+        self.rect.x = x + 6
+        self.rect.y = y + 6
 
 
 class Cell(pg.sprite.Sprite):
+    image_popal = load_image('popal.png')
+    image_ne_popal = load_image('nepopal.png')
+
     def __init__(self, rect, size, x, y, theme, *op):
         super().__init__(*op)
+        self.color = theme
         self.pos = rect
+        self.size = size
         self.image = pg.Surface((size - 1, size - 1))
         self.image.fill(theme)
         self.rect = self.image.get_rect()
         self.rect.x = x + 1
         self.rect.y = y + 1
 
+    def update(self, board, event, n=0):
+        global num, n_bot, n_player
+        if n == 1:
+            if self.pos == event:
+                if board[event[1]][event[0]] == 1:
+                    Image_popal(self.pos, self.size, self.rect.x, self.rect.y, image_popal_bot_group)
+                    n_bot += 1
+
+                else:
+                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    num += 1
+
+        elif n == 20:
+            for hh in event:
+                if self.pos == hh:
+                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+
+        elif n == 30:
+            for hh in event:
+                if self.pos == hh:
+                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    open_cell_player.append(self.pos)
+
+        else:
+            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos) and\
+                    self.pos not in open_cell_player:
+                if board[self.pos[1]][self.pos[0]] == 1:
+                    self.image = pg.transform.scale(Cell.image_popal, (self.size - 1, self.size - 1))
+                    n_player += 1
+                else:
+                    self.image = pg.transform.scale(Cell.image_ne_popal, (self.size - 1, self.size - 1))
+                    num += 1
+                open_cell_player.append(self.pos)
+
 
 class PlayWithBot:
     def __init__(self, screen, fps, path, xp, difficulty, theme):
-        global display_width, display_height
+
+        all_remove()
+        global display_width, display_height, list_pos_ship_bot, list_pos_ship_player
         # self.level = Level(screen, fps)  # я тебе немного помог
 
         if theme:
@@ -100,8 +246,9 @@ class PlayWithBot:
         else:
             self.t = (0, 0, 0), (255, 255, 255)
 
-        self.board, self.ships = Customization(screen, fps, path, self.t).bir()
-        self.board_bot = Bot().bir()
+        self.board, self.ships, list_pos_ship_player = Customization(screen, fps, path, theme).bir()
+        self.bot = Bot(difficulty)
+        self.board_bot, list_pos_ship_bot = self.bot.bir()
 
         self.all_sprites_1 = pg.sprite.Group()
         self.all_sprites_2 = pg.sprite.Group()
@@ -138,13 +285,30 @@ class PlayWithBot:
 
         while running:
             self.sc.fill(self.t[0])
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    terminate()
+                    return
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):
                         return
+
+                if n_player == 20:
+                    print('Ты выйграл')
+                    return
+                elif n_bot == 20:
+                    print('Ты проиграл')
+                    return
+
+                if num % 2 == 1:
+                    rect = self.bot.xod_008()
+                    self.all_sprites_1.update(self.board, rect, 1)
+                    self.all_sprites_1.update(self.board, test_bax(1), 20)
+
+                else:
+                    self.all_sprites_2.update(self.board_bot, event)
+                    self.all_sprites_2.update(self.board, test_bax(), 30)
 
             self.map_draw(self.map_indent_left, self.map_indent_top)
             self.map_draw_2(self.map_indent_left + int(display_width * 0.5), self.map_indent_top)
@@ -153,6 +317,7 @@ class PlayWithBot:
             self.all_sprites_2.draw(self.sc)
             self.all_sprite_gg.draw(self.sc)
             self.ships.draw(self.sc)
+            image_popal_bot_group.draw(self.sc)
 
             self.clock.tick(self.fps)
             pg.display.flip()

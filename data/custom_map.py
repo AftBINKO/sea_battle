@@ -9,6 +9,8 @@ display_height = 0
 all_sprites_cell = pg.sprite.Group()
 all_sprites = pg.sprite.Group()
 
+pos_all = []
+
 if_yes_rect_map = []  # позиция корабля на поле
 
 list_pos_if_yes = []  # позиции которые попадают в клетки
@@ -21,12 +23,14 @@ board = [[0] * 10 for _ in range(10)]  # игровое поле
 
 
 def up_per():
-    global if_downloads, if_yes_rect_map, list_pos_if_yes, board, test_007
+    global if_downloads, if_yes_rect_map, list_pos_if_yes, board, test_007, pos_all
     if_yes_rect_map = []  # позиция корабля на поле
 
     list_pos_if_yes = []  # позиции которые попадают в клетки
 
     if_downloads = False  # можно ли ставить корабль на данную позицыю
+
+    pos_all = []
 
     test_007 = 0
 
@@ -102,6 +106,7 @@ class Cell(pg.sprite.Sprite):
 
             if len(list_pos_if_yes) == len(list_007) and test_board(list_pos_if_yes, hh):
                 if_downloads = True
+                pos_all.append(list_pos_if_yes.copy())
                 downloads_tic_tac(list_pos_if_yes)
                 del list_pos_if_yes[:]
 
@@ -220,7 +225,11 @@ class Customization:
         self.sc = screen
         self.fps = fps
         self.path = path
-        self.t = theme
+
+        if theme:
+            self.t = (255, 255, 255), (0, 0, 0)
+        else:
+            self.t = (0, 0, 0), (255, 255, 255)
 
         self.all_sprite_gg = pg.sprite.Group()
 
@@ -346,4 +355,4 @@ class Customization:
                      self.size * g + self.co + self.map_indent_top, self.t[0], all_sprites_cell)
 
     def bir(self):
-        return board, all_sprites
+        return board, all_sprites, pos_all
