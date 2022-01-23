@@ -104,7 +104,7 @@ def create_window(path_config):
     version, screensize, screenmode, fps = get_values(path_config, "version", "screensize",
                                                       "screenmode", "fps")
 
-    if version != "1.2 BETA":
+    if version != "1.0":
         raise ValueError("The configuration file version is not supported")
 
     size, screen = tuple(map(int, screensize.split("x"))), None
