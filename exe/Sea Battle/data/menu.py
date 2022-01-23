@@ -1,27 +1,31 @@
-# импортируем библиотеки
 import sqlite3
 import pygame
 import os
 
-from cv2 import VideoCapture  # для воспроизвдения заставки покадрово
+from cv2 import VideoCapture  # для воспроизведения заставки по кадрам
 from datetime import datetime, date
 
 from data.main_functions import terminate, load_image, create_sprite, put_sprite, set_statistic, \
-    format_xp, get_value, add_fon
+    format_xp, get_values, add_fon
 
 
 class Menu:
-    def __init__(self, screen, fps, path):
-        self.screen, self.fps, self.path, self.size, self.n = screen, fps, path, tuple(
-            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x')))), 0
+    """Главное меню"""
 
-    # функция воспроизведения заставки
+    def __init__(self, screen, fps, path):
+        self.path_config, self.path_statistic = os.path.join(
+            path, "config.txt"), os.path.join(path, "statistic.txt")
+        self.screen, self.fps, self.size, self.n = screen, fps, tuple(
+            map(int, (get_values(self.path_config, "screensize")[0].split("x")))), 0
+
     def screensaver(self):
-        pygame.mixer.init()
+        """Заставка"""
         # воспроизводим видео, в соответствии разрешения
         cap = VideoCapture(os.path.join("data", f"screensaver{self.size[1]}.mp4"))
+
         # т.к видео воспроизводится без звука, мы его добавим вручную
         s = pygame.mixer.Sound(os.path.join("data", "screensaver.wav"))
+
         running, img = cap.read()  # running — кадры остались? img — изображение
         shape = img.shape[1::-1]
         clock = pygame.time.Clock()
@@ -33,16 +37,19 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
+
             try:
                 self.screen.blit(pygame.image.frombuffer(img.tobytes(), shape, "BGR"), (0, 0))
             except AttributeError:
                 pass
+
             pygame.display.update()
         s.stop()
 
     def menu(self):
-        buttons_tuple = ('Play', 'Play_With_Bot', 'Settings', 'Achievements')
-        fon = add_fon(get_value(f"{self.path}\config.txt", 'theme')[0], self.size)
+        """Меню"""
+        buttons_tuple = ("Play", "Play_With_Bot", "Settings", "Achievements")
+        fon = add_fon(get_values(self.path_config, "theme")[0], self.size)
 
         clock = pygame.time.Clock()
 
@@ -72,19 +79,24 @@ class Menu:
             if right:
                 if x < (300 * self.n) - 1:
                     x += 150
+
                 else:
                     x += 1  # корректировка
                     right = False
+
             if left:
                 if x > (300 * self.n) + 1:
                     x -= 150
+
                 else:
                     x -= 1
                     left = False
+
             if down:
                 c -= 2
                 if c <= (230 if self.size[1] == 768 else 330):
                     down = False
+
             else:
                 c += 2
                 if c >= (250 if self.size[1] == 768 else 350):
@@ -116,9 +128,11 @@ class Menu:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         terminate()
+
                     elif event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
                             s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
+
                             try:
                                 if left_arrow.rect.collidepoint(event.pos):
                                     s.play()
@@ -127,6 +141,7 @@ class Menu:
                                     self.n -= 1
                             except AttributeError:
                                 pass
+
                             try:
                                 if right_arrow.rect.collidepoint(event.pos):
                                     s.play()
@@ -135,19 +150,23 @@ class Menu:
                                     self.n += 1
                             except AttributeError:
                                 pass
+
                             if frame.rect.collidepoint(event.pos):
                                 pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                                 if self.n == 4:
                                     terminate()
                                 return buttons_tuple[self.n]
+
                         elif event.button == 4 and self.n - 1 >= 0:
                             x = 300 * self.n + 1
                             left = True
                             self.n -= 1
+
                         elif event.button == 5 and self.n + 1 <= 4:
                             x = 300 * self.n - 1
                             right = True
                             self.n += 1
+
                     elif event.type == pygame.KEYDOWN:
                         s = pygame.mixer.Sound(os.path.join("data", "click.ogg"))
                         if event.key == pygame.K_LEFT and self.n - 1 >= 0:
@@ -155,11 +174,13 @@ class Menu:
                             x = 300 * self.n + 1
                             left = True
                             self.n -= 1
+
                         elif event.key == pygame.K_RIGHT and self.n + 1 <= 4:
                             s.play()
                             x = 300 * self.n - 1
                             right = True
                             self.n += 1
+
                         elif event.key == pygame.K_RETURN:
                             pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                             if self.n == 4:
@@ -171,16 +192,16 @@ class Menu:
             self.screen.blit(fon, (0, 0))
             menu_sprites.draw(self.screen)
             arrow_sprites.draw(self.screen)
-            text = format_xp(f"{self.path}/statistic.txt")[0].split('\n')
+            text = format_xp(self.path_statistic)[0].split("\n")
             y = 0
             for line in text:
                 self.screen.blit(
-                    pygame.font.Font(os.path.join("data", 'font_1.ttf'), 50).render(line, True,
+                    pygame.font.Font(os.path.join("data", "font_1.ttf"), 50).render(line, True,
                                                                                     (255, 255, 255)),
                     (0, y))
                 y += 50
             self.screen.blit(
-                pygame.font.Font(os.path.join("data", 'font_1.ttf'), 50).render('Морской Бой', True,
+                pygame.font.Font(os.path.join("data", "font_1.ttf"), 50).render("Морской Бой", True,
                                                                                 (255, 255, 255)), (
                     50, 200 if self.size[1] == 768 else 300))
 
@@ -188,17 +209,25 @@ class Menu:
             clock.tick(self.fps)
 
     def set_n(self, n):
+        """Поставить элемент"""
         self.n = n
 
     def get_n(self):
+        """Получить элемент"""
         return self.n
 
 
 class Achievements:
+    """Достижения"""
+
     def __init__(self, screen, fps, path):
+        self.path_config, self.path_achievements, self.path_statistic = os.path.join(
+            path, "config.txt"), os.path.join(path, "achievements.sqlite"), os.path.join(
+            path, "statistic.txt")
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
-            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
-        with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
+            map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
+
+        with sqlite3.connect(self.path_achievements) as con:
             cur = con.cursor()
 
             """Эти строки сортируют сначала по описанию, потом по заголовку, id, опыту, дате,
@@ -207,28 +236,29 @@ class Achievements:
                 sorted(cur.execute("""SELECT * FROM achievements""").fetchall(), key=lambda x: x[2]),
                 key=lambda x: x[1]), key=lambda x: int(x[0])), key=lambda x: int(x[6]), reverse=True)
             try:
-                s = sorted(s, key=lambda x: date(int(x[5].split('.')[2]), int(x[5].split('.')[1]),
-                                                 int(x[5].split('.')[0])))
+                s = sorted(s, key=lambda x: date(int(x[5].split(".")[2]), int(x[5].split(".")[1]),
+                                                 int(x[5].split(".")[0])))
             except AttributeError:
                 pass
             self.achievements = sorted(sorted(s, key=lambda x: int(x[3]), reverse=True),
                                        key=lambda x: float(x[4]), reverse=True)
 
     def menu(self):
-        fon = pygame.transform.scale(load_image('fon_4.png'), self.size)
+        """Меню достижений"""
+        fon = pygame.transform.scale(load_image("fon_4.png"), self.size)
 
         clock = pygame.time.Clock()
 
         menu_sprites = pygame.sprite.Group()
 
         m = pygame.sprite.Sprite()
-        create_sprite(m, f'mat_2_{self.size[1]}.png', 0, 0, menu_sprites)
+        create_sprite(m, f"mat_2_{self.size[1]}.png", 0, 0, menu_sprites)
 
         x = pygame.sprite.Sprite()
-        create_sprite(x, 'x.png', self.size[0] - 100, 50, menu_sprites)
+        create_sprite(x, "x.png", self.size[0] - 100, 50, menu_sprites)
 
         title = pygame.sprite.Sprite()
-        create_sprite(title, 'achievements_title.png', 50, 50, menu_sprites)
+        create_sprite(title, "achievements_title.png", 50, 50, menu_sprites)
 
         a, f = 150, 0
         while True:
@@ -263,12 +293,11 @@ class Achievements:
                 achievement = self.achievements[i]
 
                 mat = pygame.sprite.Sprite()
-                create_sprite(mat, f'mat_{str(achievement[4]).split(".")[0]}_{self.size[1]}.png', 50,
+                create_sprite(mat, f"mat_{str(achievement[4]).split('.')[0]}_{self.size[1]}.png", 50,
                               y, achievement_sprites)
 
                 frame = pygame.sprite.Sprite()
-                create_sprite(frame, f'frame_{achievement[3]}.png', 145, y + 25,
-                              achievement_sprites)
+                create_sprite(frame, f"frame_{achievement[3]}.png", 145, y + 25, achievement_sprites)
 
                 try:
                     image = pygame.sprite.Sprite()
@@ -293,7 +322,7 @@ class Achievements:
 
             for j in text:
                 self.screen.blit(
-                    pygame.font.Font(os.path.join("data", f'font_{str(j[5])}.ttf'), j[4]).render(
+                    pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
                         j[0], True, j[1]), (j[2], j[3]))
 
             menu_sprites.draw(self.screen)
@@ -302,13 +331,14 @@ class Achievements:
             clock.tick(self.fps)
 
     def set_progress(self, number, i, add=False):
-        with sqlite3.connect(os.path.join(self.path, 'achievements.sqlite')) as con:
+        """Установить прогресс"""
+        with sqlite3.connect(self.path_achievements) as con:
             cur = con.cursor()
             if float(cur.execute(f"""SELECT progress FROM achievements
 WHERE id = {i}""").fetchone()[0]) != 1:
                 if add:
-                    pre_result = float(cur.execute(f'''SELECT progress FROM achievements
-    WHERE id = {i}''').fetchone()[0]) + number
+                    pre_result = float(cur.execute(f"""SELECT progress FROM achievements
+    WHERE id = {i}""").fetchone()[0]) + number
                     result = pre_result if pre_result < 1 else 1
                 else:
                     result = number if number < 1 else 1
@@ -322,6 +352,6 @@ WHERE id = {i}""").fetchone()[0]) == 1:
 SET date_of_completion = '{datetime.now().date().strftime('%d.%m.%Y')}'
 WHERE id = {i}""")
                     con.commit()
-                    set_statistic(f"{self.path}\statistic.txt", int(cur.execute(
+                    set_statistic(self.path_statistic, int(cur.execute(
                         f"""SELECT experience FROM achievements
 WHERE id = {i}""").fetchone()[0]))

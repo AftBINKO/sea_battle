@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 
-from data.main_functions import create_sprite, get_value, terminate
+from data.main_functions import create_sprite, get_values, terminate
 
 display_width = 0
 display_height = 0
@@ -242,9 +242,9 @@ class Customization:
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.screensize = tuple(
-            map(int, (get_value(f"{path}\config.txt", "screensize")[0].split('x'))))
+            map(int, (get_values(os.path.join(path, "config.txt"), "screensize")[0].split("x"))))
         self.co = int(display_width * 0.02)
-        self.font = pg.font.Font(os.path.join("data", f'font_2.ttf'), int(self.size * 0.8))
+        self.font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.8))
 
         self.map_indent_top = 50
         self.map_indent_left = 50
@@ -258,7 +258,7 @@ class Customization:
 
     def map_draw(self, x, y):
 
-        slo = list('АБВГДЕЖЗИК')  # буквы ё не существует)
+        slo = list("АБВГДЕЖЗИК")  # буквы ё не существует)
 
         for i in range(10):
             text = self.font.render(str(i), True, self.t[1])
@@ -281,14 +281,14 @@ class Customization:
         pg.draw.rect(self.sc, self.t[1], (self.x_ship - 30, self.y_ship - 10,
                                           (int(display_width * 0.035)) * 7,
                                           (int(display_width * 0.035)) * 6), 4)
-        text = self.font.render('Корабли:', True, self.t[1])
+        text = self.font.render("Корабли:", True, self.t[1])
         self.sc.blit(text, (self.x_ship, self.y_ship))
 
-        font = pg.font.Font(os.path.join("data", f'font_2.ttf'), int(self.size * 0.4))
-        text = font.render('Для поворота корабля нажмите пробел', True, self.t[1])
+        font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.4))
+        text = font.render("Для поворота корабля нажмите пробел", True, self.t[1])
         self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69)))
 
-        text = font.render('Если корабль не ставиться значит там его нельзя поставить!!!!', True,
+        text = font.render("Если корабль не ставиться значит там его нельзя поставить!!!!", True,
                            self.t[1])  # логично
         self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.4 + 240)))
 
@@ -296,15 +296,15 @@ class Customization:
         running = True
 
         x = pg.sprite.Sprite()
-        create_sprite(x, 'x' + ('_black' if self.t[0] == (255, 255, 255) else '') + '.png',
+        create_sprite(x, "x" + ("_black" if self.t[0] == (255, 255, 255) else "") + ".png",
                       display_width - 75, 30, self.all_sprite_gg)
 
         reset = pg.sprite.Sprite()
-        create_sprite(reset, 'reset' + ('_black' if self.t[0] == (255, 255, 255) else '') + '.png',
+        create_sprite(reset, "reset" + ("_black" if self.t[0] == (255, 255, 255) else "") + ".png",
                       display_width - 300, display_height - 100, self.all_sprite_gg)
 
         go = pg.sprite.Sprite()
-        create_sprite(go, 'go.png', display_width - 600, display_height - 100, self.all_sprite_gg)
+        create_sprite(go, "go.png", display_width - 600, display_height - 100, self.all_sprite_gg)
 
         while running:
             self.sc.fill(self.t[0])
@@ -312,8 +312,20 @@ class Customization:
                 if event.type == pg.QUIT:
                     terminate()
 
-                if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-                    return
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        raise SystemExit
+
+                    elif event.key == pg.K_r:
+                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        up_per()
+                        self.add_ship()
+                        self.add_cells()
+
+                    elif event.key == pg.K_RETURN and test_007 == 10:
+                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        return
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if x.rect.collidepoint(event.pos):

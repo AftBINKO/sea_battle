@@ -18,7 +18,7 @@ class Level:
     def draw_map(self):
 
         font = pg.font.Font(None, 60)
-        text = font.render('Выберите уровень:', True, (255, 255, 255))
+        text = font.render("Выберите уровень:", True, (255, 255, 255))
         self.sc.blit(text, (self.display_width // 2 - 200, 100))
 
     def main(self):
@@ -27,22 +27,22 @@ class Level:
         y_y = 300
 
         x = pg.sprite.Sprite()
-        create_sprite(x, 'x.png', self.display_width - 75, 30, self.all_sprite)
+        create_sprite(x, "x.png", self.display_width - 75, 30, self.all_sprite)
 
         lev_1 = pg.sprite.Sprite()
-        create_sprite(lev_1, 'lev_1.png', x_x, y_y, self.all_sprite)
+        create_sprite(lev_1, "lev_1.png", x_x, y_y, self.all_sprite)
 
         lev_2 = pg.sprite.Sprite()
-        create_sprite(lev_2, 'lev_2.png', x_x, y_y + 60, self.all_sprite)
+        create_sprite(lev_2, "lev_2.png", x_x, y_y + 60, self.all_sprite)
 
         lev_3 = pg.sprite.Sprite()
-        create_sprite(lev_3, 'lev_3.png', x_x, y_y + 60 * 2, self.all_sprite)
+        create_sprite(lev_3, "lev_3.png", x_x, y_y + 60 * 2, self.all_sprite)
 
         lev_4 = pg.sprite.Sprite()
-        create_sprite(lev_4, 'lev_4.png', x_x, y_y + 60 * 3, self.all_sprite)
+        create_sprite(lev_4, "lev_4.png", x_x, y_y + 60 * 3, self.all_sprite)
 
         lev_5 = pg.sprite.Sprite()
-        create_sprite(lev_5, 'lev_5.png', x_x, y_y + 60 * 4, self.all_sprite)
+        create_sprite(lev_5, "lev_5.png", x_x, y_y + 60 * 4, self.all_sprite)
 
         while running:
             self.sc.fill((0, 0, 0))
