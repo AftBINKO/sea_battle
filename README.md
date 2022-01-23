@@ -1,5 +1,8 @@
 # [EN] Sea Battle
 
+## Installation
+To install the game, go to the setup folder and run Setup.exe
+
 ## Information
 The project will be the embodiment of the game of the same name, but with a plot. At first we will be greeted by a screensaver, and then a menu, as in many modern games. The menu will have items such as: story mode, game against the bot, achievements, settings, exit. Levels - missions in story mode. The settings will be stored in the configuration file config.txt, achievements will be stored in the achievements_db.sqlite database, story missions will be in the format "mission_n.csv. The gameplay consists of two 10x10 fields. There are different rewards for winning at different difficulty levels. The winner is the one who blew up all the ships. The points are displayed on the final window.
 
@@ -15,6 +18,9 @@ The project will be the embodiment of the game of the same name, but with a plot
 - Ekaterina. Andrey's Love
 
 # [RU] Морской бой
+
+## Установка
+Чтобы установить игру, перейдите в папку setup и запустите Setup.exe
 
 ## Информация
 
