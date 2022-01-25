@@ -239,8 +239,8 @@ class Cell(pg.sprite.Sprite):
                     open_cell_player.append(self.pos)
 
         else:
-            if event.type == pg.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos) and \
-                    self.pos not in open_cell_player:
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and self.rect.collidepoint(
+                    event.pos) and self.pos not in open_cell_player:
                 if board[self.pos[1]][self.pos[0]] == 1:
                     self.image = pg.transform.scale(Cell.image_popal, (self.size - 1, self.size - 1))
                     n_player += 1
@@ -390,8 +390,10 @@ class PlayWithBot:
                 if event.type == pg.QUIT:
                     terminate()
 
-                if (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE) or (
-                        event.type == pg.MOUSEBUTTONDOWN and x.rect.collidepoint(event.pos)):
+                a = event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
+                b = event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and x.rect.collidepoint(
+                    event.pos)
+                if a or b:
                     pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                     return
 

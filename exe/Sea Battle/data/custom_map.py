@@ -327,7 +327,7 @@ class Customization:
                         pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
                         return
 
-                if event.type == pg.MOUSEBUTTONDOWN:
+                if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                     if x.rect.collidepoint(event.pos):
                         pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
                         raise SystemExit
