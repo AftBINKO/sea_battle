@@ -5,10 +5,12 @@ import os
 
 from datetime import datetime
 
-from data.main_functions import create_window, format_xp, extract_files, get_values
+from data.main_functions import create_window, format_xp, extract_files, get_values, set_statistic, \
+    get_values_sqlite
+from data.achievements import Achievements, Titles
 from data.settings import Settings, About
-from data.menu import Menu, Achievements
 from data.play import Play, PlayWithBot
+from data.menu import Menu, Statistic
 
 
 def main():
@@ -72,7 +74,18 @@ def main():
                     break
 
         elif result == "Achievements":
-            achievements.menu()
+            while True:
+                titles, result_achievements = Titles(screen, fps, path), achievements.menu()
+                if result_achievements is None:
+                    break
+                elif result_achievements == "titles":
+                    while True:
+                        if titles.menu() is None:
+                            break
+
+        elif result == "Statistic":
+            statistic = Statistic(screen, fps, path)
+            statistic.menu()
 
         elif result == "Play_With_Bot":
             d = ["easiest", "easy", "normal", "hard", "impossible"].index(
@@ -95,6 +108,12 @@ def main():
                                         theme_value == "\
 by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
                                 get_values(path_statistic, "mission")[0], "Андрей")
+                    break
+
+        elif result == "Titles":
+            titles = Titles(screen, fps, path)
+            while True:
+                if titles.menu() is None:
                     break
 
         """Установка прогресса для достижений"""
@@ -123,6 +142,11 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
         if int(get_values(path_statistic, "impossible_levels")[0]) >= 1:
             achievements.set_progress(1, 30)
 
+        set_statistic(path_statistic, len(get_values_sqlite(
+            path_achievements, "achievements", "progress = 1", 'id')),
+                      value="completed_achievements", add=False)
+
 
 if __name__ == "__main__":
+    # TODO: Заменить все заголовки на текст, написать описание к функциям, заменить кавычки
     sys.exit(main())

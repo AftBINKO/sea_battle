@@ -1,6 +1,7 @@
 from datetime import datetime
 from zipfile import ZipFile
 
+import sqlite3
 import pygame
 import sys
 import os
@@ -83,13 +84,26 @@ def format_xp(path):
 {x} XP""", 100, x
 
 
-def get_values(path, *values):
+def get_values(path, *values, a=False):
     """Функция получает значения переменной в файле"""
     with open(path, encoding="utf-8") as file:
         file = dict(map(lambda x: tuple(x.split(": ")), [line for line in list(
             map(lambda x: x.strip("\n"), file.readlines())) if line != "" if
                                                          line[0] != "#"]))
-        return tuple([file[value] for value in values])
+        return tuple([value for value in file.values()]) if a else tuple(
+            [file[value] for value in values])
+
+
+def get_values_sqlite(path, table, condition=None, *values):
+    """Функция получает значения переменной в базе данных"""
+    with sqlite3.connect(path) as con:
+        cur = con.cursor()
+
+        c = f"SELECT {', '.join(values)} FROM {table}"
+        if condition is not None:
+            c += f"\nWHERE {condition}"
+
+        return cur.execute(c).fetchall()
 
 
 def extract_files(path_archive, path_extract, *values):
@@ -104,7 +118,7 @@ def create_window(path_config):
     version, screensize, screenmode, fps = get_values(path_config, "version", "screensize",
                                                       "screenmode", "fps")
 
-    if version != "1.01":
+    if version != "1.1":
         raise ValueError("The configuration file version is not supported")
 
     size, screen = tuple(map(int, screensize.split("x"))), None

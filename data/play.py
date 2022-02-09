@@ -278,7 +278,7 @@ class GameOver:
 
         set_statistic(path_statistic, xp)
 
-        if difficulty == 5:
+        if difficulty == 5 and win:
             set_statistic(path_statistic, 1, value="impossible_levels")
 
         self.menu()
@@ -300,7 +300,7 @@ class GameOver:
 
         texts = []
         for line in [[("Победа" if self.win else "Поражение"), 100, 100, 1],
-                     [f"Счёт: {self.score}", self.size[1] // 2 - 25, 25, 2],
+                     [f"Счёт: {self.score * 5}", self.size[1] // 2 - 25, 25, 2],
                      [f"Награда: {self.xp} XP", self.size[1] // 2, 25, 2]]:
             text = pg.font.Font(os.path.join("data", f"font_{line[3]}.ttf"), line[2]).render(
                 line[0], True, (255, 255, 255))
