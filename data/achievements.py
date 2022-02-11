@@ -52,11 +52,21 @@ class Achievements:
         create_sprite(title_page, "title_page.png", self.size[0] - 300, self.size[1] - 100,
                       menu_sprites)
 
+        a = 100
+        progress_line = pygame.sprite.Sprite()
+        create_sprite(progress_line, "progress_line.png", a, self.size[1] - 100, menu_sprites)
+        a += 10
+
+        completed = int(
+            len(list(filter(lambda q: q[4] == 1, self.achievements))) / len(self.achievements) * 100)
+        if completed - 4 > 0:  # Учитываем погрешность из-за закруглённых краёв
+            for _ in range(completed - 4):
+                progress = pygame.sprite.Sprite()
+                create_sprite(progress, "progress.png", a, self.size[1] - 100, menu_sprites)
+                a += 5
+
         x = pygame.sprite.Sprite()
         create_sprite(x, "x.png", self.size[0] - 100, 50, menu_sprites)
-
-        title = pygame.sprite.Sprite()
-        create_sprite(title, "achievements_title.png", 50, 50, menu_sprites)
 
         a, f = 150, 0
         while True:
@@ -90,7 +100,10 @@ class Achievements:
 
             self.screen.blit(fon, (0, 0))
 
-            achievement_sprites, y, text = pygame.sprite.Group(), a, []
+            achievement_sprites, y, text, text_achievements = pygame.sprite.Group(), a, [
+                ["Достижения", (255, 255, 255), 50, 50, 50, 1],
+                [f"{completed}%", (0, 0, 0), 625,
+                 self.size[1] - 100, 25, 1]], []
             for i, achievement in enumerate(self.achievements, start=1):
                 mat = pygame.sprite.Sprite()
                 create_sprite(mat, f"mat_{str(achievement[4]).split('.')[0]}_{self.size[1]}.png", 50,
@@ -105,33 +118,44 @@ class Achievements:
                 except TypeError:
                     pass
 
-                text.extend([[str(i), (255, 255, 255), 75, y + 25, 50, 1],
-                             [achievement[1], (255, 255, 255), 400, y + 25, 50, 1],
-                             [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
-                             ["Прогресс", (192, 192, 192), 1000 if self.size[1] == 768 else 1100,
-                              y + 10, 25, 2], [f"{int(achievement[4] * 100)}%", (255, 255, 255),
-                                               1000 if self.size[1] == 768 else 1100, y + 45, 40, 1],
-                             ["Награда", (192, 192, 192), 1150 if self.size[1] == 768 else 1500,
-                              y + 10, 25, 2], [f"{achievement[6]} XP", (255, 255, 255),
-                                               1150 if self.size[1] == 768 else 1500, y + 45, 40, 1],
-                             [achievement[5], (255, 255, 255), 1000 if self.size[1] == 768 else 1100,
-                              y + 100, 25, 2]])
+                text_achievements.extend([[str(i), (255, 255, 255), 75, y + 25, 50, 1],
+                                          [achievement[1], (255, 255, 255), 400, y + 25, 50, 1],
+                                          [achievement[2], (192, 192, 192), 400, y + 100, 20, 2],
+                                          ["Прогресс", (192, 192, 192),
+                                           1000 if self.size[1] == 768 else 1100,
+                                           y + 10, 25, 2],
+                                          [f"{int(achievement[4] * 100)}%", (255, 255, 255),
+                                           1000 if self.size[1] == 768 else 1100, y + 45, 40, 1],
+                                          ["Награда", (192, 192, 192),
+                                           1150 if self.size[1] == 768 else 1500,
+                                           y + 10, 25, 2], [f"{achievement[6]} XP", (255, 255, 255),
+                                                            1150 if self.size[1] == 768 else 1500,
+                                                            y + 45, 40, 1],
+                                          [achievement[5], (255, 255, 255),
+                                           1000 if self.size[1] == 768 else 1100,
+                                           y + 100, 25, 2]])
                 if achievement[8] is not None:
                     with sqlite3.connect(self.path_achievements) as con:
                         cur = con.cursor()
-                        text.append([cur.execute(f"""SELECT name FROM titles
+                        text_achievements.append([cur.execute(f"""SELECT name FROM titles
 WHERE id = {achievement[8]}""").fetchone()[0], (255, 255, 0),
-                                     1150 if self.size[1] == 768 else 1500, y + 100, 25, 1])
+                                                  1150 if self.size[1] == 768 else 1500, y + 100, 25,
+                                                  1])
                 y += 175
 
             achievement_sprites.draw(self.screen)
 
-            for j in text:
+            for j in text_achievements:
                 self.screen.blit(
                     pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
                         j[0], True, j[1]), (j[2], j[3]))
 
             menu_sprites.draw(self.screen)
+
+            for j in text:
+                self.screen.blit(
+                    pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
+                        j[0], True, j[1]), (j[2], j[3]))
 
             pygame.display.flip()
             clock.tick(self.fps)
@@ -155,7 +179,7 @@ WHERE id = {i}""")
                 if float(cur.execute(f"""SELECT progress FROM achievements
 WHERE id = {i}""").fetchone()[0]) == 1:
                     cur.execute(f"""UPDATE achievements
-SET date_of_completion = '{datetime.now().date().strftime('%d.%m.%Y')}'
+SET date_of_completion = '{datetime.now().date().strftime("%d.%m.%Y")}'
 WHERE id = {i}""")
                     con.commit()
                     xp, title = cur.execute(f"""SELECT experience, title FROM achievements
@@ -163,6 +187,7 @@ WHERE id = {i}""").fetchone()
                     set_statistic(self.path_statistic, xp)
                     if title is not None:
                         self.set_title(title)
+                    return True
 
     def set_title(self, i):
         """Открыть доступ к титулу"""
@@ -247,14 +272,14 @@ class Titles:
                         for button in p.keys():
                             if button.rect.collidepoint(event.pos):
                                 s.play()
-                                set_statistic(self.path_statistic, p[button], value='title',
+                                set_statistic(self.path_statistic, p[button], value="title",
                                               add=False)
-                                return 'replay'
+                                return "replay"
                         for button in n.keys():
                             if button.rect.collidepoint(event.pos):
                                 s.play()
-                                set_statistic(self.path_statistic, 'not', value='title', add=False)
-                                return 'replay'
+                                set_statistic(self.path_statistic, "not", value="title", add=False)
+                                return "replay"
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     s.play()
                     return

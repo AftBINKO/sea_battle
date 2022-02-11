@@ -267,8 +267,9 @@ class GameOver:
         self.score = score
         self.xp = xp
 
-        for val in [[1, "games"], [1, "victories" if win else "defeats"]]:
-            set_statistic(path_statistic, val[0], value=val[1])
+        set_statistic(path_statistic, 1, value="games")
+        if win is not None:
+            set_statistic(path_statistic, 1, value="victories" if win else "defeats")
 
         if mission is not None and win:
             if mission not in ["8", "8a", "8b"]:
@@ -299,13 +300,16 @@ class GameOver:
                       game_over_sprites)
 
         texts = []
-        for line in [[("Победа" if self.win else "Поражение"), 100, 100, 1],
-                     [f"Счёт: {self.score * 5}", self.size[1] // 2 - 25, 25, 2],
-                     [f"Награда: {self.xp} XP", self.size[1] // 2, 25, 2]]:
+        for line in [
+            [("Победа" if self.win else ("Игра завершена" if self.win is None else "Поражение")),
+             100, 100, 1],
+            [f"Счёт:", self.size[1] // 2 - 25, 25, 2], [
+                f"Награда: {self.xp} XP", self.size[1] // 2 + 25, 25, 2]]:
             text = pg.font.Font(os.path.join("data", f"font_{line[3]}.ttf"), line[2]).render(
                 line[0], True, (255, 255, 255))
             texts.append([text, text.get_rect(center=(self.size[0] // 2, line[1]))])
 
+        score, n = self.score * 5, 0
         while True:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -324,6 +328,14 @@ class GameOver:
 
             for text in texts:
                 self.screen.blit(text[0], text[1])
+
+            if n < score:
+                n += 1
+            line = [str(n), self.size[1] // 2, 25, 2]
+            text = pg.font.Font(os.path.join("data", f"font_{line[3]}.ttf"), line[2]).render(
+                line[0], True, (255, 255, 255))
+            text = [text, text.get_rect(center=(self.size[0] // 2, line[1]))]
+            self.screen.blit(text[0], text[1])
 
             pg.display.flip()
             clock.tick(self.fps)
@@ -398,10 +410,21 @@ class PlayWithBot:
                     return
 
                 if n_player == 20:
-                    return GameOver(self.sc, self.fps, self.path, True, n_player, self.xp,
+                    if self.xp == "Farm":
+                        self.xp = n_player * [0, 5, 10, 20, 40, 500][self.difficulty]
+                        win = None
+                    else:
+                        win = True
+                    return GameOver(self.sc, self.fps, self.path, win, n_player, self.xp,
                                     self.difficulty, mission=self.mission)
                 elif n_bot == 20:
-                    return GameOver(self.sc, self.fps, self.path, False, n_player, 0,
+                    if self.xp == "Farm":
+                        self.xp = n_player * [0, 5, 10, 20, 40, 500][self.difficulty]
+                        win = None
+                    else:
+                        self.xp = 0
+                        win = False
+                    return GameOver(self.sc, self.fps, self.path, win, n_player, self.xp,
                                     self.difficulty, mission=self.mission)
 
                 if num % 2 == 1:
@@ -537,9 +560,6 @@ class Play:
         x = pg.sprite.Sprite()
         create_sprite(x, "x.png", self.size[0] - 100, 50, menu_sprites)
 
-        title = pg.sprite.Sprite()
-        create_sprite(title, "play_title.png", 50, 50, menu_sprites)
-
         q, n, mission_file = 255 if self.size[1] == 768 else 360, 0, os.path.join(
             os.path.join("data", "missions"),
             "mission_" + get_values(self.path_statistic, "mission")[0] + ".txt")
@@ -557,7 +577,8 @@ class Play:
             play = pg.sprite.Sprite()
             create_sprite(play, "play_mini.png", self.size[0] - 150, self.size[1] - 100,
                           menu_sprites)
-        t = [["Награда:", (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25, 1],
+        t = [["Задания", (255, 255, 255), 50, 50, 50, 1],
+             ["Награда:", (255, 255, 255), self.size[0] - 300, self.size[1] - 130, 25, 1],
              [f"{get_values(mission_file, 'reward')[0]} XP", (255, 255, 255),
               self.size[0] - 215,
               self.size[1] - 130, 25, 1],

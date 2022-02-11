@@ -106,11 +106,14 @@ def get_values_sqlite(path, table, condition=None, *values):
         return cur.execute(c).fetchall()
 
 
-def extract_files(path_archive, path_extract, *values):
+def extract_files(path_archive, path_extract, *values, a=False):
     """Функция распаковывает нужные файлы"""
     with ZipFile(path_archive, "r") as archive:
-        for file in values:
-            archive.extract(file, path_extract)
+        if a:
+            archive.extractall(path_extract)
+        else:
+            for file in values:
+                archive.extract(file, path_extract)
 
 
 def create_window(path_config):

@@ -8,9 +8,9 @@ from datetime import datetime
 from data.main_functions import create_window, format_xp, extract_files, get_values, set_statistic, \
     get_values_sqlite
 from data.achievements import Achievements, Titles
+from data.menu import Menu, Statistic, Instruction
 from data.settings import Settings, About
 from data.play import Play, PlayWithBot
-from data.menu import Menu, Statistic
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
 
     if not os.path.isdir(path):
         os.mkdir(path)
-        extract_files(archive, path, cfg, ach, stat)
+        extract_files(archive, path, a=True)
     else:
         if not os.path.isfile(path_config):
             extract_files(archive, path, cfg)
@@ -43,21 +43,23 @@ def main():
 
     screen, fps = create_window(path_config)  # создаём окно
 
-    menu, settings, achievements = Menu(screen, fps, path), Settings(
+    menu, settings, achievements = Menu(screen, fps, path, None), Settings(
         screen, fps, path), Achievements(screen, fps, path)
 
     pygame.mouse.set_visible(False)  # погашаем мышь
     menu.screensaver()  # заставка
     pygame.mouse.set_visible(True)  # показываем мышь
 
-    achievements.set_progress(1, 1, True)  # достижение за вход в игру
+    # переменная push означает, получено ли достижение сейчас, чтобы уведомить об этом игрока
+    push = achievements.set_progress(1, 1, True)  # достижение за вход в игру
 
     while True:
         x = menu.get_n()  # сохраним значение x в переменную
 
         # обновляем достижения, меню и настройки
-        menu, settings, achievements = Menu(screen, fps, path), Settings(
+        menu, settings, achievements = Menu(screen, fps, path, push), Settings(
             screen, fps, path), Achievements(screen, fps, path)
+        push = None  # обнулили
         menu.set_n(x)  # и вставим обратно
 
         result = menu.menu()  # меню
@@ -87,11 +89,23 @@ def main():
             statistic = Statistic(screen, fps, path)
             statistic.menu()
 
+        elif result == "Instruction":
+            instruction = Instruction(screen, fps, path)
+            instruction.menu()
+
         elif result == "Play_With_Bot":
             d = ["easiest", "easy", "normal", "hard", "impossible"].index(
                 get_values(path_config, "difficulty")[0]) + 1  # получаем сложность
             theme_value = get_values(path_config, "theme")[0]
             PlayWithBot(screen, fps, path, [0, 150, 300, 600, 1200, 10000][d], d,
+                        theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
+                            datetime.now().time().strftime("%H")) <= 18))
+
+        elif result == "Farm":
+            d = ["easiest", "easy", "normal", "hard", "impossible"].index(
+                get_values(path_config, "difficulty")[0]) + 1  # получаем сложность
+            theme_value = get_values(path_config, "theme")[0]
+            PlayWithBot(screen, fps, path, "Farm", d,
                         theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
                             datetime.now().time().strftime("%H")) <= 18))
 
@@ -120,33 +134,44 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
         m = get_values(path_statistic, "mission")[0]
         for i, val in enumerate(["2", "3", "4", "5", "6", "7", "8", "8b", "8a"], start=6):
             if m == val:
-                achievements.set_progress(1, i)
+                a = achievements.set_progress(1, i)
+                if push is None:
+                    push = a
 
         level = format_xp(path_statistic)[1]
         for i, val in enumerate(["25", "50", "75", "100"], start=2):
-            achievements.set_progress(level / int(val), i)
+            a = achievements.set_progress(level / int(val), i)
+            if push is None:
+                push = a
 
         games = get_values(path_statistic, "games")[0]
         for i, val in enumerate(["1", "10", "100", "1000", "10000"], start=15):
-            achievements.set_progress(int(games) / int(val), i)
+            a = achievements.set_progress(int(games) / int(val), i)
+            if push is None:
+                push = a
 
         victories = get_values(path_statistic, "victories")[0]
         for i, val in enumerate(["1", "10", "50", "100", "1000"], start=20):
-            achievements.set_progress(int(victories) / int(val), i)
+            a = achievements.set_progress(int(victories) / int(val), i)
+            if push is None:
+                push = a
 
         defeats = get_values(path_statistic, "defeats")[0]
         for i, val in enumerate(["1", "10", "50", "100", "1000"], start=25):
-            achievements.set_progress(int(defeats) / int(val), i)
+            a = achievements.set_progress(int(defeats) / int(val), i)
+            if push is None:
+                push = a
 
         # я уверен, что это работает, но проверить не могу :)
         if int(get_values(path_statistic, "impossible_levels")[0]) >= 1:
-            achievements.set_progress(1, 30)
+            a = achievements.set_progress(1, 30)
+            if push is None:
+                push = a
 
         set_statistic(path_statistic, len(get_values_sqlite(
-            path_achievements, "achievements", "progress = 1", 'id')),
+            path_achievements, "achievements", "progress = 1", "id")),
                       value="completed_achievements", add=False)
 
 
 if __name__ == "__main__":
-    # TODO: Заменить все заголовки на текст, написать описание к функциям, заменить кавычки
     sys.exit(main())
