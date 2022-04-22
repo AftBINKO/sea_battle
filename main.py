@@ -1,4 +1,4 @@
-# v1.0.1
+# v1.1.1
 import ctypes.wintypes
 import pygame
 import sys
