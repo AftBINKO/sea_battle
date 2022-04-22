@@ -3,6 +3,7 @@ from zipfile import ZipFile
 
 import sqlite3
 import pygame
+import json
 import sys
 import os
 
@@ -19,13 +20,13 @@ def load_image(name):
 
 
 def put_sprite(sprite, x, y):
-    """функция редактирует расположение sprite"""
+    """Функция редактирует расположение sprite"""
     sprite.rect.x = x
     sprite.rect.y = y
 
 
 def create_sprite(sprite, name, x, y, group, transform=None):
-    """функция помогает быстрее поставить sprite"""
+    """Функция помогает быстрее поставить sprite"""
 
     image = load_image(name)
 
@@ -46,29 +47,26 @@ def add_fon(theme_value, size):
         load_image("fon_1.png"), size)
 
 
-def set_statistic(path, number, value="XP", add=True):
+def set_statistic(path, value, key="XP", add=True):
     """Функция устанавливает либо добавляет значение статистики"""
-    with open(path, encoding="utf-8") as statistic_for_read:
-        statistic_for_read = list(
-            map(lambda a: a.strip("\n"), statistic_for_read.readlines()))
+    with open(path) as statistic_for_read:
+        statistic = json.load(statistic_for_read)
 
-    with open(path, "w", encoding="utf-8") as statistic_for_write:
-        statistic_for_write.write(
-            "\n".join([f"{value}: \
-{str(int(statistic_for_read[i].split(': ')[1]) + number) if add else number}" if
-                       statistic_for_read[i].split(": ")[0] == value else statistic_for_read[i] for i
-                       in range(len(statistic_for_read))]))
+    if add:
+        statistic[key] = statistic[key] + value
+    else:
+        statistic[key] = value
+
+    with open(path, "w") as statistic_for_write:
+        json.dump(statistic, statistic_for_write, ensure_ascii=False, indent="\t")
 
 
 def format_xp(path):
     """Функция возвращает отформатированный уровень"""
-    with open(path, encoding="utf-8") as statistic_for_read:
-        statistic_for_read = list(
-            map(lambda a: a.strip("\n"), statistic_for_read.readlines()))
+    with open(path) as statistic_for_read:
+        statistic = json.load(statistic_for_read)
 
-        for statistic in statistic_for_read:
-            if statistic.split(": ")[0] == "XP":
-                xp = int(statistic.split(": ")[1])
+        xp = statistic["XP"]
 
     level, requirement, x = None, None, xp
 
@@ -76,22 +74,38 @@ def format_xp(path):
         level, requirement = i, 100 * (i + 1)
 
         if requirement - x > 0:
-            return f"""{level} LVL
-{x}/{requirement} XP""", level, x, requirement
+            return f"{level} LVL\n{x}/{requirement} XP", level, x, requirement
         x -= requirement
 
-    return f"""100 LVL
-{x} XP""", 100, x
+    return f"100 LVL\n{x} XP", 100, x
 
 
-def get_values(path, *values, a=False):
-    """Функция получает значения переменной в файле"""
+def get_values(path, *values, a=False):  # a = all
+    """Функция получает значения переменных в файле"""
     with open(path, encoding="utf-8") as file:
-        file = dict(map(lambda x: tuple(x.split(": ")), [line for line in list(
-            map(lambda x: x.strip("\n"), file.readlines())) if line != "" if
-                                                         line[0] != "#"]))
-        return tuple([value for value in file.values()]) if a else tuple(
-            [file[value] for value in values])
+        js = json.load(file)
+
+        vals = []
+        if a:
+            for value in js.values():
+                vals.append(value)
+        else:
+            for value in values:
+                vals.append(js[value])
+
+        return vals
+
+
+def set_values(path, values: dict):
+    """Функция ставит переменные в файле"""
+    with open(path, encoding="utf-8") as file_read:
+        js = json.load(file_read)
+
+    for value in values.keys():
+        js[value] = values[value]
+
+    with open(path, "w") as file_write:
+        json.dump(js, file_write, ensure_ascii=False, indent="\t")
 
 
 def get_values_sqlite(path, table, condition=None, *values):
@@ -121,7 +135,7 @@ def create_window(path_config):
     version, screensize, screenmode, fps = get_values(path_config, "version", "screensize",
                                                       "screenmode", "fps")
 
-    if version != "1.1":
+    if version != "1.1.1":
         raise ValueError("The configuration file version is not supported")
 
     size, screen = tuple(map(int, screensize.split("x"))), None

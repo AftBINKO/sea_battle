@@ -259,7 +259,7 @@ class GameOver:
         self.fps = fps
 
         self.path_config, path_statistic = os.path.join(
-            path, "config.txt"), os.path.join(path, "statistic.txt")
+            path, "config.json"), os.path.join(path, "statistic.json")
 
         self.size = tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
@@ -267,20 +267,20 @@ class GameOver:
         self.score = score
         self.xp = xp
 
-        set_statistic(path_statistic, 1, value="games")
+        set_statistic(path_statistic, 1, key="games")
         if win is not None:
-            set_statistic(path_statistic, 1, value="victories" if win else "defeats")
+            set_statistic(path_statistic, 1, key="victories" if win else "defeats")
 
         if mission is not None and win:
             if mission not in ["8", "8a", "8b"]:
-                set_statistic(path_statistic, 1, value="mission")
+                set_statistic(path_statistic, 1, key="mission")
             elif mission == "8":
-                set_statistic(path_statistic, "8a", value="mission", add=False)
+                set_statistic(path_statistic, "8a", key="mission", add=False)
 
         set_statistic(path_statistic, xp)
 
         if difficulty == 5 and win:
-            set_statistic(path_statistic, 1, value="impossible_levels")
+            set_statistic(path_statistic, 1, key="impossible_levels")
 
         self.menu()
 
@@ -378,7 +378,7 @@ class PlayWithBot:
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.screensize = tuple(
-            map(int, (get_values(os.path.join(path, "config.txt"), "screensize")[0].split("x"))))
+            map(int, (get_values(os.path.join(path, "config.json"), "screensize")[0].split("x"))))
         self.co = int(display_width * 0.02)
         self.font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.5))
 
@@ -521,31 +521,33 @@ class Play:
     """Игра по сюжету"""
 
     def __init__(self, screen, fps, path):
-        path_config = os.path.join(path, "config.txt")
+        path_config = os.path.join(path, "config.json")
 
         self.screen, self.fps, self.size, self.path_statistic = screen, fps, tuple(
             map(int, (get_values(path_config, "screensize")[0].split("x")))), os.path.join(
-            path, "statistic.txt")
+            path, "statistic.json")
 
     def surrender(self):
         """Действие "Сдаться\""""
         pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
 
-        with open(self.path_statistic, encoding="utf-8") as file_for_read:
-            file_for_read = list(
-                map(lambda a: a.strip("\n"), file_for_read.readlines()))
+        # with open(self.path_statistic, encoding="utf-8") as file_for_read:
+        #     file_for_read = list(
+        #         map(lambda a: a.strip("\n"), file_for_read.readlines()))
+        #
+        # with open(self.path_statistic, "w",
+        #           encoding="utf-8") as file_for_write:
+        #     write = []
+        #     for i in range(len(file_for_read)):
+        #         if file_for_read[i].split(": ")[0] == "mission":
+        #             write.append(f"mission: 8b")
+        #         else:
+        #             write.append(file_for_read[i])
+        #     file_for_write.write("\n".join(write))
 
-        with open(self.path_statistic, "w",
-                  encoding="utf-8") as file_for_write:
-            write = []
-            for i in range(len(file_for_read)):
-                if file_for_read[i].split(": ")[0] == "mission":
-                    write.append(f"mission: 8b")
-                else:
-                    write.append(file_for_read[i])
-            file_for_write.write("\n".join(write))
+        set_statistic(self.path_statistic, "8b", key="mission", add=False)
 
-            return "replay"
+        return "replay"
 
     def menu(self):
         """Меню игры"""
@@ -562,7 +564,7 @@ class Play:
 
         q, n, mission_file = 255 if self.size[1] == 768 else 360, 0, os.path.join(
             os.path.join("data", "missions"),
-            "mission_" + get_values(self.path_statistic, "mission")[0] + ".txt")
+            "mission_" + get_values(self.path_statistic, "mission")[0] + ".json")
         mission = get_values(mission_file, "mission")[0]
 
         play, surrender = None, None

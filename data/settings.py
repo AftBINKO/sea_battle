@@ -1,5 +1,5 @@
 from data.main_functions import terminate, load_image, create_sprite, get_values, extract_files, \
-    add_fon
+    add_fon, set_values
 
 import webbrowser
 import pygame
@@ -10,12 +10,12 @@ class Settings:
     """Настройки"""
 
     def __init__(self, screen, fps, path):
-        self.path_config = os.path.join(path, "config.txt")
+        self.path_config = os.path.join(path, "config.json")
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
         self.values_screensize = ["1366x768", "1920x1080"]
         self.values_screenmode = ["window", "noframe", "fullscreen"]
-        self.values_fps = ["30", "60", "90", "120"]
+        self.values_fps = [30, 60, 90, 120]
         self.values_difficulty = ["easiest", "easy", "normal", "hard", "impossible"]
         self.values_theme = ["day", "night", "by_time_of_day"]
         self.value_screensize = self.values_screensize.index(
@@ -31,31 +31,41 @@ class Settings:
 
     def apply(self):
         """Действие "Применить\""""
-        with open(self.path_config, encoding="utf-8") as config_for_read:
-            config_for_read = list(
-                map(lambda a: a.strip("\n"), config_for_read.readlines()))
-        with open(self.path_config, "w", encoding="utf-8") as config_for_write:
-            write = []
-            for i in range(len(config_for_read)):
-                if config_for_read[i].split(": ")[0] == "screensize":
-                    write.append(f"screensize: {self.values_screensize[self.value_screensize]}")
+        # with open(self.path_config, encoding="utf-8") as config_for_read:
+        #     config_for_read = list(
+        #         map(lambda a: a.strip("\n"), config_for_read.readlines()))
+        # with open(self.path_config, "w", encoding="utf-8") as config_for_write:
+        #     write = []
+        #     for i in range(len(config_for_read)):
+        #         if config_for_read[i].split(": ")[0] == "screensize":
+        #             write.append(f"screensize: {self.values_screensize[self.value_screensize]}")
+        #
+        #         elif config_for_read[i].split(": ")[0] == "screenmode":
+        #             write.append(f"screenmode: {self.values_screenmode[self.value_screenmode]}")
+        #
+        #         elif config_for_read[i].split(": ")[0] == "fps":
+        #             write.append(f"fps: {self.values_fps[self.value_fps]}")
+        #
+        #         elif config_for_read[i].split(": ")[0] == "difficulty":
+        #             write.append(f"difficulty: {self.values_difficulty[self.value_difficulty]}")
+        #
+        #         elif config_for_read[i].split(": ")[0] == "theme":
+        #             write.append(f"theme: {self.values_theme[self.value_theme]}")
+        #
+        #         else:
+        #             write.append(config_for_read[i])
+        #
+        #     config_for_write.write("\n".join(write))
 
-                elif config_for_read[i].split(": ")[0] == "screenmode":
-                    write.append(f"screenmode: {self.values_screenmode[self.value_screenmode]}")
+        values = {
+            "screensize": self.values_screensize[self.value_screensize],
+            "screenmode": self.values_screenmode[self.value_screenmode],
+            "fps": int(self.values_fps[self.value_fps]),
+            "difficulty": self.values_difficulty[self.value_difficulty],
+            "theme": self.values_theme[self.value_theme]
+        }
+        set_values(self.path_config, values)
 
-                elif config_for_read[i].split(": ")[0] == "fps":
-                    write.append(f"fps: {self.values_fps[self.value_fps]}")
-
-                elif config_for_read[i].split(": ")[0] == "difficulty":
-                    write.append(f"difficulty: {self.values_difficulty[self.value_difficulty]}")
-
-                elif config_for_read[i].split(": ")[0] == "theme":
-                    write.append(f"theme: {self.values_theme[self.value_theme]}")
-
-                else:
-                    write.append(config_for_read[i])
-
-            config_for_write.write("\n".join(write))
         return "apply"
 
     def menu(self):
@@ -217,11 +227,11 @@ class Settings:
                         result, values = False, None
                         if recovery_settings.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                            result, values = True, ["config.txt"]
+                            result, values = True, ["config.json"]
 
                         elif new_game.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-                            result, values = True, ["statistic.txt", "achievements.sqlite"]
+                            result, values = True, ["statistic.json", "achievements.sqlite"]
 
                         if result:
                             extract_files(os.path.join("data", "files.zip"), self.path, *values)
@@ -249,7 +259,7 @@ class Settings:
                        2], ["Режим экрана: ", (255, 255, 255), 100, 250, 50, 1],
                       [self.values_screenmode[self.value_screenmode], (255, 255, 255), 500, 250, 50,
                        2], ["FPS: ", (255, 255, 255), 100, 300, 50, 1],
-                      [self.values_fps[self.value_fps], (255, 255, 255), 500, 300, 50, 2],
+                      [str(self.values_fps[self.value_fps]), (255, 255, 255), 500, 300, 50, 2],
                       ["Сложность: ", (255, 255, 255), 100, 350, 50, 1],
                       [self.values_difficulty[self.value_difficulty], (255, 255, 255), 500, 350, 50,
                        2], ["Тема: ", (255, 255, 255), 100, 405, 50, 1],

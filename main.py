@@ -23,7 +23,7 @@ def main():
 
     """Основные переменные"""
     path, archive, cfg, ach, stat = os.path.join(path, "Sea Battle"), os.path.join(
-        "data", "files.zip"), "config.txt", "achievements.sqlite", "statistic.txt"
+        "data", "files.zip"), "config.json", "achievements.sqlite", "statistic.json"
     path_config, path_achievements, path_statistic = os.path.join(path, cfg), os.path.join(
         path, ach), os.path.join(path, stat)
 
@@ -171,7 +171,7 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
 
         set_statistic(path_statistic, len(get_values_sqlite(
             path_achievements, "achievements", "progress = 1", "id")),
-                      value="completed_achievements", add=False)
+                      key="completed_achievements", add=False)
 
 
 if __name__ == "__main__":

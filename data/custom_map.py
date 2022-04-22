@@ -242,7 +242,7 @@ class Customization:
         self.clock = pg.time.Clock()
         self.size = int(display_width * 0.035)
         self.screensize = tuple(
-            map(int, (get_values(os.path.join(path, "config.txt"), "screensize")[0].split("x"))))
+            map(int, (get_values(os.path.join(path, "config.json"), "screensize")[0].split("x"))))
         self.co = int(display_width * 0.02)
         self.font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.8))
 

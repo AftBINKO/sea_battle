@@ -13,8 +13,8 @@ class Menu:
 
     def __init__(self, screen, fps, path, push):
         self.path_config, self.path_achievements, self.path_statistic, self.path = os.path.join(
-            path, "config.txt"), os.path.join(path, "achievements.sqlite"), os.path.join(
-            path, "statistic.txt"), path
+            path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
+            path, "statistic.json"), path
         self.screen, self.fps, self.size, self.n, self.push = screen, fps, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x")))), 0, push
 
@@ -281,8 +281,8 @@ class Statistic:
 
     def __init__(self, screen, fps, path):
         self.path_config, self.path_achievements, self.path_statistic = os.path.join(
-            path, "config.txt"), os.path.join(path, "achievements.sqlite"), os.path.join(
-            path, "statistic.txt")
+            path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
+            path, "statistic.json")
         self.screen, self.fps, self.size = screen, fps, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
 
@@ -349,7 +349,7 @@ class Statistic:
 class Instruction:
     """Обучение"""
     def __init__(self, screen, fps, path):
-        self.path_config = os.path.join(path, "config.txt")
+        self.path_config = os.path.join(path, "config.json")
         self.screen, self.fps, self.size = screen, fps, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
 

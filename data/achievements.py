@@ -12,8 +12,8 @@ class Achievements:
 
     def __init__(self, screen, fps, path):
         self.path_config, self.path_achievements, self.path_statistic = os.path.join(
-            path, "config.txt"), os.path.join(path, "achievements.sqlite"), os.path.join(
-            path, "statistic.txt")
+            path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
+            path, "statistic.json")
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
 
@@ -204,8 +204,8 @@ class Titles:
 
     def __init__(self, screen, fps, path):
         self.path_config, self.path_achievements, self.path_statistic = os.path.join(
-            path, "config.txt"), os.path.join(path, "achievements.sqlite"), os.path.join(
-            path, "statistic.txt")
+            path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
+            path, "statistic.json")
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
 
@@ -272,13 +272,13 @@ class Titles:
                         for button in p.keys():
                             if button.rect.collidepoint(event.pos):
                                 s.play()
-                                set_statistic(self.path_statistic, p[button], value="title",
+                                set_statistic(self.path_statistic, p[button], key="title",
                                               add=False)
                                 return "replay"
                         for button in n.keys():
                             if button.rect.collidepoint(event.pos):
                                 s.play()
-                                set_statistic(self.path_statistic, "not", value="title", add=False)
+                                set_statistic(self.path_statistic, "not", key="title", add=False)
                                 return "replay"
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     s.play()
