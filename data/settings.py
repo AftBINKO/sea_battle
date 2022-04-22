@@ -74,9 +74,6 @@ class Settings:
         apply = pygame.sprite.Sprite()
         create_sprite(apply, "apply.png", self.size[0] - 350, self.size[1] - 150, settings_sprites)
 
-        title = pygame.sprite.Sprite()
-        create_sprite(title, "settings_title.png", 50, 50, settings_sprites)
-
         left_screensize = pygame.sprite.Sprite()
         create_sprite(left_screensize, "left_arrow.png", 450, 200, settings_sprites)
         right_screensize = pygame.sprite.Sprite()
@@ -243,7 +240,8 @@ class Settings:
 
             settings_sprites.draw(self.screen)
 
-            for i in [[f"Версия конфигурационного файла: \
+            for i in [["Настройки", (255, 255, 255), 50, 50, 50, 1],
+                      [f"Версия конфигурационного файла: \
 {get_values(self.path_config, 'version')[0]}",
                        (128, 128, 128), 100, 150, 25, 2],
                       ["Размер экрана: ", (255, 255, 255), 100, 200, 50, 1],
@@ -285,9 +283,6 @@ class About:
 
         with open(os.path.join("data", "titles.txt"), encoding="utf-8") as titles:
             titles = titles.read().split("\n")
-
-        title = pygame.sprite.Sprite()
-        create_sprite(title, "about_title.png", 50, 50, about_sprites)
 
         mat = pygame.sprite.Sprite()
         create_sprite(mat, f"mat_6_{self.size[1]}.png", 50, 100, about_sprites)
@@ -378,6 +373,10 @@ class About:
                     line.lstrip("#" * (count - 1) + " "), True, (255, 255, 255))
                 self.screen.blit(text, text.get_rect(center=(self.size[0] // 2, y)))
                 y += c
+
+            self.screen.blit(
+                pygame.font.Font(os.path.join("data", f"font_1.ttf"), 50).render(
+                    "Разработчики", True, (255, 255, 255)), (50, 50))
 
             pygame.display.flip()
             clock.tick(self.fps)
