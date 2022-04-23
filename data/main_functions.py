@@ -47,15 +47,17 @@ def add_fon(theme_value, size):
         load_image("fon_1.png"), size)
 
 
-def set_statistic(path, value, key="XP", add=True):
+def set_statistic(path, value, key="XP", add=True, t=None):
     """Функция устанавливает либо добавляет значение статистики"""
+    if t is None:
+        t = type(value)
     with open(path) as statistic_for_read:
         statistic = json.load(statistic_for_read)
 
     if add:
-        statistic[key] = statistic[key] + value
+        statistic[key] = t(int(statistic[key]) + value)
     else:
-        statistic[key] = value
+        statistic[key] = t(value)
 
     with open(path, "w") as statistic_for_write:
         json.dump(statistic, statistic_for_write, ensure_ascii=False, indent="\t")

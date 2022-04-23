@@ -273,7 +273,7 @@ class GameOver:
 
         if mission is not None and win:
             if mission not in ["8", "8a", "8b"]:
-                set_statistic(path_statistic, 1, key="mission")
+                set_statistic(path_statistic, 1, key="mission", t=str)
             elif mission == "8":
                 set_statistic(path_statistic, "8a", key="mission", add=False)
 
