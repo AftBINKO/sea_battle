@@ -1,4 +1,4 @@
-from data.main_functions import terminate, load_image, create_sprite, get_values, extract_files, \
+from .main_functions import terminate, load_image, create_sprite, get_values, extract_files, \
     add_fon, set_values
 
 import webbrowser

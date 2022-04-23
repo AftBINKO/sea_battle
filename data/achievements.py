@@ -4,7 +4,7 @@ import os
 
 from datetime import datetime, date
 
-from data.main_functions import terminate, load_image, create_sprite, set_statistic, get_values
+from .main_functions import terminate, load_image, create_sprite, set_statistic, get_values
 
 
 class Achievements:

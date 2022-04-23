@@ -1,5 +1,5 @@
 import pygame as pg
-from data.main_functions import create_sprite
+from .main_functions import create_sprite
 
 
 class Level:

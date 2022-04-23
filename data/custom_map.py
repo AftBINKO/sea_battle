@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 
-from data.main_functions import create_sprite, get_values, terminate
+from .main_functions import create_sprite, get_values, terminate
 
 display_width = 0
 display_height = 0

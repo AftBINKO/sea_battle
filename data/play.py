@@ -1,6 +1,6 @@
-from data.main_functions import terminate, create_sprite, get_values, load_image, set_statistic, \
+from .main_functions import terminate, create_sprite, get_values, load_image, set_statistic, \
     add_fon
-from data.custom_map import Customization
+from .custom_map import Customization
 import pygame as pg
 import os
 import random

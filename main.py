@@ -1,21 +1,41 @@
 # v1.1.1
 import ctypes.wintypes
+import requests
 import pygame
-import sys
 import os
 
 from datetime import datetime
 
-from data.main_functions import create_window, format_xp, extract_files, get_values, set_statistic, \
+from .data.main_functions import create_window, format_xp, extract_files, get_values, set_statistic, \
     get_values_sqlite
-from data.achievements import Achievements, Titles
-from data.menu import Menu, Statistic, Instruction
-from data.settings import Settings, About
-from data.play import Play, PlayWithBot
+from .data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
+    NoLauncherRunError
+from .data.achievements import Achievements, Titles
+from .data.menu import Menu, Statistic, Instruction
+from .data.settings import Settings, About
+from .data.play import Play, PlayWithBot
 
 
-def main():
+def main(user_data: dict):
     """Запуск игры"""
+    # проверим лицензию
+    try:
+        user_login = user_data["user_login"]
+        if user_login is None:
+            raise NotAuthorizedError
+
+        login_request = "http://127.0.0.1:5000/" + \
+                        f"{user_login['email']}/{user_login['password']}/api/get_data"
+        response = requests.get(login_request)
+        if not response.json()["user"]["is_activated"]:
+            raise NotLicensedError("Купите игру, чтобы играть")
+    except NotAuthorizedError as error:
+        raise NotAuthorizedError(error)
+    except NotLicensedError as error:
+        raise NotLicensedError(error)
+    except Exception as error:
+        raise AuthorizationError(f'Ошибка авторизации: {error.__class__.__name__} "{error}"')
+
     # получим путь к документам пользователя
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
     ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf)
@@ -175,4 +195,4 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise NoLauncherRunError("Запустите игру через лаунчер")

@@ -4,7 +4,7 @@ import sqlite3
 import pygame
 from cv2 import VideoCapture  # для воспроизведения заставки по кадрам
 
-from data.main_functions import terminate, create_sprite, put_sprite, format_xp, get_values, \
+from .main_functions import terminate, create_sprite, put_sprite, format_xp, get_values, \
     get_values_sqlite, add_fon, load_image, extract_files
 
 
