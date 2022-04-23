@@ -1,19 +1,31 @@
 # v1.1.1
 import ctypes.wintypes
+import sys
+
 import requests
 import pygame
 import os
 
 from datetime import datetime
 
-from .data.main_functions import create_window, format_xp, extract_files, get_values, set_statistic, \
-    get_values_sqlite
-from .data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
-    NoLauncherRunError
-from .data.achievements import Achievements, Titles
-from .data.menu import Menu, Statistic, Instruction
-from .data.settings import Settings, About
-from .data.play import Play, PlayWithBot
+try:
+    from .data.main_functions import create_window, format_xp, extract_files, get_values, \
+        set_statistic, get_values_sqlite
+    from .data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
+        NoLauncherRunError
+    from .data.achievements import Achievements, Titles
+    from .data.menu import Menu, Statistic, Instruction
+    from .data.settings import Settings, About
+    from .data.play import Play, PlayWithBot
+except ImportError:
+    from data.main_functions import create_window, format_xp, extract_files, get_values, \
+        set_statistic, get_values_sqlite
+    from data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
+        NoLauncherRunError
+    from data.achievements import Achievements, Titles
+    from data.menu import Menu, Statistic, Instruction
+    from data.settings import Settings, About
+    from data.play import Play, PlayWithBot
 
 
 def main(user_data: dict):
@@ -65,7 +77,7 @@ def main(user_data: dict):
     screen, fps = create_window(path_config)  # создаём окно
 
     menu, settings, achievements = Menu(screen, fps, path, None), Settings(
-        screen, fps, path), Achievements(screen, fps, path)
+        screen, fps, path, user_login), Achievements(screen, fps, path)
 
     pygame.mouse.set_visible(False)  # погашаем мышь
     menu.screensaver()  # заставка
@@ -79,7 +91,7 @@ def main(user_data: dict):
 
         # обновляем достижения, меню и настройки
         menu, settings, achievements = Menu(screen, fps, path, push), Settings(
-            screen, fps, path), Achievements(screen, fps, path)
+            screen, fps, path, user_login), Achievements(screen, fps, path)
         push = None  # обнулили
         menu.set_n(x)  # и вставим обратно
 
@@ -195,4 +207,15 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
 
 
 if __name__ == "__main__":
-    raise NoLauncherRunError("Запустите игру через лаунчер")
+    # raise NoLauncherRunError("Запустите игру через лаунчер")
+    sys.exit(main({
+    "config_version": "1.0",
+    "user_login": {
+        "email": "chuyanov2006@gmail.com",
+        "password": "churoma2006"
+    },
+    "user_data": {
+        "biography": "Всемогущий, Великий и Превосходный создатель!",
+        "nickname": "AftBINKO"
+    }
+}))

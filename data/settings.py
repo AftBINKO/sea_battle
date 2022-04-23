@@ -1,5 +1,10 @@
+import json
+import sqlite3
+
+import requests
+
 from .main_functions import terminate, load_image, create_sprite, get_values, extract_files, \
-    add_fon, set_values
+    add_fon, set_values, get_values_sqlite
 
 import webbrowser
 import pygame
@@ -9,8 +14,11 @@ import os
 class Settings:
     """Настройки"""
 
-    def __init__(self, screen, fps, path):
+    def __init__(self, screen, fps, path, user_login):
+        self.email, self.password = user_login["email"], user_login["password"]
         self.path_config = os.path.join(path, "config.json")
+        self.path_statistic = os.path.join(path, "statistic.json")
+        self.path_achievements = os.path.join(path, "achievements.sqlite")
         self.screen, self.fps, self.path, self.size = screen, fps, path, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x"))))
         self.values_screensize = ["1366x768", "1920x1080"]
@@ -68,6 +76,65 @@ class Settings:
 
         return "apply"
 
+    def download(self):
+        login_request = f"http://127.0.0.1:5000/{self.email}/{self.password}/api/get_data"
+        try:
+            statistic = json.loads(requests.get(login_request).json()["user"]["statistic"])
+        except Exception:
+            return -1
+        s, a = statistic["statistic"], statistic["achievements"]
+
+        stat = {}
+        for i in s.keys():
+            stat[i] = s[i]
+        set_values(self.path_statistic, stat)
+
+        with sqlite3.connect(self.path_achievements) as con:
+            cur = con.cursor()
+            for i in a.keys():
+                u = "UPDATE achievements"
+                if a[i]['progress'] is not None:
+                    u += f"\nSET progress = {a[i]['progress']}"
+                else:
+                    u += f"\nSET progress = 0"
+
+                if a[i]['date_of_completion'] is not None:
+                    u += f', date_of_completion = "{a[i]["date_of_completion"]}"'
+                else:
+                    u += f', date_of_completion = NULL'
+                u += f"\nWHERE id = {i}"
+                cur.execute(u)
+            con.commit()
+
+    def load(self):
+        with open(self.path_statistic) as stat:
+            s = json.load(stat)
+        achievements_list = get_values_sqlite(self.path_achievements, "achievements", None, "id",
+                                              "progress", "date_of_completion")
+        achievements_dict = {}
+        for achievement in achievements_list:
+            achievements_dict[achievement[0]] = {
+                "progress": achievement[1],
+                "date_of_completion": achievement[2]
+            }
+
+        statistic = json.dumps({
+            "statistic": s,
+            "achievements": achievements_dict
+        }, ensure_ascii=False)
+
+        statistic_response = {
+            "email": self.email,
+            "password": self.password,
+            "statistic": statistic
+        }
+
+        statistic_request = "http://127.0.0.1:5000/api/edit_statistic"
+        try:
+            requests.post(statistic_request, data=statistic_response)
+        except Exception:
+            return -1
+
     def menu(self):
         """Меню настроек"""
         clock = pygame.time.Clock()
@@ -108,6 +175,12 @@ class Settings:
         create_sprite(left_theme, "left_arrow.png", 450, 400, settings_sprites)
         right_theme = pygame.sprite.Sprite()
         create_sprite(right_theme, "right_arrow.png", 900, 400, settings_sprites)
+
+        download = pygame.sprite.Sprite()
+        create_sprite(download, "download.png", self.size[0] - 350, 150, settings_sprites)
+
+        load = pygame.sprite.Sprite()
+        create_sprite(load, "load.png", self.size[0] - 220, 150, settings_sprites)
 
         developers = pygame.sprite.Sprite()
         create_sprite(developers, "developers.png", self.size[0] - 350, self.size[1] - 250,
@@ -214,6 +287,14 @@ class Settings:
 
                             else:
                                 self.value_theme = 0
+
+                        elif download.rect.collidepoint(event.pos):
+                            pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                            self.download()
+
+                        elif load.rect.collidepoint(event.pos):
+                            pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                            self.load()
 
                         elif developers.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(os.path.join("data", "enter.ogg")).play()
