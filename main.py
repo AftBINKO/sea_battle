@@ -1,6 +1,5 @@
 # v1.1.1
 import ctypes.wintypes
-import sys
 
 import requests
 import pygame
@@ -76,7 +75,7 @@ def main(user_data: dict):
 
     screen, fps = create_window(path_config)  # создаём окно
 
-    menu, settings, achievements = Menu(screen, fps, path, None), Settings(
+    menu, settings, achievements = Menu(screen, fps, path, None, user_data["user_data"]), Settings(
         screen, fps, path, user_login), Achievements(screen, fps, path)
 
     pygame.mouse.set_visible(False)  # погашаем мышь
@@ -90,7 +89,8 @@ def main(user_data: dict):
         x = menu.get_n()  # сохраним значение x в переменную
 
         # обновляем достижения, меню и настройки
-        menu, settings, achievements = Menu(screen, fps, path, push), Settings(
+        menu, settings, achievements = Menu(screen, fps, path, push,
+                                            user_data["user_data"]), Settings(
             screen, fps, path, user_login), Achievements(screen, fps, path)
         push = None  # обнулили
         menu.set_n(x)  # и вставим обратно
@@ -132,7 +132,8 @@ def main(user_data: dict):
             theme_value = get_values(path_config, "theme")[0]
             PlayWithBot(screen, fps, path, [0, 150, 300, 600, 1200, 10000][d], d,
                         theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
-                            datetime.now().time().strftime("%H")) <= 18))
+                            datetime.now().time().strftime("%H")) <= 18),
+                        name=user_data["user_data"]["nickname"])
 
         elif result == "Farm":
             d = ["easiest", "easy", "normal", "hard", "impossible"].index(
@@ -140,7 +141,8 @@ def main(user_data: dict):
             theme_value = get_values(path_config, "theme")[0]
             PlayWithBot(screen, fps, path, "Farm", d,
                         theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
-                            datetime.now().time().strftime("%H")) <= 18))
+                            datetime.now().time().strftime("%H")) <= 18),
+                        name=user_data["user_data"]["nickname"])
 
         elif result == "Play":
             while True:
@@ -207,15 +209,4 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
 
 
 if __name__ == "__main__":
-    # raise NoLauncherRunError("Запустите игру через лаунчер")
-    sys.exit(main({
-    "config_version": "1.0",
-    "user_login": {
-        "email": "chuyanov2006@gmail.com",
-        "password": "churoma2006"
-    },
-    "user_data": {
-        "biography": "Всемогущий, Великий и Превосходный создатель!",
-        "nickname": "AftBINKO"
-    }
-}))
+    raise NoLauncherRunError("Запустите игру через лаунчер")

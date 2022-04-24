@@ -11,10 +11,11 @@ from .main_functions import terminate, create_sprite, put_sprite, format_xp, get
 class Menu:
     """Главное меню"""
 
-    def __init__(self, screen, fps, path, push):
+    def __init__(self, screen, fps, path, push, user_data: dict):
         self.path_config, self.path_achievements, self.path_statistic, self.path = os.path.join(
             path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
             path, "statistic.json"), path
+        self.nickname, self.biography = user_data["nickname"], user_data["biography"]
         self.screen, self.fps, self.size, self.n, self.push = screen, fps, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x")))), 0, push
 
@@ -257,6 +258,12 @@ class Menu:
                     pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
                         j[0], True, j[1]), (j[2], j[3]))
 
+            text = pygame.font.Font(os.path.join("data", "font_1.ttf"), 50).render(self.nickname,
+                                                                                   True,
+                                                                                   (255, 255, 255))
+            text_rect = text.get_rect()
+            self.screen.blit(text, (self.size[0] - tuple(text_rect)[2], 0))
+
             if self.push:
                 for line in [("Получены награды", 40, o + 25),
                              ('Загляните в "Достижения"', 20, o + 65)]:
@@ -348,6 +355,7 @@ class Statistic:
 
 class Instruction:
     """Обучение"""
+
     def __init__(self, screen, fps, path):
         self.path_config = os.path.join(path, "config.json")
         self.screen, self.fps, self.size = screen, fps, tuple(
