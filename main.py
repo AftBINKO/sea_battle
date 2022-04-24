@@ -35,7 +35,7 @@ def main(user_data: dict):
         if user_login is None:
             raise NotAuthorizedError
 
-        login_request = "http://127.0.0.1:5000/" + \
+        login_request = "http://seabattle.aft-services.ru/" + \
                         f"{user_login['email']}/{user_login['password']}/api/get_data"
         response = requests.get(login_request)
         if not response.json()["user"]["is_activated"]:

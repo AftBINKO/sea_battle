@@ -77,7 +77,7 @@ class Settings:
         return "apply"
 
     def download(self):
-        login_request = f"http://127.0.0.1:5000/{self.email}/{self.password}/api/get_data"
+        login_request = f"http://seabattle.aft-services.ru/{self.email}/{self.password}/api/get_data"
         try:
             statistic = json.loads(requests.get(login_request).json()["user"]["statistic"])
         except Exception:
@@ -129,7 +129,7 @@ class Settings:
             "statistic": statistic
         }
 
-        statistic_request = "http://127.0.0.1:5000/api/edit_statistic"
+        statistic_request = "http://seabattle.aft-services.ru/api/edit_statistic"
         try:
             requests.post(statistic_request, data=statistic_response)
         except Exception:
