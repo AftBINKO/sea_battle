@@ -82,18 +82,27 @@ def format_xp(path):
     return f"100 LVL\n{x} XP", 100, x
 
 
-def get_values(path, *values, a=False):  # a = all
+def get_values(path, *values, a=False, d=False):  # a = all, d = dict
     """Функция получает значения переменных в файле"""
     with open(path, encoding="utf-8") as file:
         js = json.load(file)
 
-        vals = []
-        if a:
-            for value in js.values():
-                vals.append(value)
+        if d:
+            vals = {}
+            if a:
+                for key in js.keys():
+                    vals[key] = js[key]
+            else:
+                for value in values:
+                    vals[value] = js[value]
         else:
-            for value in values:
-                vals.append(js[value])
+            vals = []
+            if a:
+                for value in js.values():
+                    vals.append(value)
+            else:
+                for value in values:
+                    vals.append(js[value])
 
         return vals
 
@@ -132,13 +141,19 @@ def extract_files(path_archive, path_extract, *values, a=False):
                 archive.extract(file, path_extract)
 
 
-def create_window(path_config):
+def create_window(path):
     """Функция создаёт окно pygame"""
+    path_config = os.path.join(path, "config.json")
     version, screensize, screenmode, fps = get_values(path_config, "version", "screensize",
                                                       "screenmode", "fps")
 
-    if version != "1.1.1":
-        raise ValueError("The configuration file version is not supported")
+    if version != "1.1.2":
+        old_values = get_values(path_config, a=True, d=True)
+        old_values["version"] = "1.1.2"
+
+        extract_files(os.path.join("data", "files.zip"), path, "config.json")
+
+        set_values(path_config, old_values)
 
     size, screen = tuple(map(int, screensize.split("x"))), None
 

@@ -1,4 +1,4 @@
-# v1.1.1
+# v1.1.2
 import ctypes.wintypes
 
 import requests
@@ -27,7 +27,7 @@ except ImportError:
     from data.play import Play, PlayWithBot
 
 
-def main(user_data: dict):
+def run(user_data: dict):
     """Запуск игры"""
     # проверим лицензию
     try:
@@ -35,7 +35,7 @@ def main(user_data: dict):
         if user_login is None:
             raise NotAuthorizedError
 
-        login_request = "http://seabattle.aft-services.ru/" + \
+        login_request = "https://seabattle.aft-services.ru/" + \
                         f"{user_login['email']}/{user_login['password']}/api/get_data"
         response = requests.get(login_request)
         if not response.json()["user"]["is_activated"]:
@@ -73,7 +73,7 @@ def main(user_data: dict):
     pygame.init()
     pygame.mixer.init()
 
-    screen, fps = create_window(path_config)  # создаём окно
+    screen, fps = create_window(path)  # создаём окно
 
     menu, settings, achievements = Menu(screen, fps, path, None, user_data["user_data"]), Settings(
         screen, fps, path, user_login), Achievements(screen, fps, path)
@@ -101,7 +101,7 @@ def main(user_data: dict):
             while True:  # цикл был создан для того, чтобы выходить из подменю в меню настройки
                 about, result_settings = About(screen, fps, path_config), settings.menu()
                 if result_settings == "apply":
-                    screen, fps = create_window(path_config)  # обновляем экран
+                    screen, fps = create_window(path)  # обновляем экран
                     break
                 elif result_settings == "developers":
                     about.menu()

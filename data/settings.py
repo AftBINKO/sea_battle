@@ -39,32 +39,6 @@ class Settings:
 
     def apply(self):
         """Действие "Применить\""""
-        # with open(self.path_config, encoding="utf-8") as config_for_read:
-        #     config_for_read = list(
-        #         map(lambda a: a.strip("\n"), config_for_read.readlines()))
-        # with open(self.path_config, "w", encoding="utf-8") as config_for_write:
-        #     write = []
-        #     for i in range(len(config_for_read)):
-        #         if config_for_read[i].split(": ")[0] == "screensize":
-        #             write.append(f"screensize: {self.values_screensize[self.value_screensize]}")
-        #
-        #         elif config_for_read[i].split(": ")[0] == "screenmode":
-        #             write.append(f"screenmode: {self.values_screenmode[self.value_screenmode]}")
-        #
-        #         elif config_for_read[i].split(": ")[0] == "fps":
-        #             write.append(f"fps: {self.values_fps[self.value_fps]}")
-        #
-        #         elif config_for_read[i].split(": ")[0] == "difficulty":
-        #             write.append(f"difficulty: {self.values_difficulty[self.value_difficulty]}")
-        #
-        #         elif config_for_read[i].split(": ")[0] == "theme":
-        #             write.append(f"theme: {self.values_theme[self.value_theme]}")
-        #
-        #         else:
-        #             write.append(config_for_read[i])
-        #
-        #     config_for_write.write("\n".join(write))
-
         values = {
             "screensize": self.values_screensize[self.value_screensize],
             "screenmode": self.values_screenmode[self.value_screenmode],
@@ -77,7 +51,8 @@ class Settings:
         return "apply"
 
     def download(self):
-        login_request = f"http://seabattle.aft-services.ru/{self.email}/{self.password}/api/get_data"
+        login_request = \
+            f"https://seabattle.aft-services.ru/{self.email}/{self.password}/api/get_data"
         try:
             statistic = json.loads(requests.get(login_request).json()["user"]["statistic"])
         except Exception:
@@ -129,9 +104,9 @@ class Settings:
             "statistic": statistic
         }
 
-        statistic_request = "http://seabattle.aft-services.ru/api/edit_statistic"
+        statistic_request = "https://seabattle.aft-services.ru/api/edit_statistic"
         try:
-            requests.post(statistic_request, data=statistic_response)
+            requests.post(statistic_request, json=statistic_response)
         except Exception:
             return -1
 
