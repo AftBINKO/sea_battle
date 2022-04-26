@@ -27,7 +27,7 @@ except ImportError:
     from data.play import Play, PlayWithBot
 
 
-def main(user_data: dict):
+def run(user_data: dict):
     """Запуск игры"""
     # проверим лицензию
     try:
