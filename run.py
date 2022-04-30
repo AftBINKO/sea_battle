@@ -1,4 +1,4 @@
-# v1.1.2
+# v1.2
 import ctypes.wintypes
 
 import requests
@@ -8,23 +8,23 @@ import os
 from datetime import datetime
 
 try:
-    from .data.main_functions import create_window, format_xp, extract_files, get_values, \
+    from .data.python.main_functions import create_window, format_xp, extract_files, get_values, \
         set_statistic, get_values_sqlite
-    from .data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
+    from .data.python.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
         NoLauncherRunError
-    from .data.achievements import Achievements, Titles
-    from .data.menu import Menu, Statistic, Instruction
-    from .data.settings import Settings, About
-    from .data.play import Play, PlayWithBot
+    from .data.python.achievements import Achievements, Titles
+    from .data.python.menu import Menu, Statistic, Instruction
+    from .data.python.settings import Settings, About
+    from .data.python.play import Play, PlayWithBot
 except ImportError:
-    from data.main_functions import create_window, format_xp, extract_files, get_values, \
+    from data.python.main_functions import create_window, format_xp, extract_files, get_values, \
         set_statistic, get_values_sqlite
-    from data.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
+    from data.python.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
         NoLauncherRunError
-    from data.achievements import Achievements, Titles
-    from data.menu import Menu, Statistic, Instruction
-    from data.settings import Settings, About
-    from data.play import Play, PlayWithBot
+    from data.python.achievements import Achievements, Titles
+    from data.python.menu import Menu, Statistic, Instruction
+    from data.python.settings import Settings, About
+    from data.python.play import Play, PlayWithBot
 
 
 def run(user_data: dict):
@@ -54,7 +54,8 @@ def run(user_data: dict):
 
     """Основные переменные"""
     path, archive, cfg, ach, stat = os.path.join(path, "Sea Battle"), os.path.join(
-        "data", "files.zip"), "config.json", "achievements.sqlite", "statistic.json"
+        "data", os.path.join("packages",
+                             "files.zip")), "config.json", "achievements.sqlite", "statistic.json"
     path_config, path_achievements, path_statistic = os.path.join(path, cfg), os.path.join(
         path, ach), os.path.join(path, stat)
 

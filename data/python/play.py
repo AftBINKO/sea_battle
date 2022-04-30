@@ -1,5 +1,5 @@
 from .main_functions import terminate, create_sprite, get_values, load_image, set_statistic, \
-    add_fon
+    add_fon, custom_font
 from .custom_map import Customization
 import pygame as pg
 import os
@@ -254,6 +254,8 @@ class Cell(pg.sprite.Sprite):
 class GameOver:
     """Завершение игры"""
 
+    enter = os.path.join("data", os.path.join("sound", "enter.ogg"))
+
     def __init__(self, screen, fps, path, win, score, xp, difficulty, mission=None):
         self.screen = screen
         self.fps = fps
@@ -305,7 +307,7 @@ class GameOver:
              100, 100, 1],
             [f"Счёт:", self.size[1] // 2 - 25, 25, 2], [
                 f"Награда: {self.xp} XP", self.size[1] // 2 + 25, 25, 2]]:
-            text = pg.font.Font(os.path.join("data", f"font_{line[3]}.ttf"), line[2]).render(
+            text = pg.font.Font(custom_font(line[3]), line[2]).render(
                 line[0], True, (255, 255, 255))
             texts.append([text, text.get_rect(center=(self.size[0] // 2, line[1]))])
 
@@ -316,10 +318,10 @@ class GameOver:
                     terminate()
                 elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1 \
                         and in_main_menu.rect.collidepoint(event.pos):
-                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    pg.mixer.Sound(self.enter).play()
                     return
                 elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
-                    pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                    pg.mixer.Sound(self.enter).play()
                     return
 
             self.screen.blit(fon, (0, 0))
@@ -332,7 +334,7 @@ class GameOver:
             if n < score:
                 n += 1
             line = [str(n), self.size[1] // 2, 25, 2]
-            text = pg.font.Font(os.path.join("data", f"font_{line[3]}.ttf"), line[2]).render(
+            text = pg.font.Font(custom_font(line[3]), line[2]).render(
                 line[0], True, (255, 255, 255))
             text = [text, text.get_rect(center=(self.size[0] // 2, line[1]))]
             self.screen.blit(text[0], text[1])
@@ -342,6 +344,10 @@ class GameOver:
 
 
 class PlayWithBot:
+    click = os.path.join("data", os.path.join("sound", "click.ogg"))
+    font_1 = os.path.join("data", os.path.join("fonts", "font_1.ttf"))
+    font_2 = os.path.join("data", os.path.join("fonts", "font_2.ttf"))
+
     def __init__(self, screen, fps, path, xp, difficulty, theme, mission=None, name="Игрок"):
 
         all_remove()
@@ -380,7 +386,7 @@ class PlayWithBot:
         self.screensize = tuple(
             map(int, (get_values(os.path.join(path, "config.json"), "screensize")[0].split("x"))))
         self.co = int(display_width * 0.02)
-        self.font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.5))
+        self.font = pg.font.Font(self.font_2, int(self.size * 0.5))
 
         self.map_indent_top = 50
         self.map_indent_left = 50
@@ -406,7 +412,7 @@ class PlayWithBot:
                 b = event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and x.rect.collidepoint(
                     event.pos)
                 if a or b:
-                    pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                    pg.mixer.Sound(self.click).play()
                     return
 
                 if n_player == 20:
@@ -473,7 +479,7 @@ class PlayWithBot:
         pg.draw.line(self.sc, self.t[1], (int(display_width * 0.5), 0),
                      (int(display_width * 0.5), display_height), 4)
 
-        font = pg.font.Font(os.path.join("data", "font_1.ttf"), self.size)
+        font = pg.font.Font(self.font_1, self.size)
 
         text = font.render(self.name, True, self.t[1])
         self.sc.blit(text, (display_width // 4, 10))
@@ -519,6 +525,10 @@ class PlayWithBot:
 
 class Play:
     """Игра по сюжету"""
+    click = os.path.join("data", os.path.join("sound", "click.ogg"))
+    enter = os.path.join("data", os.path.join("sound", "enter.ogg"))
+    font_1 = os.path.join("data", os.path.join("fonts", "font_1.ttf"))
+    font_2 = os.path.join("data", os.path.join("fonts", "font_2.ttf"))
 
     def __init__(self, screen, fps, path):
         path_config = os.path.join(path, "config.json")
@@ -529,21 +539,7 @@ class Play:
 
     def surrender(self):
         """Действие "Сдаться\""""
-        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
-
-        # with open(self.path_statistic, encoding="utf-8") as file_for_read:
-        #     file_for_read = list(
-        #         map(lambda a: a.strip("\n"), file_for_read.readlines()))
-        #
-        # with open(self.path_statistic, "w",
-        #           encoding="utf-8") as file_for_write:
-        #     write = []
-        #     for i in range(len(file_for_read)):
-        #         if file_for_read[i].split(": ")[0] == "mission":
-        #             write.append(f"mission: 8b")
-        #         else:
-        #             write.append(file_for_read[i])
-        #     file_for_write.write("\n".join(write))
+        pg.mixer.Sound(self.enter).play()
 
         set_statistic(self.path_statistic, "8b", key="mission", add=False)
 
@@ -616,7 +612,7 @@ class Play:
 
             for j in texts:
                 self.screen.blit(
-                    pg.font.Font(os.path.join("data", "font_2.ttf"), j[4]).render(j[0], True, j[1]),
+                    pg.font.Font(self.font_2, j[4]).render(j[0], True, j[1]),
                     (j[2], j[3]))
 
             for event in pg.event.get():
@@ -626,12 +622,12 @@ class Play:
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if x.rect.collidepoint(event.pos):
-                            pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                            pg.mixer.Sound(self.click).play()
                             return
 
                         try:
                             if play.rect.collidepoint(event.pos):
-                                pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                                pg.mixer.Sound(self.enter).play()
                                 return tuple(
                                     map(int, get_values(mission_file, "reward", "difficulty")))
                         except AttributeError:
@@ -653,11 +649,11 @@ class Play:
 
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
-                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pg.mixer.Sound(self.click).play()
                         return
 
                     elif event.key == pg.K_RETURN and get_values(mission_file, "mode")[0] != "text":
-                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        pg.mixer.Sound(self.enter).play()
                         return tuple(map(int, get_values(mission_file, "reward", "difficulty")))
 
                     elif event.key == pg.K_BACKSPACE and get_values(
@@ -677,11 +673,10 @@ class Play:
             if get_values(mission_file, "mode")[0] != "text":
                 for j in t:
                     self.screen.blit(
-                        pg.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
-                            j[0], True, j[1]), (j[2], j[3]))
+                        pg.font.Font(custom_font(j[5]), j[4]).render(j[0], True, j[1]), (j[2], j[3]))
 
             self.screen.blit(
-                pg.font.Font(os.path.join("data", "font_1.ttf"), 50).render(
+                pg.font.Font(self.font_1, 50).render(
                     get_values(mission_file, "name")[0], True, (255, 255, 255)),
                 (70 if self.size[1] == 768 else 80, 200 if self.size[1] == 768 else 300))
 

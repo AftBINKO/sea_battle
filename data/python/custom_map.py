@@ -219,6 +219,10 @@ class Ship(pg.sprite.Sprite):
 
 
 class Customization:
+    click = os.path.join("data", os.path.join("sound", "click.ogg"))
+    enter = os.path.join("data", os.path.join("sound", "enter.ogg"))
+    font_2 = os.path.join("data", os.path.join("fonts", "font_2.ttf"))
+
     def __init__(self, screen, fps, path, theme):
         global display_width, display_height
 
@@ -244,7 +248,7 @@ class Customization:
         self.screensize = tuple(
             map(int, (get_values(os.path.join(path, "config.json"), "screensize")[0].split("x"))))
         self.co = int(display_width * 0.02)
-        self.font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.8))
+        self.font = pg.font.Font(self.font_2, int(self.size * 0.8))
 
         self.map_indent_top = 50
         self.map_indent_left = 50
@@ -258,7 +262,7 @@ class Customization:
 
     def map_draw(self, x, y):
 
-        slo = list("АБВГДЕЖЗИК")  # буквы ё не существует)
+        slo = list("АБВГДЕЖЗИК")
 
         for i in range(10):
             text = self.font.render(str(i), True, self.t[1])
@@ -284,7 +288,7 @@ class Customization:
         text = self.font.render("Корабли:", True, self.t[1])
         self.sc.blit(text, (self.x_ship, self.y_ship))
 
-        font = pg.font.Font(os.path.join("data", "font_2.ttf"), int(self.size * 0.4))
+        font = pg.font.Font(self.font_2, int(self.size * 0.4))
         text = font.render("Для поворота корабля нажмите пробел", True, self.t[1])
         self.sc.blit(text, (self.x_ship - 30, int(display_height * 0.69)))
 
@@ -314,32 +318,32 @@ class Customization:
 
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
-                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pg.mixer.Sound(self.click).play()
                         raise SystemExit
 
                     elif event.key == pg.K_r:
-                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pg.mixer.Sound(self.click).play()
                         up_per()
                         self.add_ship()
                         self.add_cells()
 
                     elif event.key == pg.K_RETURN and test_007 == 10:
-                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        pg.mixer.Sound(self.enter).play()
                         return
 
                 if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                     if x.rect.collidepoint(event.pos):
-                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pg.mixer.Sound(self.click).play()
                         raise SystemExit
 
                     elif reset.rect.collidepoint(event.pos):
-                        pg.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pg.mixer.Sound(self.click).play()
                         up_per()
                         self.add_ship()
                         self.add_cells()
 
                     elif go.rect.collidepoint(event.pos) and test_007 == 10:
-                        pg.mixer.Sound(os.path.join("data", "enter.ogg")).play()
+                        pg.mixer.Sound(self.enter).play()
                         return
 
                 all_sprites_cell.update(event)

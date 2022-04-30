@@ -4,11 +4,14 @@ import os
 
 from datetime import datetime, date
 
-from .main_functions import terminate, load_image, create_sprite, set_statistic, get_values
+from .main_functions import terminate, load_image, create_sprite, set_statistic, get_values, \
+    custom_font
 
 
 class Achievements:
     """Достижения"""
+
+    click = os.path.join("data", os.path.join("sound", "click.ogg"))
 
     def __init__(self, screen, fps, path):
         self.path_config, self.path_achievements, self.path_statistic = os.path.join(
@@ -76,10 +79,10 @@ class Achievements:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if x.rect.collidepoint(event.pos):
-                            pygame.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                            pygame.mixer.Sound(self.click).play()
                             return
                         elif title_page.rect.collidepoint(event.pos):
-                            pygame.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                            pygame.mixer.Sound(self.click).play()
                             return "titles"
                     elif event.button == 4:
                         if f - 1 >= 0:
@@ -95,7 +98,7 @@ class Achievements:
                         if f + 1 < len(self.achievements) - (2 if self.size[1] == 768 else 3):
                             a, f = a - 175, f + 1
                     elif event.key == pygame.K_ESCAPE:
-                        pygame.mixer.Sound(os.path.join("data", "click.ogg")).play()
+                        pygame.mixer.Sound(self.click).play()
                         return
 
             self.screen.blit(fon, (0, 0))
@@ -147,14 +150,14 @@ WHERE id = {achievement[8]}""").fetchone()[0], (255, 255, 0),
 
             for j in text_achievements:
                 self.screen.blit(
-                    pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
+                    pygame.font.Font(custom_font(j[5]), j[4]).render(
                         j[0], True, j[1]), (j[2], j[3]))
 
             menu_sprites.draw(self.screen)
 
             for j in text:
                 self.screen.blit(
-                    pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
+                    pygame.font.Font(custom_font(j[5]), j[4]).render(
                         j[0], True, j[1]), (j[2], j[3]))
 
             pygame.display.flip()
@@ -202,6 +205,8 @@ WHERE id = {i}""")
 class Titles:
     """Титульная"""
 
+    click = os.path.join("data", os.path.join("sound", "click.ogg"))
+
     def __init__(self, screen, fps, path):
         self.path_config, self.path_achievements, self.path_statistic = os.path.join(
             path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
@@ -221,7 +226,7 @@ class Titles:
     def menu(self):
         """Меню титулов"""
         fon, s = pygame.transform.scale(load_image("fon_5.png"), self.size), pygame.mixer.Sound(
-            os.path.join("data", "click.ogg"))
+            self.click)
 
         clock = pygame.time.Clock()
 
@@ -291,8 +296,7 @@ class Titles:
 
             for j in text:
                 self.screen.blit(
-                    pygame.font.Font(os.path.join("data", f"font_{str(j[5])}.ttf"), j[4]).render(
-                        j[0], True, j[1]), (j[2], j[3]))
+                    pygame.font.Font(custom_font(j[5]), j[4]).render(j[0], True, j[1]), (j[2], j[3]))
 
             pygame.display.flip()
             clock.tick(self.fps)
