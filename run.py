@@ -1,4 +1,4 @@
-# v1.2
+# v1.3
 import ctypes.wintypes
 
 import requests
@@ -6,46 +6,36 @@ import pygame
 import os
 
 from datetime import datetime
+from sys import exit
 
-try:
-    from .data.python.main_functions import create_window, format_xp, extract_files, get_values, \
-        set_statistic, get_values_sqlite
-    from .data.python.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
-        NoLauncherRunError
-    from .data.python.achievements import Achievements, Titles
-    from .data.python.menu import Menu, Statistic, Instruction
-    from .data.python.settings import Settings, About
-    from .data.python.play import Play, PlayWithBot
-except ImportError:
-    from data.python.main_functions import create_window, format_xp, extract_files, get_values, \
-        set_statistic, get_values_sqlite
-    from data.python.exceptions import NotAuthorizedError, NotLicensedError, AuthorizationError, \
-        NoLauncherRunError
-    from data.python.achievements import Achievements, Titles
-    from data.python.menu import Menu, Statistic, Instruction
-    from data.python.settings import Settings, About
-    from data.python.play import Play, PlayWithBot
+from data.python.main_functions import create_window, format_xp, extract_files, get_values, \
+    set_statistic, get_values_sqlite
+from data.python.achievements import Achievements, Titles
+from data.python.menu import Menu, Statistic, Instruction
+from data.python.settings import Settings, About
+from data.python.play import Play, PlayWithBot
 
 
-def run(user_data: dict):
+def run():
     """Запуск игры"""
-    # проверим лицензию
-    try:
-        user_login = user_data["user_login"]
-        if user_login is None:
-            raise NotAuthorizedError
 
-        login_request = "https://seabattle.aft-services.ru/" + \
-                        f"{user_login['email']}/{user_login['password']}/api/get_data"
-        response = requests.get(login_request)
-        if not response.json()["user"]["is_activated"]:
-            raise NotLicensedError("Купите игру, чтобы играть")
-    except NotAuthorizedError as error:
-        raise NotAuthorizedError(error)
-    except NotLicensedError as error:
-        raise NotLicensedError(error)
-    except Exception as error:
-        raise AuthorizationError(f'Ошибка авторизации: {error.__class__.__name__} "{error}"')
+    # # проверим лицензию
+    # try:
+    #     user_login = user_data["user_login"]
+    #     if user_login is None:
+    #         raise NotAuthorizedError
+    #
+    #     login_request = "https://seabattle.aft-services.ru/" + \
+    #                     f"{user_login['email']}/{user_login['password']}/api/get_data"
+    #     response = requests.get(login_request)
+    #     if not response.json()["user"]["is_activated"]:
+    #         raise NotLicensedError("Купите игру, чтобы играть")
+    # except NotAuthorizedError as error:
+    #     raise NotAuthorizedError(error)
+    # except NotLicensedError as error:
+    #     raise NotLicensedError(error)
+    # except Exception as error:
+    #     raise AuthorizationError(f'Ошибка авторизации: {error.__class__.__name__} "{error}"')
 
     # получим путь к документам пользователя
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
@@ -76,8 +66,8 @@ def run(user_data: dict):
 
     screen, fps = create_window(path)  # создаём окно
 
-    menu, settings, achievements = Menu(screen, fps, path, None, user_data["user_data"]), Settings(
-        screen, fps, path, user_login), Achievements(screen, fps, path)
+    menu, settings, achievements = Menu(screen, fps, path, None), Settings(
+        screen, fps, path), Achievements(screen, fps, path)
 
     pygame.mouse.set_visible(False)  # погашаем мышь
     menu.screensaver()  # заставка
@@ -90,9 +80,8 @@ def run(user_data: dict):
         x = menu.get_n()  # сохраним значение x в переменную
 
         # обновляем достижения, меню и настройки
-        menu, settings, achievements = Menu(screen, fps, path, push,
-                                            user_data["user_data"]), Settings(
-            screen, fps, path, user_login), Achievements(screen, fps, path)
+        menu, settings, achievements = Menu(screen, fps, path, push), Settings(
+            screen, fps, path), Achievements(screen, fps, path)
         push = None  # обнулили
         menu.set_n(x)  # и вставим обратно
 
@@ -133,8 +122,7 @@ def run(user_data: dict):
             theme_value = get_values(path_config, "theme")[0]
             PlayWithBot(screen, fps, path, [0, 150, 300, 600, 1200, 10000][d], d,
                         theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
-                            datetime.now().time().strftime("%H")) <= 18),
-                        name=user_data["user_data"]["nickname"])
+                            datetime.now().time().strftime("%H")) <= 18))
 
         elif result == "Farm":
             d = ["easiest", "easy", "normal", "hard", "impossible"].index(
@@ -142,8 +130,7 @@ def run(user_data: dict):
             theme_value = get_values(path_config, "theme")[0]
             PlayWithBot(screen, fps, path, "Farm", d,
                         theme_value == "day" or (theme_value == "by_time_of_day" and 8 <= int(
-                            datetime.now().time().strftime("%H")) <= 18),
-                        name=user_data["user_data"]["nickname"])
+                            datetime.now().time().strftime("%H")) <= 18))
 
         elif result == "Play":
             while True:
@@ -210,4 +197,4 @@ by_time_of_day" and 8 <= int(datetime.now().time().strftime("%H")) <= 18),
 
 
 if __name__ == "__main__":
-    raise NoLauncherRunError("Запустите игру через лаунчер")
+    exit(run())

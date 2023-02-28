@@ -151,9 +151,9 @@ def create_window(path):
     version, screensize, screenmode, fps = get_values(path_config, "version", "screensize",
                                                       "screenmode", "fps")
 
-    if version != "1.1.2":
+    if version != "1.3":
         old_values = get_values(path_config, a=True, d=True)
-        old_values["version"] = "1.1.2"
+        old_values["version"] = "1.3"
 
         extract_files(os.path.join("data", os.path.join("packages", "files.zip")), path,
                       "config.json")
@@ -172,6 +172,6 @@ def create_window(path):
     elif screenmode == "fullscreen":
         screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
-    pygame.display.set_icon(load_image("SeaBattleIcon.ico"))
+    pygame.display.set_icon(load_image("icon.png"))
 
     return screen, int(fps)

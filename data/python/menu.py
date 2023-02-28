@@ -19,11 +19,10 @@ class Menu:
     font_1 = os.path.join("data", os.path.join("fonts", "font_1.ttf"))
     font_2 = os.path.join("data", os.path.join("fonts", "font_2.ttf"))
 
-    def __init__(self, screen, fps, path, push, user_data: dict):
+    def __init__(self, screen, fps, path, push):
         self.path_config, self.path_achievements, self.path_statistic, self.path = os.path.join(
             path, "config.json"), os.path.join(path, "achievements.sqlite"), os.path.join(
             path, "statistic.json"), path
-        self.nickname, self.biography = user_data["nickname"], user_data["biography"]
         self.screen, self.fps, self.size, self.n, self.push = screen, fps, tuple(
             map(int, (get_values(self.path_config, "screensize")[0].split("x")))), 0, push
         self.path_screensaver = os.path.join("data",
@@ -265,9 +264,9 @@ class Menu:
                 self.screen.blit(
                     pygame.font.Font(custom_font(j[5]), j[4]).render(j[0], True, j[1]), (j[2], j[3]))
 
-            text = pygame.font.Font(self.font_1, 50).render(self.nickname, True, (255, 255, 255))
-            text_rect = text.get_rect()
-            self.screen.blit(text, (self.size[0] - tuple(text_rect)[2], 0))
+            # text = pygame.font.Font(self.font_1, 50).render(self.nickname, True, (255, 255, 255))
+            # text_rect = text.get_rect()
+            # self.screen.blit(text, (self.size[0] - tuple(text_rect)[2], 0))
 
             if self.push:
                 for line in [("Получены награды", 40, o + 25),

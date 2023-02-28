@@ -22,8 +22,7 @@ class Settings:
     enter = os.path.join("data", os.path.join("sound", "enter.ogg"))
     package = os.path.join("data", os.path.join("packages", "files.zip"))
 
-    def __init__(self, screen, fps, path, user_login):
-        self.email, self.password = user_login["email"], user_login["password"]
+    def __init__(self, screen, fps, path):
         self.path_config = os.path.join(path, "config.json")
         self.path_statistic = os.path.join(path, "statistic.json")
         self.path_achievements = os.path.join(path, "achievements.sqlite")
@@ -39,6 +38,7 @@ class Settings:
             get_values(self.path_config, "difficulty")[0])
         self.value_theme = self.values_theme.index(
             get_values(self.path_config, "theme")[0])
+        self.update = pygame.USEREVENT + 1, 1
 
     def apply(self):
         """Действие "Применить\""""
@@ -54,64 +54,66 @@ class Settings:
         return "apply"
 
     def download(self):
-        login_request = \
-            f"https://seabattle.aft-services.ru/{self.email}/{self.password}/api/get_data"
-        try:
-            statistic = json.loads(requests.get(login_request).json()["user"]["statistic"])
-        except Exception:
-            return -1
-        s, a = statistic["statistic"], statistic["achievements"]
-
-        stat = {}
-        for i in s.keys():
-            stat[i] = s[i]
-        set_values(self.path_statistic, stat)
-
-        with sqlite3.connect(self.path_achievements) as con:
-            cur = con.cursor()
-            for i in a.keys():
-                u = "UPDATE achievements"
-                if a[i]['progress'] is not None:
-                    u += f"\nSET progress = {a[i]['progress']}"
-                else:
-                    u += f"\nSET progress = 0"
-
-                if a[i]['date_of_completion'] is not None:
-                    u += f', date_of_completion = "{a[i]["date_of_completion"]}"'
-                else:
-                    u += f', date_of_completion = NULL'
-                u += f"\nWHERE id = {i}"
-                cur.execute(u)
-            con.commit()
+        pass
+        # login_request = \
+        #     f"https://seabattle.aft-services.ru/{self.email}/{self.password}/api/get_data"
+        # try:
+        #     statistic = json.loads(requests.get(login_request).json()["user"]["statistic"])
+        # except Exception:
+        #     return -1
+        # s, a = statistic["statistic"], statistic["achievements"]
+        #
+        # stat = {}
+        # for i in s.keys():
+        #     stat[i] = s[i]
+        # set_values(self.path_statistic, stat)
+        #
+        # with sqlite3.connect(self.path_achievements) as con:
+        #     cur = con.cursor()
+        #     for i in a.keys():
+        #         u = "UPDATE achievements"
+        #         if a[i]['progress'] is not None:
+        #             u += f"\nSET progress = {a[i]['progress']}"
+        #         else:
+        #             u += f"\nSET progress = 0"
+        #
+        #         if a[i]['date_of_completion'] is not None:
+        #             u += f', date_of_completion = "{a[i]["date_of_completion"]}"'
+        #         else:
+        #             u += f', date_of_completion = NULL'
+        #         u += f"\nWHERE id = {i}"
+        #         cur.execute(u)
+        #     con.commit()
 
     def load(self):
-        with open(self.path_statistic) as stat:
-            s = json.load(stat)
-        achievements_list = get_values_sqlite(self.path_achievements, "achievements", None, "id",
-                                              "progress", "date_of_completion")
-        achievements_dict = {}
-        for achievement in achievements_list:
-            achievements_dict[achievement[0]] = {
-                "progress": achievement[1],
-                "date_of_completion": achievement[2]
-            }
-
-        statistic = json.dumps({
-            "statistic": s,
-            "achievements": achievements_dict
-        }, ensure_ascii=False)
-
-        statistic_response = {
-            "email": self.email,
-            "password": self.password,
-            "statistic": statistic
-        }
-
-        statistic_request = "https://seabattle.aft-services.ru/api/edit_statistic"
-        try:
-            requests.post(statistic_request, json=statistic_response)
-        except Exception:
-            return -1
+        pass
+        # with open(self.path_statistic) as stat:
+        #     s = json.load(stat)
+        # achievements_list = get_values_sqlite(self.path_achievements, "achievements", None, "id",
+        #                                       "progress", "date_of_completion")
+        # achievements_dict = {}
+        # for achievement in achievements_list:
+        #     achievements_dict[achievement[0]] = {
+        #         "progress": achievement[1],
+        #         "date_of_completion": achievement[2]
+        #     }
+        #
+        # statistic = json.dumps({
+        #     "statistic": s,
+        #     "achievements": achievements_dict
+        # }, ensure_ascii=False)
+        #
+        # statistic_response = {
+        #     "email": self.email,
+        #     "password": self.password,
+        #     "statistic": statistic
+        # }
+        #
+        # statistic_request = "https://seabattle.aft-services.ru/api/edit_statistic"
+        # try:
+        #     requests.post(statistic_request, json=statistic_response)
+        # except Exception:
+        #     return -1
 
     def menu(self):
         """Меню настроек"""
@@ -154,11 +156,11 @@ class Settings:
         right_theme = pygame.sprite.Sprite()
         create_sprite(right_theme, "right_arrow.png", 900, 400, settings_sprites)
 
-        download = pygame.sprite.Sprite()
-        create_sprite(download, "download.png", self.size[0] - 350, 150, settings_sprites)
+        # download = pygame.sprite.Sprite()
+        # create_sprite(download, "download.png", self.size[0] - 350, 150, settings_sprites)
 
-        load = pygame.sprite.Sprite()
-        create_sprite(load, "load.png", self.size[0] - 220, 150, settings_sprites)
+        # load = pygame.sprite.Sprite()
+        # create_sprite(load, "load.png", self.size[0] - 220, 150, settings_sprites)
 
         developers = pygame.sprite.Sprite()
         create_sprite(developers, "developers.png", self.size[0] - 350, self.size[1] - 250,
@@ -266,13 +268,13 @@ class Settings:
                             else:
                                 self.value_theme = 0
 
-                        elif download.rect.collidepoint(event.pos):
-                            pygame.mixer.Sound(self.enter).play()
-                            self.download()
-
-                        elif load.rect.collidepoint(event.pos):
-                            pygame.mixer.Sound(self.enter).play()
-                            self.load()
+                        # elif download.rect.collidepoint(event.pos):
+                        #     pygame.mixer.Sound(self.enter).play()
+                        #     self.download()
+                        #
+                        # elif load.rect.collidepoint(event.pos):
+                        #     pygame.mixer.Sound(self.enter).play()
+                        #     self.load()
 
                         elif developers.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(self.enter).play()
@@ -377,6 +379,9 @@ class About:
         yandex = pygame.sprite.Sprite()
         create_sprite(yandex, "yandex.png", self.size[0] - 450, self.size[1] - 100, about_sprites)
 
+        thank = pygame.sprite.Sprite()
+        create_sprite(thank, "thank.png", 100, 250, about_sprites)
+
         pygame.time.set_timer(self.update, 200)
         n = 1
 
@@ -413,7 +418,7 @@ class About:
 
                         elif youtube.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(self.enter).play()
-                            link = "https://www.youtube.com/c/BINKO_aft"
+                            link = "https://www.youtube.com/@aftbinko"
 
                         elif yandex.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(self.enter).play()
@@ -422,6 +427,10 @@ class About:
                         elif pygame_sprite.rect.collidepoint(event.pos):
                             pygame.mixer.Sound(self.enter).play()
                             link = "https://www.pygame.org"
+
+                        elif thank.rect.collidepoint(event.pos):
+                            pygame.mixer.Sound(self.enter).play()
+                            link = "https://www.donationalerts.com/r/binko"
 
                         try:
                             webbrowser.open(link, new=0)
@@ -435,7 +444,7 @@ class About:
 
             about_sprites.draw(self.screen)
 
-            c, y = 20 if self.size[1] == 768 else 30, 250
+            c, y = 15 if self.size[1] == 768 else 25, 250
             for line in titles:
                 count = 1
                 for symbol in line:
